@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { LOCATION_REGISTRY } from "../src/snapshot/config";
 import { buildSnapshots } from "../src/snapshot/job";
+import { COOP_FLYER_PDF_SOURCE } from "../src/snapshot/coop-pdf";
 
 const fixtureRoot = resolve(import.meta.dirname, "fixtures/coop");
 const linkoping = LOCATION_REGISTRY.locations.find(
@@ -16,7 +17,9 @@ if (!linkoping || !linkopingCoop) {
 
 const coopOnlyLinkoping = {
   ...linkoping,
-  chains: { Coop: linkopingCoop },
+  chains: {
+    Coop: { ...linkopingCoop, source: COOP_FLYER_PDF_SOURCE },
+  },
 };
 
 const PAGE_URL = "https://www.coop.se/butiker-erbjudanden/";
@@ -31,8 +34,45 @@ type FixtureOptions = {
   credentialUrlFor?: string;
   malformedFlyerFor?: string;
   missingFlyerFor?: string;
+  nonProductFlyerFor?: string;
   observedLayoutFor?: string;
 };
+
+function createTextPdf(lines: string[]): ArrayBuffer {
+  const escapePdfString = (value: string) =>
+    value.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
+  const stream = [
+    "BT",
+    "/F1 12 Tf",
+    "50 700 Td",
+    ...lines.flatMap((line) => [`(${escapePdfString(line)}) Tj`, "0 -18 Td"]),
+    "ET",
+  ].join("\n");
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    `<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`,
+  ];
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  for (const [index, object] of objects.entries()) {
+    offsets.push(Buffer.byteLength(pdf));
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  }
+  const xrefOffset = Buffer.byteLength(pdf);
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  pdf += offsets
+    .slice(1)
+    .map((offset) => `${String(offset).padStart(10, "0")} 00000 n \n`)
+    .join("");
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+  const bytes = Buffer.from(pdf, "ascii");
+  const result = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(result).set(bytes);
+  return result;
+}
 
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(resolve(fixtureRoot, path), "utf8")) as T;
@@ -107,6 +147,11 @@ function recordedFetcher(options: FixtureOptions = {}) {
           { headers: { "Content-Type": "application/pdf" } },
         );
       }
+      if (options.nonProductFlyerFor === ledgerAccountNumber) {
+        return new Response(createTextPdf(["FREDAG 99 kr"]), {
+          headers: { "Content-Type": "application/pdf" },
+        });
+      }
       return new Response(
         readFileSync(
           resolve(fixtureRoot, `flyers/${ledgerAccountNumber}.pdf`),
@@ -131,7 +176,17 @@ async function buildConfiguredCoopSnapshot(
   location = coopOnlyLinkoping,
 ) {
   const replay = recordedFetcher(options);
-  const [snapshot] = await buildSnapshots([location], {
+  const coop = location.chains.Coop;
+  if (!coop) {
+    throw new Error("Missing Coop source configuration");
+  }
+  const pdfLocation = {
+    ...location,
+    chains: {
+      Coop: { ...coop, source: COOP_FLYER_PDF_SOURCE },
+    },
+  };
+  const [snapshot] = await buildSnapshots([pdfLocation], {
     fetcher: replay.fetcher,
     now: () => new Date("2026-11-17T05:00:00.000Z"),
     sleep: replay.sleep,
@@ -167,6 +222,7 @@ describe("Coop flyer-PDF Snapshot job", () => {
       name: "babyvård och tillbehör",
       brand: "Libero",
       mechanicText: "2 för 169:- Gäller ej blöjor.",
+      comparisonPriceText: "110:-/kg.",
       quantity: 2,
       price: 169,
       unitPrice: 84.5,
@@ -178,7 +234,7 @@ describe("Coop flyer-PDF Snapshot job", () => {
   });
 
   it("uses each configured Store's flyer and preserves its validity and Offers", async () => {
-    expect(linkopingCoop.source).toBe("coop-flyer-pdf");
+    expect(linkopingCoop.source).toBe("coop-tjek");
 
     const { snapshot, requests } = await buildConfiguredCoopSnapshot();
 
@@ -321,6 +377,19 @@ describe("Coop flyer-PDF Snapshot job", () => {
       source: "coop-flyer-pdf",
     });
     expect(snapshot.chains[0].error).toMatch(/aktuell.*flyer|flyer.*saknas/i);
+    expect(snapshot.offers).toHaveLength(0);
+  });
+
+  it("fails instead of publishing promotional boilerplate as a product Offer", async () => {
+    const { snapshot } = await buildConfiguredCoopSnapshot({
+      nonProductFlyerFor: "056010",
+    });
+
+    expect(snapshot.chains[0]).toMatchObject({
+      status: "failed",
+      source: "coop-flyer-pdf",
+    });
+    expect(snapshot.chains[0].error).toContain("produktrad");
     expect(snapshot.offers).toHaveLength(0);
   });
 

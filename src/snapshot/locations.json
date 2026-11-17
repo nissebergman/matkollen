@@ -15,7 +15,7 @@
           }
         },
         "Coop": {
-          "source": "coop-flyer-pdf",
+          "source": "coop-tjek",
           "storeDiscovery": {
             "exactCity": {
               "field": "city",

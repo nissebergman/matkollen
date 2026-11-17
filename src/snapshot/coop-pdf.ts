@@ -654,6 +654,15 @@ function productFromSuffix(value: string): {
   };
 }
 
+function isNonProductName(value: string): boolean {
+  return (
+    !/[a-zåäö]/iu.test(value) ||
+    /(?:välkomstbonus|passa på nu|jfr[- ]?pris|(?:^|\s)fredag\b|(?:^|\s)vid köp av\b|(?:^|\s)(?:så får du|och är du inte medlem)|(?:^|\s)medlemskap\b)/iu.test(
+      value,
+    )
+  );
+}
+
 function isNoiseLine(line: string): boolean {
   return /^(?:veckans erbjudanden?|aktuella erbjudanden?|erbjudanden?|coop|gäller denna vecka)$/iu.test(
     line.trim(),
@@ -672,6 +681,7 @@ function parseFlyerOffers(
   let category: Offer["category"] = "Övrigt";
   let sourceCategory: string | undefined;
   let pendingLimitText: string | undefined;
+  let pendingComparisonPriceText: string | undefined;
   let lastOffer: Offer | undefined;
 
   for (const rawLine of lines) {
@@ -686,6 +696,7 @@ function parseFlyerOffers(
       sourceCategory = line;
       pendingNameLines.length = 0;
       pendingLimitText = undefined;
+      pendingComparisonPriceText = undefined;
       lastOffer = undefined;
       continue;
     }
@@ -714,8 +725,9 @@ function parseFlyerOffers(
       if (!mechanicLine || !parseMechanic(mechanicLine)) {
         if (lastOffer) {
           lastOffer.comparisonPriceText = comparisonPriceText;
+        } else {
+          pendingComparisonPriceText = comparisonPriceText;
         }
-        pendingNameLines.length = 0;
         continue;
       }
     }
@@ -745,7 +757,12 @@ function parseFlyerOffers(
       : suffixProduct;
     if (!product.name) {
       throw new Error(
-        `Coop-flyern för ${store.name} innehåller ett pris utan produktnamn.`,
+        `Coop-flyern för ${store.name} innehåller ett pris utan produktnamn: "${cleanText(line).slice(0, 100)}".`,
+      );
+    }
+    if (isNonProductName(product.name)) {
+      throw new Error(
+        `Coop-flyern för ${store.name} innehåller en produktrad som inte verkar vara ett erbjudande: "${product.name.slice(0, 100)}".`,
       );
     }
     if (flyer.validTo < runDate || flyer.validFrom > weekEnd) {
@@ -796,12 +813,18 @@ function parseFlyerOffers(
       ...(unitPrice !== undefined ? { unitPrice } : {}),
       ...(priceUnit ? { priceUnit } : {}),
       ...(pendingLimitText ? { limitText: pendingLimitText } : {}),
-      ...(comparisonPriceText ? { comparisonPriceText } : {}),
+      ...(comparisonPriceText ?? pendingComparisonPriceText
+        ? {
+            comparisonPriceText:
+              comparisonPriceText ?? pendingComparisonPriceText,
+          }
+        : {}),
       ...(sourceCategory ? { sourceCategory } : {}),
     };
     offers.push(offer);
     lastOffer = offer;
     pendingLimitText = undefined;
+    pendingComparisonPriceText = undefined;
     pendingNameLines.length = 0;
   }
 

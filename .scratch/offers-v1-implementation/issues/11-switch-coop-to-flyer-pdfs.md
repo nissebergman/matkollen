@@ -14,4 +14,4 @@
 
 ## Comments
 
-The implementation has been merged into `integration/offers-v1` as `53729cf`. The 70-test suite using synthetic fixtures passes. The corrected parser has not been rerun against an actual Coop flyer since the parser change, so real-flyer post-fix accuracy remains unverified. Validation against an actual flyer is still outstanding.
+The implementation was merged into `integration/offers-v1` as `53729cf`. A read-only GET of the Stora Coop Garnisonen flyer returned a PDF, but the parser initially produced incorrect Offers. The parser now preserves a comparison-price line that precedes an Offer and rejects obvious non-product rows rather than publishing them. An end-to-end rerun against the same flyer failed closed on the row `103:15`, publishing zero Offers. The PDF was not saved. Synthetic fixture tests pass, but accurate extraction from actual Coop flyers remains unverified; keep Tjek as the configured primary source.
