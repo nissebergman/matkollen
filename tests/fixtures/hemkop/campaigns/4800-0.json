@@ -1,0 +1,29 @@
+{
+  "results": [
+    {
+      "id": "test-product-norrkoping",
+      "name": "Testprodukt för Norrköping",
+      "manufacturer": "Fixture",
+      "price": 19.9,
+      "priceUnit": "st",
+      "regularPrice": 24.9,
+      "displayVolume": "1 st",
+      "googleAnalyticsCategory": "skafferi|test",
+      "potentialPromotions": [
+        {
+          "id": "test-offer-norrkoping",
+          "campaignType": "GENERAL",
+          "cartLabel": "19,90 kr/st",
+          "price": 19.9,
+          "startDate": "2026-11-17",
+          "endDate": "2026-11-22"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "currentPage": 0,
+    "numberOfPages": 1,
+    "totalNumberOfResults": 1
+  }
+}

@@ -58,6 +58,26 @@ h1 {
   letter-spacing: -0.035em;
 }
 
+.location-picker {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.9rem;
+  color: #456a51;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.location-picker select {
+  min-height: 2.5rem;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid #bdcbbb;
+  border-radius: 0.6rem;
+  background: #fff;
+  color: #17231e;
+}
+
 .offer-count {
   margin-bottom: 0.25rem;
   color: #345b3e;
@@ -65,10 +85,125 @@ h1 {
   font-weight: 700;
 }
 
+.sort-control {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 20rem;
+  margin-bottom: 1rem;
+  color: #345b3e;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.sort-control select {
+  min-height: 2.75rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #b9c9b8;
+  border-radius: 0.65rem;
+  background: #fff;
+  color: #17231e;
+}
+
+.sort-control select:focus-visible {
+  outline: 3px solid #72a27b;
+  outline-offset: 2px;
+}
+
 .updated-at {
   margin-bottom: 0;
   color: #58655e;
   font-size: 0.88rem;
+}
+
+.filter-panel {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  border: 1px solid #dfe5dc;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.filter-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.filter-group legend {
+  margin-bottom: 0.45rem;
+  color: #405a47;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.filter-option {
+  display: flex;
+  min-height: 2.5rem;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem;
+  border: 1px solid #d8e0d7;
+  border-radius: 999px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.88rem;
+}
+
+.filter-option input {
+  accent-color: #28733e;
+}
+
+.search-field {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 32rem;
+}
+
+.search-field label {
+  color: #405a47;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.search-field input {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #cbd6ca;
+  border-radius: 0.65rem;
+  background: #fff;
+}
+
+.search-field input:focus-visible,
+.filter-option:focus-within,
+button:focus-visible {
+  outline: 3px solid #7bad87;
+  outline-offset: 2px;
+}
+
+.reset-filters {
+  width: fit-content;
+  min-height: 2.5rem;
+  padding: 0.55rem 0.9rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: #245c35;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.reset-filters:hover {
+  background: #184a2c;
 }
 
 .offer-list {

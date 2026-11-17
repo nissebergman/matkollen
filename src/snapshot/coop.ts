@@ -8,10 +8,11 @@ import {
   type Snapshot,
   type Store,
 } from "../domain/snapshot";
+import type { StoreDiscoveryConfig } from "./config";
 
 export const TJEK_REQUEST_DELAY_MS = 1_000;
+export const COOP_TJEK_SOURCE = "coop-tjek";
 
-const TJEK_SOURCE = "coop-tjek";
 const TJEK_ENDPOINT = "https://ereklamblad.se/";
 const TJEK_PAGE_SIZE = 100;
 const TJEK_MAX_PAGES = 40;
@@ -20,7 +21,8 @@ const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 export interface CoopLocation {
   id: string;
   name: string;
-  city: string;
+  city?: string;
+  storeDiscovery?: StoreDiscoveryConfig;
 }
 
 export interface CoopJobDependencies {
@@ -289,6 +291,52 @@ function normalizedKey(value: string): string {
 
 function sourceId(value: string | number): string {
   return String(value);
+}
+
+function discoveryFor(location: CoopLocation): StoreDiscoveryConfig {
+  if (location.storeDiscovery) {
+    return location.storeDiscovery;
+  }
+  if (location.city) {
+    return {
+      exactCity: { field: "city", value: location.city },
+      pinStoreIds: [],
+      excludeStoreIds: [],
+    };
+  }
+  throw new Error("Coop saknar konfigurerade kriterier för butiksupptäckt.");
+}
+
+function sourceField(value: unknown, path: string): unknown {
+  const parts = path.split(".");
+  if (
+    !parts.every(
+      (part) =>
+        /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(part) &&
+        !["__proto__", "prototype", "constructor"].includes(part),
+    )
+  ) {
+    return undefined;
+  }
+
+  let current = value;
+  for (const part of parts) {
+    if (
+      typeof current !== "object" ||
+      current === null ||
+      !Object.hasOwn(current, part)
+    ) {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
+
+function coopSourceStoreId(configuredId: string): string {
+  return configuredId.startsWith("Coop:")
+    ? configuredId.slice("Coop:".length)
+    : configuredId;
 }
 
 function businessCity(business: TjekBusiness): string | undefined {
@@ -636,23 +684,52 @@ export async function buildCoopSnapshot(
   };
 
   try {
+    const discovery = discoveryFor(location);
     const businessesResponse = await requestJson(["businesses", {}], "butiker");
     const businesses = parseResponse(
       TjekBusinessesResponseSchema,
       businessesResponse,
       "butiker",
     ).value;
-    const matchingBusinesses = businesses.filter(
-      (business) =>
-        businessCity(business) === location.city && isCoopBusiness(business),
+    const coopBusinesses = businesses.filter(isCoopBusiness);
+    const pinnedIds = new Set(
+      (discovery.pinStoreIds ?? []).map(coopSourceStoreId),
     );
+    const excludedIds = new Set(
+      (discovery.excludeStoreIds ?? []).map(coopSourceStoreId),
+    );
+    const availableIds = new Set(
+      coopBusinesses.map((business) => sourceId(business.publicId)),
+    );
+    const missingPins = [...pinnedIds].filter((id) => !availableIds.has(id));
+    if (missingPins.length) {
+      throw new Error(
+        `Konfigurerade Coop-butiker hittades inte: ${missingPins.join(", ")}.`,
+      );
+    }
+    const matchingBusinesses = coopBusinesses.filter((business) => {
+      const id = sourceId(business.publicId);
+      return (
+        !excludedIds.has(id) &&
+        (pinnedIds.has(id) ||
+          sourceField(business, discovery.exactCity.field) ===
+            discovery.exactCity.value)
+      );
+    });
     if (matchingBusinesses.length === 0) {
-      throw new Error(`Inga Coop-butiker hittades för ${location.city}.`);
+      throw new Error(
+        `Inga Coop-butiker hittades för ${discovery.exactCity.value}.`,
+      );
     }
 
-    discoveredStores = matchingBusinesses.map((business) =>
-      storeFromBusiness(business, location.city),
-    );
+    discoveredStores = matchingBusinesses.map((business) => {
+      const fieldCity = sourceField(business, discovery.exactCity.field);
+      const city =
+        (typeof fieldCity === "string" && fieldCity.trim()) ||
+        businessCity(business) ||
+        discovery.exactCity.value;
+      return storeFromBusiness(business, city);
+    });
     const uniqueStores = new Map(
       discoveredStores.map((store) => [store.id, store]),
     );
@@ -738,7 +815,7 @@ export async function buildCoopSnapshot(
       chains: [
         {
           chain: "Coop",
-          source: TJEK_SOURCE,
+          source: COOP_TJEK_SOURCE,
           status: "ok",
           lastAttemptAt: attemptAt,
           lastSuccessAt: completedAt,
@@ -758,7 +835,8 @@ export async function buildCoopSnapshot(
         : undefined;
     const previousCoop = previous?.chains.find((chain) => chain.chain === "Coop");
     const canReusePrevious =
-      previousCoop?.source === TJEK_SOURCE && previousCoop.status !== "failed";
+      previousCoop?.source === COOP_TJEK_SOURCE &&
+      previousCoop.status !== "failed";
     const previousOffers =
       (canReusePrevious ? previous?.offers : undefined)?.filter(
         (offer) =>
@@ -777,7 +855,7 @@ export async function buildCoopSnapshot(
       chains: [
         {
           chain: "Coop",
-          source: TJEK_SOURCE,
+          source: COOP_TJEK_SOURCE,
           status: stale ? "stale" : "failed",
           lastAttemptAt: attemptAt,
           lastSuccessAt: canReusePrevious ? previousCoop?.lastSuccessAt ?? null : null,

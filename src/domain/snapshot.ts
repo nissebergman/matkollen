@@ -3,6 +3,7 @@ import { CATEGORIES } from "./categories";
 
 export const SCHEMA_VERSION = 1;
 export const CHAINS = ["ICA", "Coop", "Hemköp"] as const;
+export type Chain = (typeof CHAINS)[number];
 export const PRICE_UNITS = ["st", "kg", "l"] as const;
 
 const isoDate = z

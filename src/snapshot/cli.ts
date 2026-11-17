@@ -1,9 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { parseSnapshot, type Snapshot } from "../domain/snapshot";
-import { LINKOPING_HEMKOP } from "./config";
-import { buildHemkopSnapshot } from "./job";
-import { mergeChainSnapshot } from "./merge";
+import { LOCATION_REGISTRY } from "./config";
+import { buildSnapshots } from "./job";
 
 async function readPreviousSnapshot(path: string): Promise<Snapshot | undefined> {
   let contents: string;
@@ -29,20 +28,43 @@ async function readPreviousSnapshot(path: string): Promise<Snapshot | undefined>
 }
 
 async function main(): Promise<void> {
-  const outputPath = resolve(process.argv[2] ?? "public/snapshots/linkoping.json");
-  const previousSnapshot = await readPreviousSnapshot(outputPath);
-  const refreshed = await buildHemkopSnapshot(LINKOPING_HEMKOP, {
-    previousSnapshot,
+  const outputArgument = process.argv[2];
+  const isJsonFile = outputArgument?.toLowerCase().endsWith(".json") ?? false;
+  if (isJsonFile && LOCATION_REGISTRY.locations.length !== 1) {
+    throw new Error("Ange en utdatamapp när fler än en Location är konfigurerad.");
+  }
+  const outputDirectory = resolve(
+    isJsonFile ? "public/snapshots" : outputArgument ?? "public/snapshots",
+  );
+  const singleOutputFile = isJsonFile ? resolve(outputArgument!) : undefined;
+  const outputPathFor = (locationId: string): string =>
+    singleOutputFile ?? resolve(outputDirectory, `${locationId}.json`);
+  const previousSnapshots: Record<string, unknown> = {};
+
+  for (const location of LOCATION_REGISTRY.locations) {
+    previousSnapshots[location.id] = await readPreviousSnapshot(
+      outputPathFor(location.id),
+    );
+  }
+
+  const snapshots = await buildSnapshots(LOCATION_REGISTRY.locations, {
+    previousSnapshots,
   });
-  const snapshot = mergeChainSnapshot(previousSnapshot, refreshed);
+  let hasFailures = false;
+  for (const snapshot of snapshots) {
+    const outputPath = outputPathFor(snapshot.location.id);
+    await mkdir(dirname(outputPath), { recursive: true });
+    await writeFile(outputPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
+    console.log(`Snapshot sparad: ${outputPath}`);
 
-  await mkdir(dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
-  console.log(`Snapshot sparad: ${outputPath}`);
-
-  const hemkopStatus = snapshot.chains.find((chain) => chain.chain === "Hemköp");
-  if (hemkopStatus && hemkopStatus.status !== "ok") {
-    console.error(hemkopStatus.error ?? "Hemköp uppdaterades inte.");
+    for (const chain of snapshot.chains) {
+      if (chain.status !== "ok") {
+        console.error(`${snapshot.location.name} · ${chain.chain}: ${chain.error}`);
+        hasFailures = true;
+      }
+    }
+  }
+  if (hasFailures) {
     process.exitCode = 1;
   }
 }

@@ -1,12 +1,30 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildCoopSnapshot } from "../src/snapshot/coop";
+import { LOCATION_REGISTRY } from "../src/snapshot/config";
+import {
+  buildCoopSnapshot,
+  COOP_TJEK_SOURCE,
+  type CoopLocation,
+} from "../src/snapshot/coop";
+import { buildSnapshots } from "../src/snapshot/job";
 
 const fixtureRoot = resolve(import.meta.dirname, "fixtures/coop");
+const hemkopFixtureRoot = resolve(import.meta.dirname, "fixtures/hemkop");
+const coopLocation: CoopLocation = {
+  id: "linkoping",
+  name: "Linköping",
+  storeDiscovery: {
+    exactCity: { field: "city", value: "Linköping" },
+  },
+};
 
 function readFixture<T>(path: string): T {
   return JSON.parse(readFileSync(resolve(fixtureRoot, path), "utf8")) as T;
+}
+
+function readHemkopFixture<T>(path: string): T {
+  return JSON.parse(readFileSync(resolve(hemkopFixtureRoot, path), "utf8")) as T;
 }
 
 function decodeCommand(init?: RequestInit): [string, Record<string, unknown>] {
@@ -81,19 +99,16 @@ describe("Coop Snapshot job", () => {
       return new Response("No recorded fixture for this command", { status: 404 });
     };
 
-    const snapshot = await buildCoopSnapshot(
-      { id: "linkoping", name: "Linköping", city: "Linköping" },
-      {
-        fetcher,
-        now: () => new Date("2026-11-17T05:00:00.000Z"),
-        sleep: async (milliseconds) => {
-          elapsed += milliseconds;
-        },
+    const snapshot = await buildCoopSnapshot(coopLocation, {
+      fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async (milliseconds) => {
+        elapsed += milliseconds;
       },
-    );
+    });
 
     expect(snapshot.chains).toMatchObject([
-      { chain: "Coop", source: "coop-tjek", status: "ok" },
+      { chain: "Coop", source: COOP_TJEK_SOURCE, status: "ok" },
     ]);
     expect(snapshot.stores.map((store) => store.id)).toEqual([
       "Coop:coop-drottninggatan",
@@ -237,15 +252,12 @@ describe("Coop Snapshot job", () => {
       return new Response("No recorded fixture for this command", { status: 404 });
     };
 
-    const snapshot = await buildCoopSnapshot(
-      { id: "linkoping", name: "Linköping", city: "Linköping" },
-      {
-        fetcher,
-        now: () => new Date("2026-11-17T05:00:00.000Z"),
-        sleep: async () => {},
-        previousSnapshot,
-      },
-    );
+    const snapshot = await buildCoopSnapshot(coopLocation, {
+      fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+      previousSnapshot,
+    });
 
     expect(snapshot.chains[0]).toMatchObject({
       status: "stale",
@@ -268,8 +280,37 @@ describe("Coop Snapshot job", () => {
         : Response.json({ value: { data: {} } });
     };
 
+    const snapshot = await buildCoopSnapshot(coopLocation, {
+      fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(snapshot.chains[0].status).toBe("failed");
+    expect(snapshot.chains[0].error).toContain("Ogiltigt svar från Tjek");
+    expect(snapshot.offers).toHaveLength(0);
+  });
+
+  it("applies Coop Store pins and exclusions from Location configuration", async () => {
+    const businesses = readFixture<{ value: Array<Record<string, unknown>> }>(
+      "businesses.json",
+    );
+    const fetcher: typeof fetch = async (_input, init) => {
+      const [action] = decodeCommand(init);
+      return action === "businesses"
+        ? Response.json(businesses)
+        : Response.json({ value: { data: [] } });
+    };
+
     const snapshot = await buildCoopSnapshot(
-      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      {
+        ...coopLocation,
+        storeDiscovery: {
+          exactCity: { field: "city", value: "Linköping" },
+          pinStoreIds: ["Coop:coop-garnisonen", "coop-norrkoping"],
+          excludeStoreIds: ["coop-garnisonen"],
+        },
+      },
       {
         fetcher,
         now: () => new Date("2026-11-17T05:00:00.000Z"),
@@ -277,8 +318,91 @@ describe("Coop Snapshot job", () => {
       },
     );
 
-    expect(snapshot.chains[0].status).toBe("failed");
-    expect(snapshot.chains[0].error).toContain("Ogiltigt svar från Tjek");
-    expect(snapshot.offers).toHaveLength(0);
+    expect(snapshot.chains[0].status).toBe("ok");
+    expect(snapshot.stores.map((store) => store.id)).toEqual([
+      "Coop:coop-drottninggatan",
+      "Coop:coop-norrkoping",
+    ]);
+  });
+
+  it("runs Coop beside Hemköp from one configured Location without network access", async () => {
+    const businesses = readFixture<{ value: Array<Record<string, unknown>> }>(
+      "businesses.json",
+    );
+    const coopOffers = new Map([
+      [
+        "coop-drottninggatan",
+        readFixture<{ value: { data: Array<Record<string, unknown>> } }>(
+          "offers/coop-drottninggatan-0.json",
+        ),
+      ],
+      [
+        "coop-garnisonen",
+        readFixture<{ value: { data: Array<Record<string, unknown>> } }>(
+          "offers/coop-garnisonen-0.json",
+        ),
+      ],
+    ]);
+    const hemkopStores = readHemkopFixture<unknown>("stores.json");
+    const campaignPages = new Map(
+      ["4552-0", "4552-1", "4552-2", "4701-0", "4800-0"].map((key) => [
+        key,
+        readHemkopFixture<unknown>(`campaigns/${key}.json`),
+      ]),
+    );
+    const fetcher: typeof fetch = async (input, init) => {
+      const url = new URL(String(input));
+      if (url.hostname === "ereklamblad.se") {
+        const [action, params] = decodeCommand(init);
+        if (action === "businesses") {
+          return Response.json(businesses);
+        }
+        if (action === "offers") {
+          const businessId = (params.businessIds as string[] | undefined)?.[0];
+          return Response.json(
+            coopOffers.get(businessId ?? "") ?? { value: { data: [] } },
+          );
+        }
+        return new Response("No recorded Coop fixture", { status: 404 });
+      }
+
+      if (url.pathname === "/axfood/rest/store") {
+        return Response.json(hemkopStores);
+      }
+      if (url.pathname === "/search/campaigns/offline") {
+        const key = `${url.searchParams.get("q")}-${url.searchParams.get("page")}`;
+        const page = campaignPages.get(key);
+        return page
+          ? Response.json(page)
+          : new Response("No recorded Hemköp fixture", { status: 404 });
+      }
+      return new Response("No recorded fixture for this request", { status: 404 });
+    };
+    const location = LOCATION_REGISTRY.locations.find(
+      (candidate) => candidate.id === "linkoping",
+    );
+    if (!location) {
+      throw new Error("Missing Linköping Location configuration");
+    }
+
+    const [snapshot] = await buildSnapshots([location], {
+      fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(snapshot.chains).toMatchObject([
+      { chain: "Coop", source: COOP_TJEK_SOURCE, status: "ok" },
+      { chain: "Hemköp", source: "hemkop-first-party", status: "ok" },
+    ]);
+    expect(snapshot.stores.map((store) => store.id)).toEqual(
+      expect.arrayContaining([
+        "Coop:coop-drottninggatan",
+        "Hemköp:4552",
+      ]),
+    );
+    expect(snapshot.offers.map((offer) => offer.chain)).toEqual(
+      expect.arrayContaining(["Coop", "Hemköp"]),
+    );
   });
 });

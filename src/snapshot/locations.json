@@ -1,0 +1,29 @@
+{
+  "defaultLocationId": "linkoping",
+  "locations": [
+    {
+      "id": "linkoping",
+      "name": "Linköping",
+      "chains": {
+        "Coop": {
+          "source": "coop-tjek",
+          "storeDiscovery": {
+            "exactCity": {
+              "field": "city",
+              "value": "Linköping"
+            }
+          }
+        },
+        "Hemköp": {
+          "source": "hemkop-first-party",
+          "storeDiscovery": {
+            "exactCity": {
+              "field": "address.town",
+              "value": "Linköping"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

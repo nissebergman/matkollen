@@ -8,8 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "snapshot:hemkop": "tsx src/snapshot/cli.ts",
-    "snapshot:coop": "tsx src/snapshot/coop-cli.ts"
+    "snapshot:hemkop": "tsx src/snapshot/cli.ts"
   },
   "dependencies": {
     "react": "^19.2.0",
