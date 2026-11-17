@@ -16,5 +16,14 @@
       "line1": "Timmermansgatan 1",
       "postalCode": "582 77"
     }
+  },
+  {
+    "storeId": "4800",
+    "name": "Hemköp Testbutik Norrköping",
+    "address": {
+      "town": "Norrköping",
+      "line1": "Testvägen 1",
+      "postalCode": "000 00"
+    }
   }
 ]

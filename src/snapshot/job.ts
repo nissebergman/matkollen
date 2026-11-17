@@ -1,12 +1,19 @@
 import { z } from "zod";
 import { mapHemkopCategory } from "../domain/categories";
 import {
+  CHAINS,
   SCHEMA_VERSION,
   SnapshotSchema,
+  type Chain,
   type Offer,
   type Snapshot,
   type Store,
 } from "../domain/snapshot";
+import type {
+  ChainLocationConfig,
+  LocationConfig,
+  StoreDiscoveryConfig,
+} from "./config";
 
 export const HEMKOP_REQUEST_DELAY_MS = 10_000;
 const HEMKOP_SOURCE = "hemkop-first-party";
@@ -16,7 +23,8 @@ const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 export interface HemkopLocation {
   id: string;
   name: string;
-  city: string;
+  city?: string;
+  storeDiscovery?: StoreDiscoveryConfig;
 }
 
 export interface HemkopJobDependencies {
@@ -24,6 +32,11 @@ export interface HemkopJobDependencies {
   now?: () => Date;
   sleep?: (milliseconds: number) => Promise<void>;
   previousSnapshot?: unknown;
+}
+
+export interface SnapshotJobDependencies extends Omit<HemkopJobDependencies, "previousSnapshot"> {
+  previousSnapshot?: unknown;
+  previousSnapshots?: Readonly<Record<string, unknown>>;
 }
 
 const optionalText = z.string().nullable().optional();
@@ -409,6 +422,63 @@ function storeFromSource(store: HemkopStore): Store {
   };
 }
 
+function unwrapStoreIdOverride(configuredId: string): string {
+  const prefix = "Hemköp:";
+  return configuredId.startsWith(prefix) ? configuredId.slice(prefix.length) : configuredId;
+}
+
+function sourceField(value: unknown, path: string): unknown {
+  let current = value;
+  for (const part of path.split(".")) {
+    if (
+      typeof current !== "object" ||
+      current === null ||
+      !Object.hasOwn(current, part)
+    ) {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
+
+function discoverHemkopStores(
+  stores: HemkopStore[],
+  discovery: StoreDiscoveryConfig,
+): HemkopStore[] {
+  const pinIds = new Set((discovery.pinStoreIds ?? []).map(unwrapStoreIdOverride));
+  const excludeIds = new Set(
+    (discovery.excludeStoreIds ?? []).map(unwrapStoreIdOverride),
+  );
+  const availableIds = new Set(stores.map((store) => String(store.storeId)));
+  const missingPins = [...pinIds].filter((id) => !availableIds.has(id));
+  if (missingPins.length) {
+    throw new Error(
+      `Konfigurerade Hemköp-butiker hittades inte: ${missingPins.join(", ")}.`,
+    );
+  }
+
+  const matchingCityStores = stores.filter(
+    (store) =>
+      sourceField(store, discovery.exactCity.field) === discovery.exactCity.value,
+  );
+  if (matchingCityStores.length === 0 && pinIds.size === 0) {
+    throw new Error(
+      `Inga Hemköp-butiker hittades för ${discovery.exactCity.value}.`,
+    );
+  }
+
+  const selected = stores.filter((store) => {
+    const id = String(store.storeId);
+    return (
+      !excludeIds.has(id) &&
+      (pinIds.has(id) ||
+        sourceField(store, discovery.exactCity.field) === discovery.exactCity.value)
+    );
+  });
+  return selected;
+}
+
 function stableOfferId(
   storeId: string,
   product: HemkopProduct,
@@ -577,12 +647,19 @@ export async function buildHemkopSnapshot(
       storesResponse,
       "butiker",
     );
-    const matchingStores = sourceStores.filter(
-      (store) => store.address.town === location.city,
-    );
-    if (matchingStores.length === 0) {
-      throw new Error(`Inga Hemköp-butiker hittades för ${location.city}.`);
+    const discovery =
+      location.storeDiscovery ??
+      (location.city
+        ? {
+            exactCity: { field: "address.town", value: location.city },
+            pinStoreIds: [],
+            excludeStoreIds: [],
+          }
+        : undefined);
+    if (!discovery) {
+      throw new Error("Hemköp saknar konfigurerade kriterier för butiksupptäckt.");
     }
+    const matchingStores = discoverHemkopStores(sourceStores, discovery);
     const mappedStores = matchingStores.map(storeFromSource);
     discoveredStores = [
       ...new Map(mappedStores.map((store) => [store.id, store])).values(),
@@ -716,4 +793,121 @@ export async function buildHemkopSnapshot(
       offers: stale ? previousOffers : [],
     });
   }
+}
+
+function buildUnavailableChainSnapshot(
+  location: LocationConfig,
+  chain: Chain,
+  configuration: ChainLocationConfig,
+  dependencies: SnapshotJobDependencies,
+): Snapshot {
+  const now = dependencies.now ?? (() => new Date());
+  const attemptAt = now().toISOString();
+  const runDate = stockholmDate(new Date(attemptAt));
+  const weekEnd = currentOfferWeekEnd(runDate);
+  const previousValue =
+    dependencies.previousSnapshots?.[location.id] ?? dependencies.previousSnapshot;
+  const previousResult =
+    previousValue !== undefined
+      ? SnapshotSchema.safeParse(previousValue)
+      : undefined;
+  const previous =
+    previousResult?.success && previousResult.data.location.id === location.id
+      ? previousResult.data
+      : undefined;
+  const previousChain = previous?.chains.find(
+    (status) => status.chain === chain,
+  );
+  const canReusePrevious =
+    previousChain?.source === configuration.source &&
+    previousChain.status !== "failed";
+  const previousOffers =
+    (canReusePrevious ? previous?.offers : undefined)?.filter(
+      (offer) =>
+        offer.chain === chain &&
+        offer.validTo >= runDate &&
+        (!offer.validFrom || offer.validFrom <= weekEnd),
+    ) ?? [];
+  const stale = previousOffers.length > 0;
+  const failedAt = now().toISOString();
+
+  return SnapshotSchema.parse({
+    schemaVersion: SCHEMA_VERSION,
+    location: { id: location.id, name: location.name },
+    generatedAt: failedAt,
+    chains: [
+      {
+        chain,
+        source: configuration.source,
+        status: stale ? "stale" : "failed",
+        lastAttemptAt: attemptAt,
+        lastSuccessAt: canReusePrevious ? previousChain?.lastSuccessAt ?? null : null,
+        error: `Källan "${configuration.source}" för ${chain} är inte implementerad i Snapshot-jobbet.`,
+      },
+    ],
+    stores: stale
+      ? previous?.stores.filter((store) => store.chain === chain) ?? []
+      : [],
+    offers: stale ? previousOffers : [],
+  });
+}
+
+export async function buildSnapshots(
+  locations: readonly LocationConfig[],
+  dependencies: SnapshotJobDependencies = {},
+): Promise<Snapshot[]> {
+  const now = dependencies.now ?? (() => new Date());
+  const snapshots: Snapshot[] = [];
+
+  for (const location of locations) {
+    const previousSnapshot =
+      dependencies.previousSnapshots?.[location.id] ?? dependencies.previousSnapshot;
+    const chainSnapshots: Snapshot[] = [];
+
+    for (const chain of CHAINS) {
+      const configuration = location.chains[chain];
+      if (!configuration) {
+        continue;
+      }
+
+      if (chain === "Hemköp" && configuration.source === HEMKOP_SOURCE) {
+        chainSnapshots.push(
+          await buildHemkopSnapshot(
+            {
+              id: location.id,
+              name: location.name,
+              storeDiscovery: configuration.storeDiscovery,
+            },
+            {
+              fetcher: dependencies.fetcher,
+              now,
+              sleep: dependencies.sleep,
+              previousSnapshot,
+            },
+          ),
+        );
+      } else {
+        chainSnapshots.push(
+          buildUnavailableChainSnapshot(location, chain, configuration, {
+            ...dependencies,
+            now,
+            previousSnapshot,
+          }),
+        );
+      }
+    }
+
+    snapshots.push(
+      SnapshotSchema.parse({
+        schemaVersion: SCHEMA_VERSION,
+        location: { id: location.id, name: location.name },
+        generatedAt: now().toISOString(),
+        chains: chainSnapshots.flatMap((snapshot) => snapshot.chains),
+        stores: chainSnapshots.flatMap((snapshot) => snapshot.stores),
+        offers: chainSnapshots.flatMap((snapshot) => snapshot.offers),
+      }),
+    );
+  }
+
+  return snapshots;
 }
