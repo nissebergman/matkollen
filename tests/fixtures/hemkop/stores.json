@@ -1,0 +1,20 @@
+[
+  {
+    "storeId": "4552",
+    "name": "Hemköp Linköping Lucullus",
+    "address": {
+      "town": "Linköping",
+      "line1": "Stora Torget 5",
+      "postalCode": "582 19"
+    }
+  },
+  {
+    "storeId": "4701",
+    "name": "Hemköp Linköping Priso",
+    "address": {
+      "town": "Linköping",
+      "line1": "Timmermansgatan 1",
+      "postalCode": "582 77"
+    }
+  }
+]

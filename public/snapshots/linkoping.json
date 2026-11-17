@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "location": {
+    "id": "linkoping",
+    "name": "Linköping"
+  },
+  "generatedAt": "2026-11-17T09:00:00.000Z",
+  "chains": [
+    {
+      "chain": "Hemköp",
+      "source": "hemkop-fixture",
+      "status": "ok",
+      "lastAttemptAt": "2026-11-17T09:00:00.000Z",
+      "lastSuccessAt": "2026-11-17T09:00:00.000Z"
+    }
+  ],
+  "stores": [
+    {
+      "id": "Hemköp:4552",
+      "chain": "Hemköp",
+      "name": "Hemköp Linköping Lucullus",
+      "address": "Stora Torget 5, 582 19, Linköping"
+    }
+  ],
+  "offers": [
+    {
+      "id": "fixture-tomatoes",
+      "chain": "Hemköp",
+      "storeId": "Hemköp:4552",
+      "name": "Krossade tomater",
+      "brand": "Garant",
+      "packageSize": "390g",
+      "mechanicText": "6 kr/st",
+      "category": "Skafferi",
+      "validFrom": "2026-11-17",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://www.hemkop.se/search/campaigns/offline?q=4552",
+      "price": 6,
+      "unitPrice": 6,
+      "priceUnit": "st",
+      "regularPrice": 12.25,
+      "comparisonPriceText": "15,38/kg",
+      "limitText": "Max 2",
+      "sourceCategory": "skafferi|konserver-och-burkar|tomatkonserver"
+    },
+    {
+      "id": "fixture-future",
+      "chain": "Hemköp",
+      "storeId": "Hemköp:4552",
+      "name": "Läsk 4-pack",
+      "brand": "Garant",
+      "packageSize": "4-pack",
+      "mechanicText": "49,95 kr/st",
+      "category": "Dryck",
+      "validFrom": "2026-11-18",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://www.hemkop.se/search/campaigns/offline?q=4552",
+      "price": 49.95,
+      "unitPrice": 49.95,
+      "priceUnit": "st"
+    },
+    {
+      "id": "fixture-expired",
+      "chain": "Hemköp",
+      "storeId": "Hemköp:4552",
+      "name": "Utgånget exempel",
+      "mechanicText": "8 kr/st",
+      "category": "Skafferi",
+      "validFrom": "2026-11-10",
+      "validTo": "2026-11-16",
+      "sourceUrl": "https://www.hemkop.se/search/campaigns/offline?q=4552",
+      "price": 8,
+      "unitPrice": 8,
+      "priceUnit": "st"
+    }
+  ]
+}

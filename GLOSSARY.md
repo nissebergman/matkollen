@@ -23,3 +23,7 @@ _Avoid_: Shop, butik
 **Location**:
 A town or city whose Stores are covered. Linköping is the only Location for now, and more can be added later.
 _Avoid_: Region, area
+
+**Snapshot**:
+A versioned publication for one Location containing its Store metadata, normalized Offers, and per-Chain freshness status.
+_Avoid_: Feed, dump
