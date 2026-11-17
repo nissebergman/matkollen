@@ -44,6 +44,21 @@ The checked-in Snapshot is visibly labelled as fixture data, not a live
 refresh. Automated tests replay secret-free fixtures and do not access the
 network.
 
+## GitHub Pages publication
+
+`.github/workflows/publish.yml` refreshes and publishes the app and Snapshots
+daily at 05:00 UTC, or on a manual `workflow_dispatch`. It commits the generated
+Snapshots, builds them alongside the app, and deploys the resulting static site.
+If a Chain refresh fails, the successful and retained stale data is still
+committed and deployed before the workflow reports failure.
+
+The workflow stores no source credentials and requires no CI source secrets.
+GitHub Actions' automatically provided token is used only to commit Snapshot
+updates and deploy the Pages artifact. GitHub Pages sites may be publicly
+accessible: before configuring Pages or running the workflow, verify that the
+repository and the visibility of its Pages site are acceptable for the
+household data. The workflow does not enable Pages.
+
 ## Snapshot refresh
 
 `npm run snapshot -- [output-directory]` runs the job for every configured
