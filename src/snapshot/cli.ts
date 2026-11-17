@@ -1,8 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { parseSnapshot } from "../domain/snapshot";
-import { LINKOPING_HEMKOP } from "./config";
-import { buildHemkopSnapshot } from "./job";
+import { LINKOPING } from "./config";
+import { buildLocationSnapshot } from "./build";
 
 async function readPreviousSnapshot(path: string): Promise<unknown> {
   let contents: string;
@@ -30,7 +30,7 @@ async function readPreviousSnapshot(path: string): Promise<unknown> {
 async function main(): Promise<void> {
   const outputPath = resolve(process.argv[2] ?? "public/snapshots/linkoping.json");
   const previousSnapshot = await readPreviousSnapshot(outputPath);
-  const snapshot = await buildHemkopSnapshot(LINKOPING_HEMKOP, {
+  const snapshot = await buildLocationSnapshot(LINKOPING, {
     previousSnapshot,
   });
 
@@ -38,9 +38,11 @@ async function main(): Promise<void> {
   await writeFile(outputPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
   console.log(`Snapshot sparad: ${outputPath}`);
 
-  const hemkopStatus = snapshot.chains.find((chain) => chain.chain === "Hemköp");
-  if (hemkopStatus && hemkopStatus.status !== "ok") {
-    console.error(hemkopStatus.error ?? "Hemköp uppdaterades inte.");
+  const unhealthyChains = snapshot.chains.filter((chain) => chain.status !== "ok");
+  for (const chain of unhealthyChains) {
+    console.error(`${chain.chain}: ${chain.error ?? "Kedjan uppdaterades inte."}`);
+  }
+  if (unhealthyChains.length > 0) {
     process.exitCode = 1;
   }
 }

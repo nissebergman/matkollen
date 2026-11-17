@@ -7,24 +7,15 @@ import {
   type Snapshot,
   type Store,
 } from "../domain/snapshot";
+import type { LocationConfig, SnapshotJobDependencies } from "./types";
 
 export const HEMKOP_REQUEST_DELAY_MS = 10_000;
 const HEMKOP_SOURCE = "hemkop-first-party";
 const HEMKOP_ORIGIN = "https://www.hemkop.se";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
-export interface HemkopLocation {
-  id: string;
-  name: string;
-  city: string;
-}
-
-export interface HemkopJobDependencies {
-  fetcher?: typeof fetch;
-  now?: () => Date;
-  sleep?: (milliseconds: number) => Promise<void>;
-  previousSnapshot?: unknown;
-}
+export type HemkopLocation = LocationConfig;
+export type HemkopJobDependencies = SnapshotJobDependencies;
 
 const optionalText = z.string().nullable().optional();
 const optionalNumber = z

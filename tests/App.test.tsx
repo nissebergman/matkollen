@@ -34,9 +34,16 @@ describe("Offers app", () => {
     expect(screen.getByText("15,38/kg")).toBeVisible();
     expect(screen.getByText("12,25 kr")).toBeVisible();
     expect(screen.getByText("Hemköp Linköping Lucullus")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Småcitrus i nät" })).toBeVisible();
+    expect(
+      screen.getByText("ICA Supermarket Berga Centrum, Linköping"),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "Utgånget ICA-exempel" }),
+    ).not.toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Ingen produktbild" })).toBeInTheDocument();
     expect(screen.getByText("Max 2")).toBeVisible();
-    expect(screen.getByText(/t\.o\.m\./i)).toBeVisible();
+    expect(screen.getAllByText(/t\.o\.m\./i)).toHaveLength(2);
     expect(screen.getByText(/senast uppdaterad/i)).toBeVisible();
   });
 
@@ -56,6 +63,28 @@ describe("Offers app", () => {
     vi.setSystemTime(new Date("2026-11-17T23:00:00.000Z"));
     view.rerender(<App />);
     expect(screen.getByRole("heading", { name: "Läsk 4-pack" })).toBeVisible();
+  });
+
+  it("keeps an ICA Offer hidden until its future start date in Stockholm", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-19T22:59:00.000Z"));
+    vi.stubGlobal("fetch", async () => Response.json(snapshotFixture));
+
+    const view = render(<App />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(
+      screen.queryByRole("heading", { name: "Fredagserbjudande" }),
+    ).not.toBeInTheDocument();
+
+    vi.setSystemTime(new Date("2026-11-19T23:00:00.000Z"));
+    view.rerender(<App />);
+    expect(
+      screen.getByRole("heading", { name: "Fredagserbjudande" }),
+    ).toBeVisible();
   });
 
   it("keeps an Offer through its Stockholm end date and hides it the next day", async () => {
@@ -95,7 +124,9 @@ describe("Offers app", () => {
         await Promise.resolve();
       });
 
-      expect(screen.getByText(/t\.o\.m\.\s*22 november 2026/i)).toBeVisible();
+      expect(
+        screen.getAllByText(/t\.o\.m\.\s*22 november 2026/i),
+      ).toHaveLength(2);
     } finally {
       if (originalTimezone === undefined) {
         delete process.env.TZ;

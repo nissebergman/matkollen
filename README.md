@@ -2,7 +2,7 @@
 
 A Swedish, mobile-first view of supermarket Offers for Linköping. The app reads
 the versioned Snapshot at `public/snapshots/linkoping.json`; it never calls
-Hemköp directly.
+supermarket data sources directly.
 
 ## Development
 
@@ -17,11 +17,13 @@ The checked-in Snapshot is visibly labelled as fixture data, not a live
 refresh. Automated tests replay secret-free fixtures and do not access the
 network.
 
-## Hemköp refresh
+## Snapshot refresh
 
-`npm run snapshot:hemkop -- [output-path]` runs the Snapshot job. Before
-refreshing, read [the source terms and robots notes](docs/sources/hemkop.md):
-the campaign route is disallowed by Hemköp's robots.txt. The job makes direct,
-anonymous requests only during the stated UTC visit window, waits at least ten
-seconds between requests, does not retry access denials, and reports a failed
-or stale Chain with a nonzero process exit.
+`npm run snapshot -- [output-path]` runs the Snapshot job for ICA and Hemköp.
+Before refreshing, read the [ICA](docs/sources/ica.md) and
+[Hemköp](docs/sources/hemkop.md) access notes. ICA uses an anonymous token
+fetched at runtime for Store discovery and public per-Store Offers pages;
+Hemköp requests only run during its stated UTC visiting window and wait at
+least ten seconds between requests. Both adapters make sequential, anonymous
+requests, stop on access denials without retries or workarounds, and report a
+failed or stale Chain with a nonzero process exit.

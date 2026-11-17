@@ -12,6 +12,13 @@
       "status": "ok",
       "lastAttemptAt": "2026-11-17T09:00:00.000Z",
       "lastSuccessAt": "2026-11-17T09:00:00.000Z"
+    },
+    {
+      "chain": "ICA",
+      "source": "ica-fixture",
+      "status": "ok",
+      "lastAttemptAt": "2026-11-17T09:00:00.000Z",
+      "lastSuccessAt": "2026-11-17T09:00:00.000Z"
     }
   ],
   "stores": [
@@ -20,6 +27,18 @@
       "chain": "Hemköp",
       "name": "Hemköp Linköping Lucullus",
       "address": "Stora Torget 5, 582 19, Linköping"
+    },
+    {
+      "id": "ICA:2151",
+      "chain": "ICA",
+      "name": "ICA Supermarket Berga Centrum, Linköping",
+      "address": "Linköping"
+    },
+    {
+      "id": "ICA:2137",
+      "chain": "ICA",
+      "name": "ICA Signalen, Linköping",
+      "address": "Linköping"
     }
   ],
   "offers": [
@@ -69,6 +88,52 @@
       "validFrom": "2026-11-10",
       "validTo": "2026-11-16",
       "sourceUrl": "https://www.hemkop.se/search/campaigns/offline?q=4552",
+      "price": 8,
+      "unitPrice": 8,
+      "priceUnit": "st"
+    },
+    {
+      "id": "fixture-ica-citrus",
+      "chain": "ICA",
+      "storeId": "ICA:2151",
+      "name": "Småcitrus i nät",
+      "brand": "ICA. Spanien",
+      "packageSize": "1 kg",
+      "mechanicText": "20 kr/st",
+      "category": "Frukt & grönt",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://www.ica.se/erbjudanden/ica-supermarket-berga-centrum-linkoping-1003586/",
+      "price": 20,
+      "unitPrice": 20,
+      "priceUnit": "st",
+      "regularPrice": 30.95,
+      "comparisonPriceText": "20:00/kg",
+      "imageUrl": "https://assets.icanet.se/fixture-citrus.jpg",
+      "sourceCategory": "Frukt & Grönt"
+    },
+    {
+      "id": "fixture-ica-future",
+      "chain": "ICA",
+      "storeId": "ICA:2151",
+      "name": "Fredagserbjudande",
+      "mechanicText": "15 kr/st",
+      "category": "Dryck",
+      "validFrom": "2026-11-20",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://www.ica.se/erbjudanden/ica-supermarket-berga-centrum-linkoping-1003586/",
+      "price": 15,
+      "unitPrice": 15,
+      "priceUnit": "st"
+    },
+    {
+      "id": "fixture-ica-expired",
+      "chain": "ICA",
+      "storeId": "ICA:2151",
+      "name": "Utgånget ICA-exempel",
+      "mechanicText": "8 kr/st",
+      "category": "Skafferi",
+      "validTo": "2026-11-16",
+      "sourceUrl": "https://www.ica.se/erbjudanden/ica-supermarket-berga-centrum-linkoping-1003586/",
       "price": 8,
       "unitPrice": 8,
       "priceUnit": "st"

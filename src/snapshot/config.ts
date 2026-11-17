@@ -1,7 +1,9 @@
-import type { HemkopLocation } from "./job";
+import type { LocationConfig } from "./types";
 
-export const LINKOPING_HEMKOP: HemkopLocation = {
+export const LINKOPING: LocationConfig = {
   id: "linkoping",
   name: "Linköping",
   city: "Linköping",
 };
+
+export const LINKOPING_HEMKOP = LINKOPING;
