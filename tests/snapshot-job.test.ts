@@ -1,7 +1,17 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildHemkopSnapshot, buildSnapshots } from "../src/snapshot/job";
+import {
+  buildHemkopSnapshot,
+  buildSnapshots,
+  HEMKOP_SOURCE_ADAPTER,
+} from "../src/snapshot/job";
+import {
+  buildSnapshot,
+  type ChainRefreshResult,
+  type ChainSourceAdapter,
+} from "../src/snapshot/runner";
+import { runSnapshotCli } from "../src/snapshot/cli";
 
 const fixtureRoot = resolve(import.meta.dirname, "fixtures/hemkop");
 const stores = JSON.parse(readFileSync(resolve(fixtureRoot, "stores.json"), "utf8"));
@@ -12,6 +22,18 @@ const campaignPages = new Map(
       readFileSync(resolve(fixtureRoot, `campaigns/${key}.json`), "utf8"),
     ),
   ]),
+);
+const coopResult = JSON.parse(
+  readFileSync(
+    resolve(import.meta.dirname, "fixtures/snapshots/coop-chain-result.json"),
+    "utf8",
+  ),
+) as ChainRefreshResult;
+const previousMultiChainSnapshot = JSON.parse(
+  readFileSync(
+    resolve(import.meta.dirname, "fixtures/snapshots/multi-chain-previous.json"),
+    "utf8",
+  ),
 );
 
 function fixtureFetcher(now: () => number) {
@@ -33,6 +55,27 @@ function fixtureFetcher(now: () => number) {
     return new Response("No recorded fixture for this request", { status: 404 });
   };
   return { fetcher, requestTimes };
+}
+
+type FixtureLocation = { id: string; name: string; city: string };
+
+function fixtureAdapter(
+  chain: "ICA" | "Coop",
+  source: string,
+): ChainSourceAdapter<FixtureLocation> {
+  return {
+    chain,
+    source,
+    async refresh(_location, { fetcher }) {
+      const response = await (fetcher ?? fetch)(
+        `https://fixtures.matapp.test/${chain.toLowerCase()}`,
+      );
+      if (!response.ok) {
+        throw new Error(`${chain} fixture HTTP ${response.status}.`);
+      }
+      return (await response.json()) as ChainRefreshResult;
+    },
+  };
 }
 
 describe("Hemköp Snapshot job", () => {
@@ -463,6 +506,21 @@ describe("Hemköp Snapshot job", () => {
     expect(failed.chains[0].status).toBe("failed");
     expect(failed.chains[0].lastSuccessAt).toBe(previous.chains[0].lastSuccessAt);
     expect(failed.offers).toHaveLength(0);
+
+    const failedAgain = await buildHemkopSnapshot(
+      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      {
+        fetcher,
+        now,
+        sleep: async () => {},
+        previousSnapshot: failed,
+      },
+    );
+
+    expect(failedAgain.chains[0]).toMatchObject({
+      status: "failed",
+      lastSuccessAt: previous.chains[0].lastSuccessAt,
+    });
   });
 
   it("does not mistake the checked-in fixture Snapshot for a successful live refresh", async () => {
@@ -493,5 +551,276 @@ describe("Hemköp Snapshot job", () => {
     expect(failed.chains[0].status).toBe("failed");
     expect(failed.chains[0].lastSuccessAt).toBeNull();
     expect(failed.offers).toHaveLength(0);
+  });
+});
+
+describe("multi-Chain Snapshot job", () => {
+  it("keeps a failed Chain's still-valid previous Offers while publishing another Chain", async () => {
+    const fetcher: typeof fetch = async (input) => {
+      const chain = new URL(String(input)).pathname.slice(1);
+      if (chain === "ica") {
+        return new Response("Unavailable", { status: 503 });
+      }
+      if (chain === "coop") {
+        return Response.json(coopResult);
+      }
+      return new Response("No fixture for this request", { status: 404 });
+    };
+
+    const snapshot = await buildSnapshot(
+      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      [
+        fixtureAdapter("ICA", "ica-first-party"),
+        fixtureAdapter("Coop", "coop-tjek"),
+      ],
+      {
+        fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        previousSnapshot: previousMultiChainSnapshot,
+      },
+    );
+
+    expect(snapshot.chains).toMatchObject([
+      {
+        chain: "ICA",
+        source: "ica-first-party",
+        status: "stale",
+        lastSuccessAt: "2026-11-16T05:00:00.000Z",
+        error: "ICA fixture HTTP 503.",
+      },
+      {
+        chain: "Coop",
+        source: "coop-tjek",
+        status: "ok",
+      },
+    ]);
+    expect(snapshot.offers.map((offer) => offer.id)).toEqual([
+      "ica-previous",
+      "coop-current",
+    ]);
+    expect(snapshot.stores.map((store) => store.id)).toEqual([
+      "ICA:fixture-1",
+      "Coop:fixture-1",
+    ]);
+    expect(snapshot.generatedAt).toBe("2026-11-17T05:00:00.000Z");
+  });
+
+  it("uses configured Location discovery while preserving stale Offers after a source failure", async () => {
+    const now = () => new Date("2026-11-17T05:00:00.000Z");
+    const { fetcher: replay } = fixtureFetcher(() => 0);
+    const previous = await buildHemkopSnapshot(
+      {
+        id: "linkoping",
+        name: "Linköping",
+        city: "Linköping",
+      },
+      { fetcher: replay, now, sleep: async () => {} },
+    );
+    const fetcher: typeof fetch = async (input) => {
+      if (new URL(String(input)).pathname === "/search/campaigns/offline") {
+        return new Response("Unavailable", { status: 503 });
+      }
+      return replay(input);
+    };
+    const [snapshot] = await buildSnapshots(
+      [
+        {
+          id: "linkoping",
+          name: "Linköping",
+          chains: {
+            Hemköp: {
+              source: "hemkop-first-party",
+              storeDiscovery: {
+                exactCity: {
+                  field: "address.town",
+                  value: "Linköping",
+                },
+              },
+            },
+          },
+        },
+      ],
+      {
+        fetcher,
+        now,
+        sleep: async () => {},
+        previousSnapshots: { linkoping: previous },
+      },
+    );
+
+    expect(snapshot.chains[0]).toMatchObject({
+      chain: "Hemköp",
+      status: "stale",
+      lastSuccessAt: previous.chains[0].lastSuccessAt,
+      error: expect.stringContaining("HTTP 503"),
+    });
+    expect(snapshot.offers.map((offer) => offer.id)).toEqual(
+      previous.offers.map((offer) => offer.id),
+    );
+  });
+
+  it("keeps still-valid Offers when a configured source changes and then fails", async () => {
+    const fetcher: typeof fetch = async (input) => {
+      const chain = new URL(String(input)).pathname.slice(1);
+      if (chain === "ica") {
+        return new Response("Unavailable", { status: 503 });
+      }
+      if (chain === "coop") {
+        return Response.json(coopResult);
+      }
+      return new Response("No fixture for this request", { status: 404 });
+    };
+
+    const snapshot = await buildSnapshot(
+      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      [
+        fixtureAdapter("ICA", "ica-fallback"),
+        fixtureAdapter("Coop", "coop-tjek"),
+      ],
+      {
+        fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        previousSnapshot: previousMultiChainSnapshot,
+      },
+    );
+
+    expect(snapshot.chains[0]).toMatchObject({
+      chain: "ICA",
+      source: "ica-fallback",
+      status: "stale",
+      lastSuccessAt: "2026-11-16T05:00:00.000Z",
+    });
+    expect(snapshot.offers.map((offer) => offer.id)).toEqual([
+      "ica-previous",
+      "coop-current",
+    ]);
+  });
+
+  it("treats malformed Chain output as a failure without masking another Chain", async () => {
+    const fetcher: typeof fetch = async (input) => {
+      const chain = new URL(String(input)).pathname.slice(1);
+      if (chain === "ica") {
+        return Response.json({ stores: "unexpected", offers: [] });
+      }
+      if (chain === "coop") {
+        return Response.json(coopResult);
+      }
+      return new Response("No fixture for this request", { status: 404 });
+    };
+
+    const snapshot = await buildSnapshot(
+      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      [
+        fixtureAdapter("ICA", "ica-first-party"),
+        fixtureAdapter("Coop", "coop-tjek"),
+      ],
+      {
+        fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        previousSnapshot: previousMultiChainSnapshot,
+      },
+    );
+
+    expect(snapshot.chains).toMatchObject([
+      {
+        chain: "ICA",
+        status: "stale",
+        error: expect.stringContaining("stores"),
+      },
+      { chain: "Coop", status: "ok" },
+    ]);
+    expect(snapshot.offers.map((offer) => offer.id)).toEqual([
+      "ica-previous",
+      "coop-current",
+    ]);
+  });
+
+  it("reports a real Hemköp source failure without dropping a successful fixture Chain", async () => {
+    const fetcher: typeof fetch = async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname === "/axfood/rest/store") {
+        return Response.json(stores);
+      }
+      if (url.pathname === "/search/campaigns/offline") {
+        return new Response("Unavailable", { status: 503 });
+      }
+      if (url.hostname === "fixtures.matapp.test" && url.pathname === "/coop") {
+        return Response.json(coopResult);
+      }
+      return new Response("No fixture for this request", { status: 404 });
+    };
+
+    const snapshot = await buildSnapshot(
+      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      [
+        HEMKOP_SOURCE_ADAPTER,
+        fixtureAdapter("Coop", "coop-tjek"),
+      ],
+      {
+        fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        sleep: async () => {},
+      },
+    );
+
+    expect(snapshot.chains).toMatchObject([
+      {
+        chain: "Hemköp",
+        source: "hemkop-first-party",
+        status: "failed",
+        lastSuccessAt: null,
+        error: expect.stringContaining("HTTP 503"),
+      },
+      {
+        chain: "Coop",
+        source: "coop-tjek",
+        status: "ok",
+      },
+    ]);
+    expect(snapshot.offers.map((offer) => offer.id)).toEqual(["coop-current"]);
+  });
+
+  it("writes the combined Snapshot and returns a failing job result for a stale Chain", async () => {
+    const fetcher: typeof fetch = async (input) => {
+      const chain = new URL(String(input)).pathname.slice(1);
+      if (chain === "ica") {
+        return new Response("Unavailable", { status: 503 });
+      }
+      if (chain === "coop") {
+        return Response.json(coopResult);
+      }
+      return new Response("No fixture for this request", { status: 404 });
+    };
+    const errors: string[] = [];
+    let written: unknown;
+
+    const result = await runSnapshotCli({
+      outputPath: "public/snapshots/test-linkoping.json",
+      adapters: [
+        fixtureAdapter("ICA", "ica-first-party"),
+        fixtureAdapter("Coop", "coop-tjek"),
+      ],
+      dependencies: {
+        fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+      },
+      readPrevious: async () => previousMultiChainSnapshot,
+      writeSnapshot: async (_path, snapshot) => {
+        written = snapshot;
+      },
+      log: () => {},
+      error: (message) => errors.push(message),
+    });
+
+    expect(result.exitCode).toBe(1);
+    expect(result.snapshot.chains[0].status).toBe("stale");
+    expect(errors).toEqual(["ICA: ICA fixture HTTP 503."]);
+    expect(written).toMatchObject({
+      chains: [{ chain: "ICA", status: "stale" }, { chain: "Coop", status: "ok" }],
+      offers: expect.arrayContaining([
+        expect.objectContaining({ id: "ica-previous" }),
+        expect.objectContaining({ id: "coop-current" }),
+      ]),
+    });
   });
 });
