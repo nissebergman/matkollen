@@ -4,6 +4,7 @@ import { App } from "../src/App";
 import snapshotFixture from "./fixtures/snapshots/linkoping.json";
 import norrkopingSnapshotFixture from "./fixtures/snapshots/norrkoping.json";
 import multiChainFixture from "./fixtures/snapshots/multi-chain-previous.json";
+import coopFlyerSnapshotFixture from "./fixtures/snapshots/coop-flyer-pdf.json";
 
 afterEach(() => {
   cleanup();
@@ -101,6 +102,37 @@ describe("Offers app", () => {
 
     expect(requestedUrls).toEqual(["/matapp/snapshots/linkoping.json"]);
     expect(screen.getByRole("heading", { name: /i Linköping/ })).toBeVisible();
+  });
+
+  it("shows Coop flyer Offers and hides each Store's future Offer until valid", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-17T21:59:00.000Z"));
+    vi.stubGlobal(
+      "fetch",
+      async () => Response.json(coopFlyerSnapshotFixture),
+    );
+
+    const view = render(<App />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(
+      screen.getByRole("heading", { name: "Arla Mellanmjölk 1 l" }),
+    ).toBeVisible();
+    expect(screen.getByText("Stora Coop Garnisonen Linköping")).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Zoégas kaffe 450 g" })).not.toBeInTheDocument();
+
+    vi.setSystemTime(new Date("2026-11-17T23:00:00.000Z"));
+    view.rerender(<App />);
+
+    expect(
+      screen.getByRole("heading", { name: "Zoégas kaffe 450 g" }),
+    ).toBeVisible();
+    expect(screen.getByText("Coop Vallaplan")).toBeVisible();
+    expect(screen.getByText("2 för 99 kr")).toBeVisible();
   });
 
   it("shows current Snapshot Offers and hides expired and future Offers", async () => {

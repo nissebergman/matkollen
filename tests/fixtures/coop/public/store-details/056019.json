@@ -1,0 +1,22 @@
+{
+  "id": 239,
+  "ledgerAccountNumber": "056019",
+  "name": "Coop Vallaplan",
+  "city": "Linköping",
+  "address": {
+    "line1": "Malmslättsvägen",
+    "postalCode": "58246"
+  },
+  "weeklyOffersLink": "https://dr.coop.se/butik/056019",
+  "flyers": [
+    {
+      "id": 206360,
+      "startDate": "2026-11-18T00:00:00",
+      "stopDate": "2026-11-24T23:59:59",
+      "current": true,
+      "pdfExists": true,
+      "pdfUrl": "https://dr.coop.se/butik/056019",
+      "isHemmaBilaga": false
+    }
+  ]
+}

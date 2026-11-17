@@ -6,7 +6,14 @@ import {
   type Snapshot,
   type Store,
 } from "../domain/snapshot";
-import { COOP_TJEK_SOURCE } from "./coop";
+import {
+  COOP_TJEK_SOURCE,
+  type CoopLocation,
+} from "./coop";
+import {
+  COOP_FLYER_PDF_SOURCE,
+  COOP_FLYER_PDF_SOURCE_ADAPTER,
+} from "./coop-pdf";
 import { buildIcaSnapshot, ICA_SOURCE } from "./ica";
 import type {
   LocationConfig,
@@ -815,6 +822,23 @@ export function snapshotAdaptersFromConfig(
           tjekThrottle,
         ),
       );
+      continue;
+    }
+
+    if (chain === "Coop" && configuration.source === COOP_FLYER_PDF_SOURCE) {
+      adapters.push({
+        chain: COOP_FLYER_PDF_SOURCE_ADAPTER.chain,
+        source: COOP_FLYER_PDF_SOURCE_ADAPTER.source,
+        refresh: (snapshotLocation, context) =>
+          COOP_FLYER_PDF_SOURCE_ADAPTER.refresh(
+            {
+              id: snapshotLocation.id,
+              name: snapshotLocation.name,
+              storeDiscovery: configuration.storeDiscovery,
+            } satisfies CoopLocation,
+            context,
+          ),
+      });
       continue;
     }
 
