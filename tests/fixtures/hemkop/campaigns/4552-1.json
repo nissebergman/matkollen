@@ -1,0 +1,35 @@
+{
+  "results": [
+    {
+      "name": "Läsk 4-pack",
+      "priceUnit": "kr/st",
+      "displayVolume": "4-pack",
+      "googleAnalyticsCategory": "dryck|läsk",
+      "potentialPromotions": [
+        {
+          "campaignType": "GENERAL",
+          "promotionType": "MixMatchPricePromotion",
+          "price": 59.95,
+          "cartLabel": "59,95 kr/st",
+          "startDate": "16/11-2026",
+          "endDate": "22/11-2026"
+        },
+        {
+          "campaignType": "LOYALTY",
+          "promotionType": "LoyaltyPricePromotion",
+          "price": 49.95,
+          "cartLabel": "49,95 kr/st",
+          "textLabel": "Klubbpris",
+          "startDate": "16/11-2026",
+          "endDate": "22/11-2026",
+          "comparePrice": "8,33/l +pant"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "currentPage": 1,
+    "numberOfPages": 3,
+    "totalNumberOfResults": 66
+  }
+}

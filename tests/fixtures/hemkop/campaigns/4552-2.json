@@ -1,0 +1,63 @@
+{
+  "results": [
+    {
+      "name": "Kampanjprodukt",
+      "googleAnalyticsCategory": "ny-kategori|prov",
+      "potentialPromotions": [
+        {
+          "campaignType": "LOYALTY",
+          "promotionType": "MixMatchPricePromotion",
+          "price": null,
+          "cartLabel": "3 för 2",
+          "textLabel": "Klubbpris",
+          "startDate": "20/11-2026",
+          "endDate": "22/11-2026",
+          "comparePrice": "15,38/kg"
+        }
+      ]
+    },
+    {
+      "name": "Två för 22",
+      "googleAnalyticsCategory": "skafferi|erbjudanden",
+      "potentialPromotions": [
+        {
+          "campaignType": "GENERAL",
+          "price": null,
+          "cartLabel": "2 för 22 kr",
+          "startDate": "16/11-2026",
+          "endDate": "22/11-2026"
+        }
+      ]
+    },
+    {
+      "name": "Nästa vecka",
+      "potentialPromotions": [
+        {
+          "campaignType": "GENERAL",
+          "price": 15,
+          "cartLabel": "15 kr/st",
+          "startDate": "23/11-2026",
+          "endDate": "29/11-2026"
+        }
+      ]
+    },
+    {
+      "name": "Utgånget exempel",
+      "googleAnalyticsCategory": "skafferi|konserver",
+      "potentialPromotions": [
+        {
+          "campaignType": "GENERAL",
+          "price": 8,
+          "cartLabel": "8 kr/st",
+          "startDate": "10/11-2026",
+          "endDate": "16/11-2026"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "currentPage": 2,
+    "numberOfPages": 3,
+    "totalNumberOfResults": 66
+  }
+}

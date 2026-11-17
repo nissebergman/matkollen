@@ -1,0 +1,30 @@
+{
+  "results": [
+    {
+      "name": "Krossade tomater",
+      "manufacturer": "Garant",
+      "price": "12,25 kr",
+      "priceNoUnit": 12.25,
+      "priceUnit": "kr/st",
+      "displayVolume": "390g",
+      "googleAnalyticsCategory": "skafferi|konserver-och-burkar|tomatkonserver",
+      "potentialPromotions": [
+        {
+          "campaignType": "GENERAL",
+          "promotionType": "MixMatchPricePromotion",
+          "price": 6,
+          "cartLabel": "6 kr/st",
+          "startDate": "16/11-2026",
+          "endDate": "22/11-2026",
+          "comparePrice": "15,38/kg",
+          "redeemLimit": 2
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "currentPage": 0,
+    "numberOfPages": 3,
+    "totalNumberOfResults": 66
+  }
+}
