@@ -34,9 +34,13 @@ describe("Offers app", () => {
     expect(screen.getByText("15,38/kg")).toBeVisible();
     expect(screen.getByText("12,25 kr")).toBeVisible();
     expect(screen.getByText("Hemköp Linköping Lucullus")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Arla Mellanmjölk" })).toBeVisible();
+    expect(screen.getByText("Coop Drottninggatan Linköping")).toBeVisible();
+    expect(screen.getByText("Medlemspris 15 kr/l")).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Coop Fruktjuice" })).not.toBeInTheDocument();
     expect(screen.getByRole("img", { name: "Ingen produktbild" })).toBeInTheDocument();
     expect(screen.getByText("Max 2")).toBeVisible();
-    expect(screen.getByText(/t\.o\.m\./i)).toBeVisible();
+    expect(screen.getAllByText(/t\.o\.m\./i)).toHaveLength(2);
     expect(screen.getByText(/senast uppdaterad/i)).toBeVisible();
   });
 
@@ -52,10 +56,12 @@ describe("Offers app", () => {
       await Promise.resolve();
     });
     expect(screen.queryByRole("heading", { name: "Läsk 4-pack" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Coop Fruktjuice" })).not.toBeInTheDocument();
 
     vi.setSystemTime(new Date("2026-11-17T23:00:00.000Z"));
     view.rerender(<App />);
     expect(screen.getByRole("heading", { name: "Läsk 4-pack" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Coop Fruktjuice" })).toBeVisible();
   });
 
   it("keeps an Offer through its Stockholm end date and hides it the next day", async () => {
@@ -95,7 +101,9 @@ describe("Offers app", () => {
         await Promise.resolve();
       });
 
-      expect(screen.getByText(/t\.o\.m\.\s*22 november 2026/i)).toBeVisible();
+      expect(
+        screen.getAllByText(/t\.o\.m\.\s*22 november 2026/i),
+      ).toHaveLength(2);
     } finally {
       if (originalTimezone === undefined) {
         delete process.env.TZ;

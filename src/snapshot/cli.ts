@@ -1,10 +1,11 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
-import { parseSnapshot } from "../domain/snapshot";
+import { parseSnapshot, type Snapshot } from "../domain/snapshot";
 import { LINKOPING_HEMKOP } from "./config";
 import { buildHemkopSnapshot } from "./job";
+import { mergeChainSnapshot } from "./merge";
 
-async function readPreviousSnapshot(path: string): Promise<unknown> {
+async function readPreviousSnapshot(path: string): Promise<Snapshot | undefined> {
   let contents: string;
   try {
     contents = await readFile(path, "utf8");
@@ -30,9 +31,10 @@ async function readPreviousSnapshot(path: string): Promise<unknown> {
 async function main(): Promise<void> {
   const outputPath = resolve(process.argv[2] ?? "public/snapshots/linkoping.json");
   const previousSnapshot = await readPreviousSnapshot(outputPath);
-  const snapshot = await buildHemkopSnapshot(LINKOPING_HEMKOP, {
+  const refreshed = await buildHemkopSnapshot(LINKOPING_HEMKOP, {
     previousSnapshot,
   });
+  const snapshot = mergeChainSnapshot(previousSnapshot, refreshed);
 
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
