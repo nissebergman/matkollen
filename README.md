@@ -4,6 +4,10 @@ A Swedish, mobile-first view of supermarket Offers for Linköping. The app reads
 the versioned Snapshot at `public/snapshots/linkoping.json`; it never calls
 Hemköp directly.
 
+Use the multi-select Chain, Store and category filters together, or search
+product names and brands by one or more words. Select **Rensa filter** to
+return to all currently valid Offers.
+
 ## Development
 
 ```sh
