@@ -1,5 +1,10 @@
 # Coop source: Tjek/eReklamblad
 
+Coop keeps the source id `coop-tjek` for Snapshot compatibility. The adapter
+is now shared with the configurable ICA and Hemköp fallback; see the
+[Tjek/eReklamblad source note](tjek-ereklamblad.md) for the source-selection
+configuration, shared request behavior, and terms risk.
+
 The Coop adapter uses Tjek/eReklamblad's undocumented consumer endpoint at
 `https://ereklamblad.se/`. It requests the business list and then paginated,
 Store-scoped Offers using each business's public ID. Store discovery requires

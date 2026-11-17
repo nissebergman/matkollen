@@ -45,18 +45,37 @@ The checked-in Snapshot is visibly labelled as fixture data, not a live
 refresh. Automated tests replay secret-free fixtures and do not access the
 network.
 
+## GitHub Pages publication
+
+`.github/workflows/publish.yml` refreshes and publishes the app and Snapshots
+daily at 05:00 UTC, or on a manual `workflow_dispatch`. It commits the generated
+Snapshots, builds them alongside the app, and deploys the resulting static site.
+If a Chain refresh fails, the successful and retained stale data is still
+committed and deployed before the workflow reports failure.
+
+The workflow stores no source credentials and requires no CI source secrets.
+GitHub Actions' automatically provided token is used only to commit Snapshot
+updates and deploy the Pages artifact. GitHub Pages sites may be publicly
+accessible: before configuring Pages or running the workflow, verify that the
+repository and the visibility of its Pages site are acceptable for the
+household data. The workflow does not enable Pages.
+
 ## Snapshot refresh
 
 `npm run snapshot -- [output-directory]` runs the job for every configured
 Location, one at a time, and writes one Snapshot per Location. When only one
 Location is configured, a `.json` argument can still be used as the exact
-output path. Before refreshing, read the [ICA](docs/sources/ica.md),
-[Hemköp](docs/sources/hemkop.md), [Coop flyer-PDF](docs/sources/coop-pdf.md)
-and [Coop Tjek](docs/sources/coop-tjek.md) source-access notes. ICA fetches an
-anonymous token at runtime for Store discovery, then requests public per-Store
-Offers pages sequentially. Hemköp requests only run during its stated UTC
-visiting window and wait at least ten seconds between requests. Both Coop
-sources make sequential requests with a one-second delay. The PDF source reads
-Coop's public page configuration at runtime; it stores no key or credentials.
-All adapters stop on access denials without retries or workarounds, and report
-a failed or stale Chain with a nonzero process exit.
+output path. Before refreshing, read the
+[ICA](docs/sources/ica.md), [Hemköp](docs/sources/hemkop.md),
+[Tjek/eReklamblad](docs/sources/tjek-ereklamblad.md),
+[Coop flyer-PDF](docs/sources/coop-pdf.md), and
+[Coop Tjek](docs/sources/coop-tjek.md) source-access notes. The Coop-specific
+Tjek note records its retained Snapshot source id. ICA fetches an anonymous
+token at runtime for Store
+discovery, then requests public per-Store Offers pages sequentially. Hemköp
+requests only run during its stated UTC visiting window and wait at least ten
+seconds between requests. Tjek and both Coop sources make sequential requests
+with a one-second delay. The PDF source reads Coop's public page configuration
+at runtime; it stores no key or credentials. All adapters stop on access denials
+without retries or workarounds, and report a failed or stale Chain with a
+nonzero process exit.

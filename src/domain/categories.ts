@@ -18,25 +18,38 @@ export type Category = (typeof CATEGORIES)[number];
 
 const sourceCategoryMap: Record<string, Category> = {
   barn: "Barn",
+  baby: "Barn",
   brod: "Bröd & bageri",
   "brod-bageri": "Bröd & bageri",
+  bakery: "Bröd & bageri",
   dryck: "Dryck",
+  beverages: "Dryck",
   djur: "Djur",
+  pets: "Djur",
   fisk: "Fisk & skaldjur",
   "fisk-skaldjur": "Fisk & skaldjur",
+  seafood: "Fisk & skaldjur",
   frukt: "Frukt & grönt",
   "frukt-gront": "Frukt & grönt",
   "frukt-och-gront": "Frukt & grönt",
+  produce: "Frukt & grönt",
+  "fruits-vegetables": "Frukt & grönt",
   fryst: "Fryst",
+  frozen: "Fryst",
   godis: "Godis & snacks",
   "godis-snacks": "Godis & snacks",
+  snacks: "Godis & snacks",
   hushall: "Hushåll & hygien",
   "hushall-hygien": "Hushåll & hygien",
+  household: "Hushåll & hygien",
   kott: "Kött & chark",
   "kott-chark": "Kött & chark",
+  meat: "Kött & chark",
   mejeri: "Mejeri & ost",
   "mejeri-ost": "Mejeri & ost",
+  dairy: "Mejeri & ost",
   skafferi: "Skafferi",
+  pantry: "Skafferi",
 };
 
 function sourceCategoryKey(value: string): string {
@@ -57,6 +70,10 @@ export function mapHemkopCategory(sourceCategory?: string | null): Category {
 }
 
 export function mapCoopCategory(sourceCategory?: string | null): Category {
+  return sourceCategoryMap[sourceCategoryKey(sourceCategory ?? "")] ?? "Övrigt";
+}
+
+export function mapTjekCategory(sourceCategory?: string | null): Category {
   return sourceCategoryMap[sourceCategoryKey(sourceCategory ?? "")] ?? "Övrigt";
 }
 

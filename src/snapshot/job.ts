@@ -7,7 +7,6 @@ import {
   type Store,
 } from "../domain/snapshot";
 import {
-  COOP_SOURCE_ADAPTER,
   COOP_TJEK_SOURCE,
   type CoopLocation,
 } from "./coop";
@@ -20,6 +19,11 @@ import type {
   LocationConfig,
   StoreDiscoveryConfig,
 } from "./config";
+import {
+  createTjekRequestThrottle,
+  createTjekSourceAdapter,
+  TJEK_SOURCE,
+} from "./tjek";
 import {
   ChainRefreshError,
   buildSnapshot,
@@ -758,6 +762,7 @@ export function snapshotAdaptersFromConfig(
   location: LocationConfig,
 ): ChainSourceAdapter<HemkopLocation>[] {
   const adapters: ChainSourceAdapter<HemkopLocation>[] = [];
+  const tjekThrottle = createTjekRequestThrottle();
 
   for (const chain of CHAINS) {
     const configuration = location.chains[chain];
@@ -805,20 +810,18 @@ export function snapshotAdaptersFromConfig(
       continue;
     }
 
-    if (chain === "Coop" && configuration.source === COOP_TJEK_SOURCE) {
-      adapters.push({
-        chain: COOP_SOURCE_ADAPTER.chain,
-        source: COOP_SOURCE_ADAPTER.source,
-        refresh: (snapshotLocation, context) =>
-          COOP_SOURCE_ADAPTER.refresh(
-            {
-              id: snapshotLocation.id,
-              name: snapshotLocation.name,
-              storeDiscovery: configuration.storeDiscovery,
-            } satisfies CoopLocation,
-            context,
-          ),
-      });
+    if (
+      configuration.source === TJEK_SOURCE ||
+      (chain === "Coop" && configuration.source === COOP_TJEK_SOURCE)
+    ) {
+      adapters.push(
+        createTjekSourceAdapter<HemkopLocation>(
+          chain,
+          configuration.storeDiscovery,
+          configuration.source,
+          tjekThrottle,
+        ),
+      );
       continue;
     }
 
