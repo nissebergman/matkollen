@@ -326,7 +326,7 @@ export function App({
   const resolvedSnapshotUrl =
     snapshotUrl ??
     (activeLocation
-      ? `/snapshots/${encodeURIComponent(activeLocation.id)}.json`
+      ? `${import.meta.env.BASE_URL}snapshots/${encodeURIComponent(activeLocation.id)}.json`
       : undefined);
 
   useEffect(() => {
