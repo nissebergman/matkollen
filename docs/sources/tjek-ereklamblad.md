@@ -4,11 +4,13 @@ The shared adapter in `src/snapshot/tjek.ts` can be selected as an explicit
 fallback for ICA or Hemköp by setting a Location's
 `chains.<Chain>.source` to `tjek-ereklamblad`. Change either Chain independently
 in `src/snapshot/locations.json`; the checked-in defaults remain their
-first-party sources. Coop uses the same adapter with the compatibility source
-id `coop-tjek` so existing Coop Snapshots keep their identity. The current
-adapter follows the observed Store-specific `fronts` request to publication
-pages and individual `offer` lookups. The earlier Coop sample is verified, but
-a later bounded refresh stopped before a complete Snapshot; full live coverage
+first-party sources. An explicitly selected ICA or Hemköp fallback now attempts
+the same Store-specific `fronts` → publication pages → individual `offer`
+flow used by Coop. That shared code path is exercised with synthetic offline
+fixtures only; no ICA or Hemköp response compatibility has been verified. Coop
+uses the same adapter with the compatibility source id `coop-tjek` so existing
+Coop Snapshots keep their identity. The earlier Coop sample is verified, but a
+later bounded refresh stopped before a complete Snapshot; full live coverage
 is not established.
 
 ## Live compatibility status
@@ -80,9 +82,12 @@ only a subset of configured Stores, publications and Offers before the
 cumulative request cap. The failed Snapshot did not publish partial Offers.
 The exact live `fronts` body was not saved verbatim, but its response and
 nested shape are represented in the sanitized fixture. Full Coop coverage,
-ICA and Hemköp remain unverified; the adapter explicitly stops after Store
-discovery for ICA and Hemköp. Keep the configured source unchanged; do not
-claim complete live coverage or replace failures with synthetic-success data.
+ICA and Hemköp remain unverified. When either fallback is explicitly selected,
+the adapter attempts the shared publication/Offer flow and fails closed on
+unsupported responses or mismatched associations. Synthetic fixtures exercise
+that path and Snapshot contract only; they are not evidence of live
+compatibility. Keep the configured source unchanged; do not claim complete
+live coverage or replace failures with synthetic-success data.
 
 The adapter sends anonymous JSON `POST` requests to `https://ereklamblad.se/`
 with a base64-encoded command, plus a GET to the observed publication-pages

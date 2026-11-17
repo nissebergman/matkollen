@@ -45,6 +45,9 @@ contain all fields needed for a fixture.
 The ICA and Hemköp Store/Offer examples are synthetic, secret-free fixtures
 for the legacy adapter schema. Their Store identities, Offer values, and
 associations are fabricated and do not verify the current Tjek response
-shapes. The synthetic Offer fixtures are not used to make ICA or Hemköp
-report success. Tests replay fixtures through an injected fetcher and make no
-network requests.
+shapes. `ica-hemkop-publication-flow-synthetic.json` is a hypothetical
+end-to-end fixture for the shared Store/publication/Offer flow. It tests the
+Snapshot contract and fail-closed association checks only; it is not based on
+live ICA or Hemköp responses and does not establish source compatibility.
+Tests replay fixtures through an injected fetcher and make no network
+requests.
