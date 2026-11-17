@@ -16,6 +16,13 @@ import "./styles.css";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 type LocationOption = Pick<LocationConfig, "id" | "name">;
 type SortOrder = "price" | "discount";
+type OfferView = {
+  sortOrder: SortOrder;
+  selectedChains: string[];
+  selectedStoreIds: string[];
+  selectedCategories: string[];
+  searchText: string;
+};
 
 class SnapshotLoadError extends Error {
   constructor(
@@ -105,6 +112,80 @@ function toggleSelection(selected: string[], value: string): string[] {
   return selected.includes(value)
     ? selected.filter((item) => item !== value)
     : [...selected, value];
+}
+
+function readOfferViewFromAddress(
+  snapshot: Snapshot,
+  search: string,
+): OfferView {
+  const searchParams = new URLSearchParams(search);
+  const selectedChains = [
+    ...new Set(
+      searchParams
+        .getAll("chain")
+        .filter((chain) =>
+          snapshot.chains.some((available) => available.chain === chain),
+        ),
+    ),
+  ];
+  const availableStoreIds = new Set(
+    snapshot.stores
+      .filter(
+        (store) =>
+          selectedChains.length === 0 ||
+          selectedChains.includes(store.chain),
+      )
+      .map((store) => store.id),
+  );
+  const validCategories = new Set<string>(CATEGORIES);
+
+  return {
+    sortOrder: searchParams.get("sort") === "discount" ? "discount" : "price",
+    selectedChains,
+    selectedStoreIds: [
+      ...new Set(
+        searchParams
+          .getAll("store")
+          .filter((storeId) => availableStoreIds.has(storeId)),
+      ),
+    ],
+    selectedCategories: [
+      ...new Set(
+        searchParams
+          .getAll("category")
+          .filter((category) => validCategories.has(category)),
+      ),
+    ],
+    searchText: searchParams.get("q") ?? "",
+  };
+}
+
+function writeOfferViewToAddress(view: OfferView): void {
+  const url = new URL(window.location.href);
+  const searchParams = url.searchParams;
+  for (const name of ["chain", "store", "category", "q", "sort"]) {
+    searchParams.delete(name);
+  }
+  view.selectedChains.forEach((chain) => searchParams.append("chain", chain));
+  view.selectedStoreIds.forEach((storeId) =>
+    searchParams.append("store", storeId),
+  );
+  view.selectedCategories.forEach((category) =>
+    searchParams.append("category", category),
+  );
+  if (view.searchText) {
+    searchParams.set("q", view.searchText);
+  }
+  if (view.sortOrder !== "price") {
+    searchParams.set("sort", view.sortOrder);
+  }
+
+  const query = searchParams.toString();
+  window.history.replaceState(
+    window.history.state,
+    "",
+    `${url.pathname}${query ? `?${query}` : ""}${url.hash}`,
+  );
 }
 
 async function loadSnapshot(snapshotUrl: string): Promise<Snapshot> {
@@ -228,7 +309,7 @@ export function App({
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [error, setError] = useState<SnapshotLoadError | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("price");
+  const [view, setView] = useState<OfferView | null>(null);
   const [requestedLocationId, setRequestedLocationId] = useState(() =>
     new URLSearchParams(window.location.search).get("location"),
   );
@@ -257,16 +338,19 @@ export function App({
     window.addEventListener("popstate", syncLocationFromAddress);
     return () => window.removeEventListener("popstate", syncLocationFromAddress);
   }, []);
-  const [selectedChains, setSelectedChains] = useState<string[]>([]);
-  const [selectedStoreIds, setSelectedStoreIds] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [searchText, setSearchText] = useState("");
 
   const resetFilters = () => {
-    setSelectedChains([]);
-    setSelectedStoreIds([]);
-    setSelectedCategories([]);
-    setSearchText("");
+    setView((current) =>
+      current
+        ? {
+            ...current,
+            selectedChains: [],
+            selectedStoreIds: [],
+            selectedCategories: [],
+            searchText: "",
+          }
+        : current,
+    );
   };
 
   useEffect(() => {
@@ -292,6 +376,7 @@ export function App({
         }
         if (active) {
           setSnapshot(loaded);
+          setView(readOfferViewFromAddress(loaded, window.location.search));
           setLoading(false);
         }
       })
@@ -317,6 +402,12 @@ export function App({
     locationError,
     resolvedSnapshotUrl,
   ]);
+
+  useEffect(() => {
+    if (snapshot && view) {
+      writeOfferViewToAddress(view);
+    }
+  }, [snapshot, view]);
 
   if (loading) {
     return (
@@ -346,23 +437,34 @@ export function App({
     );
   }
 
+  if (!view) {
+    return (
+      <main className="app-shell">
+        <h1>Veckans erbjudanden</h1>
+        <p role="status">Laddar erbjudanden…</p>
+      </main>
+    );
+  }
+
   const currentOffers = visibleOffers(snapshot, stockholmDate(new Date()));
-  const searchTerms = searchText
+  const searchTerms = view.searchText
     .trim()
     .toLocaleLowerCase("sv-SE")
     .split(/\s+/)
     .filter(Boolean);
   const availableStores = snapshot.stores.filter(
     (store) =>
-      selectedChains.length === 0 || selectedChains.includes(store.chain),
+      view.selectedChains.length === 0 ||
+      view.selectedChains.includes(store.chain),
   );
   const matchingOffers = currentOffers.filter(
     (offer) =>
-      (selectedChains.length === 0 || selectedChains.includes(offer.chain)) &&
-      (selectedStoreIds.length === 0 ||
-        selectedStoreIds.includes(offer.storeId)) &&
-      (selectedCategories.length === 0 ||
-        selectedCategories.includes(offer.category)) &&
+      (view.selectedChains.length === 0 ||
+        view.selectedChains.includes(offer.chain)) &&
+      (view.selectedStoreIds.length === 0 ||
+        view.selectedStoreIds.includes(offer.storeId)) &&
+      (view.selectedCategories.length === 0 ||
+        view.selectedCategories.includes(offer.category)) &&
       searchTerms.every((term) =>
         `${offer.name} ${offer.brand ?? ""}`
           .toLocaleLowerCase("sv-SE")
@@ -371,9 +473,10 @@ export function App({
   );
   const chainChoices = snapshot.chains.map(({ chain }) => chain);
   const categoryChoices = CATEGORIES.filter((category) =>
-    currentOffers.some((offer) => offer.category === category),
+    currentOffers.some((offer) => offer.category === category) ||
+    view.selectedCategories.includes(category),
   );
-  const sortedOffers = sortOffers(matchingOffers, sortOrder);
+  const sortedOffers = sortOffers(matchingOffers, view.sortOrder);
   const storeNames = new Map(snapshot.stores.map((store) => [store.id, store.name]));
   const staleChains = new Set(
     snapshot.chains
@@ -429,8 +532,17 @@ export function App({
       <label className="sort-control">
         <span>Sortera efter</span>
         <select
-          value={sortOrder}
-          onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+          value={view.sortOrder}
+          onChange={(event) =>
+            setView((current) =>
+              current
+                ? {
+                    ...current,
+                    sortOrder: event.target.value as SortOrder,
+                  }
+                : current,
+            )
+          }
         >
           <option value="price">Lägsta pris</option>
           <option value="discount">Största rabatt</option>
@@ -462,24 +574,33 @@ export function App({
               <label className="filter-option" key={chain}>
                 <input
                   type="checkbox"
-                  checked={selectedChains.includes(chain)}
+                  checked={view.selectedChains.includes(chain)}
                   onChange={() => {
-                    const nextChains = toggleSelection(selectedChains, chain);
-                    setSelectedChains(nextChains);
-                    const availableStoreIds = new Set(
-                      snapshot.stores
-                        .filter(
-                          (store) =>
-                            nextChains.length === 0 ||
-                            nextChains.includes(store.chain),
-                        )
-                        .map((store) => store.id),
-                    );
-                    setSelectedStoreIds((selected) =>
-                      selected.filter((storeId) =>
-                        availableStoreIds.has(storeId),
-                      ),
-                    );
+                    setView((current) => {
+                      if (!current) {
+                        return current;
+                      }
+                      const nextChains = toggleSelection(
+                        current.selectedChains,
+                        chain,
+                      );
+                      const availableStoreIds = new Set(
+                        snapshot.stores
+                          .filter(
+                            (store) =>
+                              nextChains.length === 0 ||
+                              nextChains.includes(store.chain),
+                          )
+                          .map((store) => store.id),
+                      );
+                      return {
+                        ...current,
+                        selectedChains: nextChains,
+                        selectedStoreIds: current.selectedStoreIds.filter(
+                          (storeId) => availableStoreIds.has(storeId),
+                        ),
+                      };
+                    });
                   }}
                 />
                 <span>{chain}</span>
@@ -494,10 +615,18 @@ export function App({
               <label className="filter-option" key={store.id}>
                 <input
                   type="checkbox"
-                  checked={selectedStoreIds.includes(store.id)}
+                  checked={view.selectedStoreIds.includes(store.id)}
                   onChange={() =>
-                    setSelectedStoreIds((selected) =>
-                      toggleSelection(selected, store.id),
+                    setView((current) =>
+                      current
+                        ? {
+                            ...current,
+                            selectedStoreIds: toggleSelection(
+                              current.selectedStoreIds,
+                              store.id,
+                            ),
+                          }
+                        : current,
                     )
                   }
                 />
@@ -515,10 +644,18 @@ export function App({
               <label className="filter-option" key={category}>
                 <input
                   type="checkbox"
-                  checked={selectedCategories.includes(category)}
+                  checked={view.selectedCategories.includes(category)}
                   onChange={() =>
-                    setSelectedCategories((selected) =>
-                      toggleSelection(selected, category),
+                    setView((current) =>
+                      current
+                        ? {
+                            ...current,
+                            selectedCategories: toggleSelection(
+                              current.selectedCategories,
+                              category,
+                            ),
+                          }
+                        : current,
                     )
                   }
                 />
@@ -532,8 +669,14 @@ export function App({
           <input
             id="offer-search"
             type="search"
-            value={searchText}
-            onChange={(event) => setSearchText(event.target.value)}
+            value={view.searchText}
+            onChange={(event) =>
+              setView((current) =>
+                current
+                  ? { ...current, searchText: event.target.value }
+                  : current,
+              )
+            }
             placeholder="Sök erbjudanden"
           />
         </div>
