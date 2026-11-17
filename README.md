@@ -19,9 +19,12 @@ precedence over pins.
 Add a Location by adding a configuration entry and publishing a Snapshot named
 `public/snapshots/<id>.json`. The app shows a Location picker only when more
 than one Location is configured. A configured source without a registered
-adapter is reported as a failed Chain. The ICA and Hemköp adapters and both
-Coop sources are implemented. Linköping currently selects
-`coop-flyer-pdf`; change the Coop `source` to `coop-tjek` to switch back.
+adapter is reported as a failed Chain. The ICA and Hemköp adapters and both Coop sources are implemented. Linköping
+uses `coop-tjek` as Coop's primary source. The flyer-PDF adapter is available
+as an experimental, manually selected fallback; a read-only check of a real
+flyer showed a layout that the parser correctly rejects rather than publishing
+misidentified Offers. Keep Tjek selected until real-flyer extraction is
+validated.
 
 Offers are ordered by lowest effective price by default. Choose “Största rabatt”
 to sort by the difference between regular and effective price when both use a

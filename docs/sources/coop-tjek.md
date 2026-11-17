@@ -39,10 +39,11 @@ and never work around an access block.
 
 Membership prices are normalized as ordinary Offers; no member-only flag is
 added. The separate `coop-flyer-pdf` adapter is documented in
-[`coop-pdf.md`](coop-pdf.md). Linköping currently selects that source in
-`src/snapshot/locations.json`; set the Coop `source` back to `coop-tjek` to
-select this adapter. Source selection is explicit and does not automatically
-retry Tjek after a PDF-source failure.
+[`coop-pdf.md`](coop-pdf.md). Linköping currently selects `coop-tjek` in
+`src/snapshot/locations.json`. The PDF source can be selected manually, but it
+is experimental and should not replace Tjek until its extraction has been
+validated against current real flyers. Source selection is explicit and does
+not automatically retry Tjek after a PDF-source failure.
 
 Automated tests replay the secret-free fixtures in `tests/fixtures/coop/` and
 never contact Tjek. Their representative data is not proof that the

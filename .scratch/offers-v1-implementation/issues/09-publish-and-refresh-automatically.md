@@ -4,7 +4,7 @@
 
 **Blocked by:** 02: Add ICA Offers; 03: Add Coop Offers; 07: Keep Offers visible when a source fails.
 
-**Status:** blocked
+**Status:** in_progress
 
 - [ ] A GitHub Actions workflow runs the Snapshot job daily around 05:00 UTC and supports manual runs; the app and Snapshots are deployed together to GitHub Pages.
 - [ ] A partially failed refresh still publishes successful and retained stale data, then reports a failed workflow run for maintainer notification.
@@ -14,4 +14,8 @@
 
 ## Comments
 
-Blocked because the repository has no GitHub remote; configuring remote/Pages and verifying an actual deployment and its visibility require user approval.
+The workflow is integrated and the user approved publishing to the public
+`nissebergman/matkollen` repository. The active GitHub account has admin access,
+the remote is configured, and the approved public commit email is set locally.
+Actual publication and GitHub Pages verification are pending final review and
+history cleanup. Pages must remain public only as already approved.

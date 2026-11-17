@@ -35,11 +35,13 @@ map to `Övrigt`. A flyer preview is not used as a product image.
 
 The checked-in PDFs are small, generated text-only fixtures, not copies of
 Coop flyers. A read-only retrieval of the Stora Coop Garnisonen flyer on
-2026-11-17 returned a 12-page PDF. Running the adapter exposed a failure on
-price-before-name text and the `Jfr-pris` comparison-price label. The parser
-was updated for those observed structures, and a synthetic two-page fixture
-captures short extracted text fragments for offline regression coverage. The
-real PDF was not saved, and the updated parser has not been re-run against it;
-this fixture does not establish full real-flyer fidelity. Image-only PDFs,
-unusual text ordering, or changed layouts can still fail parsing. The adapter
-reports such failures and does not publish an apparently complete result.
+2026-11-17 returned a 12-page PDF. The initial adapter run exposed prices
+preceding product names and the `Jfr-pris` comparison-price label. A later run
+preserved the comparison text but encountered a numeric row (`103:15`) that
+could not safely be identified as a product, so the adapter failed the Chain
+and published zero Offers. The real PDF was not saved. A synthetic fixture
+covers the observed Libero row, but accurate extraction across real flyers remains
+unverified.
+Image-only PDFs, unusual text ordering, and changed layouts may fail parsing;
+ambiguous rows must fail rather than be published as Offers. Keep the configured
+Coop primary source on Tjek until real-flyer extraction is validated.
