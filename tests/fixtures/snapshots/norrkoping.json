@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "location": {
+    "id": "norrkoping",
+    "name": "Norrköping"
+  },
+  "generatedAt": "2026-11-17T09:00:00.000Z",
+  "chains": [
+    {
+      "chain": "Hemköp",
+      "source": "hemkop-fixture",
+      "status": "ok",
+      "lastAttemptAt": "2026-11-17T09:00:00.000Z",
+      "lastSuccessAt": "2026-11-17T09:00:00.000Z"
+    }
+  ],
+  "stores": [
+    {
+      "id": "Hemköp:4800",
+      "chain": "Hemköp",
+      "name": "Hemköp Testbutik Norrköping",
+      "address": "Testvägen 1, 000 00, Norrköping"
+    }
+  ],
+  "offers": [
+    {
+      "id": "fixture-norrkoping",
+      "chain": "Hemköp",
+      "storeId": "Hemköp:4800",
+      "name": "Norrköpings Testprodukt",
+      "brand": "Fixture",
+      "packageSize": "1 st",
+      "mechanicText": "19,90 kr/st",
+      "category": "Skafferi",
+      "validFrom": "2026-11-17",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://www.hemkop.se/search/campaigns/offline?q=4800",
+      "price": 19.9,
+      "unitPrice": 19.9,
+      "priceUnit": "st",
+      "regularPrice": 24.9
+    }
+  ]
+}
