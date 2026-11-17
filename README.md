@@ -21,6 +21,11 @@ than one Location is configured. A configured source without a registered
 adapter is reported as a failed Chain; currently only the Hemköp adapter is
 implemented.
 
+Offers are ordered by lowest effective price by default. Choose “Största rabatt”
+to sort by the difference between regular and effective price when both use a
+known, shared unit; Offers without a usable price or computable discount appear
+last.
+
 ## Development
 
 ```sh

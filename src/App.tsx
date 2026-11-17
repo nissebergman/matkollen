@@ -14,6 +14,7 @@ import "./styles.css";
 
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 type LocationOption = Pick<LocationConfig, "id" | "name">;
+type SortOrder = "price" | "discount";
 
 class SnapshotLoadError extends Error {
   constructor(
@@ -64,6 +65,39 @@ function visibleOffers(snapshot: Snapshot, today: string): Offer[] {
     (offer) =>
       offer.validTo >= today && (!offer.validFrom || offer.validFrom <= today),
   );
+}
+
+function offerDiscount(offer: Offer): number | undefined {
+  if (
+    offer.unitPrice === undefined ||
+    offer.regularPrice === undefined ||
+    offer.priceUnit === undefined
+  ) {
+    return undefined;
+  }
+  return offer.regularPrice - offer.unitPrice;
+}
+
+function sortOffers(offers: Offer[], order: SortOrder): Offer[] {
+  return [...offers].sort((left, right) => {
+    const leftValue =
+      order === "price" ? left.unitPrice : offerDiscount(left);
+    const rightValue =
+      order === "price" ? right.unitPrice : offerDiscount(right);
+
+    if (leftValue === undefined) {
+      return rightValue === undefined
+        ? left.name.localeCompare(right.name, "sv")
+        : 1;
+    }
+    if (rightValue === undefined) {
+      return -1;
+    }
+
+    const valueDifference =
+      order === "price" ? leftValue - rightValue : rightValue - leftValue;
+    return valueDifference || left.name.localeCompare(right.name, "sv");
+  });
 }
 
 async function loadSnapshot(snapshotUrl: string): Promise<Snapshot> {
@@ -187,6 +221,7 @@ export function App({
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [error, setError] = useState<SnapshotLoadError | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("price");
   const [requestedLocationId, setRequestedLocationId] = useState(() =>
     new URLSearchParams(window.location.search).get("location"),
   );
@@ -294,6 +329,7 @@ export function App({
   }
 
   const currentOffers = visibleOffers(snapshot, stockholmDate(new Date()));
+  const sortedOffers = sortOffers(currentOffers, sortOrder);
   const storeNames = new Map(snapshot.stores.map((store) => [store.id, store.name]));
   const staleChains = new Set(
     snapshot.chains
@@ -346,6 +382,17 @@ export function App({
         </p>
       </header>
 
+      <label className="sort-control">
+        <span>Sortera efter</span>
+        <select
+          value={sortOrder}
+          onChange={(event) => setSortOrder(event.target.value as SortOrder)}
+        >
+          <option value="price">Lägsta pris</option>
+          <option value="discount">Största rabatt</option>
+        </select>
+      </label>
+
       {isFixtureSnapshot && (
         <aside className="fixture-notice" role="note">
           Exempeldata från testfixturer — ingen liveuppdatering har körts.
@@ -370,7 +417,7 @@ export function App({
         </section>
       ) : (
         <section className="offer-list" aria-label="Erbjudanden">
-          {currentOffers.map((offer) => (
+          {sortedOffers.map((offer) => (
             <OfferCard
               key={offer.id}
               offer={offer}

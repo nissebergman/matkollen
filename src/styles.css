@@ -85,6 +85,30 @@ h1 {
   font-weight: 700;
 }
 
+.sort-control {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 20rem;
+  margin-bottom: 1rem;
+  color: #345b3e;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.sort-control select {
+  min-height: 2.75rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid #b9c9b8;
+  border-radius: 0.65rem;
+  background: #fff;
+  color: #17231e;
+}
+
+.sort-control select:focus-visible {
+  outline: 3px solid #72a27b;
+  outline-offset: 2px;
+}
+
 .updated-at {
   margin-bottom: 0;
   color: #58655e;
