@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "location": {
+    "id": "linkoping",
+    "name": "Linköping"
+  },
+  "generatedAt": "2026-11-17T05:00:00.000Z",
+  "chains": [
+    {
+      "chain": "Coop",
+      "source": "coop-flyer-pdf",
+      "status": "ok",
+      "lastAttemptAt": "2026-11-17T05:00:00.000Z",
+      "lastSuccessAt": "2026-11-17T05:00:00.000Z"
+    }
+  ],
+  "stores": [
+    {
+      "id": "Coop:2303",
+      "chain": "Coop",
+      "name": "Stora Coop Garnisonen Linköping",
+      "address": "Garnisonsvägen 50, 58750, Linköping"
+    },
+    {
+      "id": "Coop:239",
+      "chain": "Coop",
+      "name": "Coop Vallaplan",
+      "address": "Malmslättsvägen, 58246, Linköping"
+    }
+  ],
+  "offers": [
+    {
+      "id": "coop-flyer-205762-0",
+      "chain": "Coop",
+      "storeId": "Coop:2303",
+      "name": "Arla Mellanmjölk 1 l",
+      "brand": "Arla",
+      "packageSize": "1 l",
+      "mechanicText": "Medlemspris 15 kr/l",
+      "category": "Mejeri & ost",
+      "validFrom": "2026-11-16",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://dr.coop.se/butik/056010",
+      "unitPrice": 15,
+      "priceUnit": "l",
+      "regularPrice": 17.9
+    },
+    {
+      "id": "coop-flyer-206360-0",
+      "chain": "Coop",
+      "storeId": "Coop:239",
+      "name": "Zoégas kaffe 450 g",
+      "brand": "Zoégas",
+      "packageSize": "450 g",
+      "mechanicText": "2 för 99 kr",
+      "category": "Skafferi",
+      "validFrom": "2026-11-18",
+      "validTo": "2026-11-24",
+      "sourceUrl": "https://dr.coop.se/butik/056019",
+      "quantity": 2,
+      "price": 99,
+      "unitPrice": 49.5
+    }
+  ]
+}

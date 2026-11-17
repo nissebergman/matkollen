@@ -1,0 +1,22 @@
+{
+  "id": 2303,
+  "ledgerAccountNumber": "056010",
+  "name": "Stora Coop Garnisonen Linköping",
+  "city": "Linköping",
+  "address": {
+    "line1": "Garnisonsvägen 50",
+    "postalCode": "58750"
+  },
+  "weeklyOffersLink": "https://dr.coop.se/butik/056010",
+  "flyers": [
+    {
+      "id": 205762,
+      "startDate": "2026-11-16T00:00:00",
+      "stopDate": "2026-11-22T23:59:59",
+      "current": true,
+      "pdfExists": true,
+      "pdfUrl": "https://dr.coop.se/butik/056010",
+      "isHemmaBilaga": false
+    }
+  ]
+}

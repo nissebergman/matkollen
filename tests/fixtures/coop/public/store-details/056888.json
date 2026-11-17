@@ -1,0 +1,22 @@
+{
+  "id": 8888,
+  "ledgerAccountNumber": "056888",
+  "name": "Coop Norrköping",
+  "city": "Norrköping",
+  "address": {
+    "line1": "Kungsgatan 1",
+    "postalCode": "60200"
+  },
+  "weeklyOffersLink": "https://dr.coop.se/butik/056888",
+  "flyers": [
+    {
+      "id": 206888,
+      "startDate": "2026-11-16T00:00:00",
+      "stopDate": "2026-11-22T23:59:59",
+      "current": true,
+      "pdfExists": true,
+      "pdfUrl": "https://dr.coop.se/butik/056888",
+      "isHemmaBilaga": false
+    }
+  ]
+}

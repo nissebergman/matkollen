@@ -1,0 +1,26 @@
+[
+  {
+    "storeId": 2303,
+    "ledgerAccountNumber": "056010",
+    "name": "Stora Coop Garnisonen Linköping",
+    "address": "Garnisonsvägen 50",
+    "city": "Linköping",
+    "postalCode": "58750"
+  },
+  {
+    "storeId": 239,
+    "ledgerAccountNumber": "056019",
+    "name": "Coop Vallaplan",
+    "address": "Malmslättsvägen",
+    "city": "Linköping",
+    "postalCode": "58246"
+  },
+  {
+    "storeId": 8888,
+    "ledgerAccountNumber": "056888",
+    "name": "Coop Norrköping",
+    "address": "Norrköping",
+    "city": "Norrköping",
+    "postalCode": "60200"
+  }
+]

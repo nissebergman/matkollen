@@ -12,3 +12,8 @@ exact payload.
 The job tests replay the fixtures through an injected fetcher. They make no
 network requests. A generated 100-record first page exercises the observed
 offset pagination boundary without storing a large repetitive fixture.
+
+The files under `public/` and `flyers/` are synthetic Coop API/page and
+text-only PDF fixtures. The public configuration contains an obvious
+fixture-only placeholder, not a Coop key. The PDFs are generated examples,
+not copies of real flyers, and only exercise basic selectable-text layouts.

@@ -325,7 +325,7 @@ describe("Coop Snapshot job", () => {
     ]);
   });
 
-  it("runs Coop beside Hemköp from one configured Location without network access", async () => {
+  it("switches Coop back to Tjek beside Hemköp without network access", async () => {
     const businesses = readFixture<{ value: Array<Record<string, unknown>> }>(
       "businesses.json",
     );
@@ -387,7 +387,10 @@ describe("Coop Snapshot job", () => {
     const location = {
       ...configuredLocation,
       chains: {
-        Coop: configuredLocation.chains.Coop,
+        Coop: {
+          ...configuredLocation.chains.Coop!,
+          source: COOP_TJEK_SOURCE,
+        },
         Hemköp: configuredLocation.chains.Hemköp,
       },
     };
