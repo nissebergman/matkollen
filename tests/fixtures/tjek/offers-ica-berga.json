@@ -1,0 +1,79 @@
+{
+  "value": {
+    "data": [
+      {
+        "publicId": "ica-member-milk",
+        "name": "Mjölk 1,5 %",
+        "brand": "Arla",
+        "packageSize": "1 l",
+        "description": "2 för 40 kr",
+        "price": 24.9,
+        "membershipPrice": 20,
+        "unitPrice": 20,
+        "baseUnit": "piece",
+        "unitSymbol": "st",
+        "regularPrice": 25,
+        "validFrom": "2026-11-16T00:00:00+01:00",
+        "validUntil": "2026-11-22T23:59:59+01:00",
+        "departmentSlug": "dairy",
+        "business": {
+          "publicId": "ica-berga"
+        },
+        "image": "https://images.example.test/ica-milk.jpg",
+        "url": "https://ereklamblad.se/erbjudanden/ica-member-milk"
+      },
+      {
+        "publicId": "ica-three-for-two",
+        "name": "Kampanjprodukt ICA",
+        "description": "3 för 2",
+        "price": null,
+        "membershipPrice": null,
+        "unitPrice": null,
+        "validFrom": "2026-11-20",
+        "validUntil": "2026-11-22",
+        "departmentSlug": "unknown-category",
+        "business": {
+          "publicId": "ica-berga"
+        }
+      },
+      {
+        "publicId": "ica-weight-coffee",
+        "name": "Lösviktskaffe",
+        "price": 29.9,
+        "membershipPrice": null,
+        "priceText": "29,90 kr/kg",
+        "unitPrice": 29.9,
+        "baseUnit": "kilogram",
+        "unitSymbol": "kg",
+        "validFrom": "2026-11-16",
+        "validUntil": "2026-11-22",
+        "departmentSlug": "pantry",
+        "business": {
+          "publicId": "ica-berga"
+        }
+      },
+      {
+        "publicId": "ica-next-week",
+        "name": "Nästa veckas vara",
+        "description": "10 kr/st",
+        "price": 10,
+        "validFrom": "2026-11-23",
+        "validUntil": "2026-11-29",
+        "business": {
+          "publicId": "ica-berga"
+        }
+      },
+      {
+        "publicId": "ica-expired",
+        "name": "Utgånget exempel ICA",
+        "description": "10 kr/st",
+        "price": 10,
+        "validFrom": "2026-11-10",
+        "validUntil": "2026-11-16",
+        "business": {
+          "publicId": "ica-berga"
+        }
+      }
+    ]
+  }
+}

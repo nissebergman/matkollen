@@ -1,0 +1,48 @@
+{
+  "value": [
+    {
+      "publicId": "ica-berga",
+      "name": "ICA Supermarket Berga Centrum",
+      "chainName": "ICA",
+      "city": "Linköping",
+      "address": {
+        "street": "Berga centrum",
+        "postalCode": "583 03",
+        "town": "Linköping"
+      }
+    },
+    {
+      "publicId": "hemkop-lucullus",
+      "name": "Hemköp Linköping Lucullus",
+      "chainName": "Hemköp",
+      "city": "Linköping",
+      "address": {
+        "street": "Stora Torget 5",
+        "postalCode": "582 19",
+        "town": "Linköping"
+      }
+    },
+    {
+      "publicId": "coop-drottninggatan",
+      "name": "Coop Drottninggatan Linköping",
+      "chainName": "Coop",
+      "city": "Linköping",
+      "address": {
+        "street": "Drottninggatan 23",
+        "postalCode": "582 25",
+        "town": "Linköping"
+      }
+    },
+    {
+      "publicId": "ica-norrkoping",
+      "name": "ICA Supermarket Norrköping",
+      "chainName": "ICA",
+      "city": "Norrköping",
+      "address": {
+        "street": "Testgatan 1",
+        "postalCode": "602 10",
+        "town": "Norrköping"
+      }
+    }
+  ]
+}

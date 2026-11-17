@@ -1,0 +1,40 @@
+{
+  "value": {
+    "data": [
+      {
+        "publicId": "hemkop-member-yoghurt",
+        "name": "Naturell yoghurt",
+        "brand": "Arla",
+        "packageSize": "1 kg",
+        "membershipPrice": 19.9,
+        "membershipPriceText": "Klubbpris 19,90 kr/st",
+        "price": null,
+        "unitPrice": 19.9,
+        "baseUnit": "piece",
+        "unitSymbol": "st",
+        "validFrom": "2026-11-16T00:00:00+01:00",
+        "validUntil": "2026-11-22T23:59:59+01:00",
+        "departmentSlug": "mejeri",
+        "limitText": "Max 2 per hushåll",
+        "business": {
+          "publicId": "hemkop-lucullus"
+        },
+        "image": "https://images.example.test/hemkop-yoghurt.jpg"
+      },
+      {
+        "publicId": "hemkop-three-for-two",
+        "name": "Kampanjprodukt Hemköp",
+        "description": "3 för 2",
+        "price": null,
+        "membershipPrice": null,
+        "unitPrice": null,
+        "validFrom": "2026-11-20",
+        "validUntil": "2026-11-22",
+        "departmentSlug": "unmapped",
+        "business": {
+          "publicId": "hemkop-lucullus"
+        }
+      }
+    ]
+  }
+}
