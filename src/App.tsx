@@ -5,6 +5,7 @@ import {
   type Offer,
   type Snapshot,
 } from "./domain/snapshot";
+import { CATEGORIES } from "./domain/categories";
 import {
   DEFAULT_LOCATION_ID,
   LOCATION_REGISTRY,
@@ -98,6 +99,12 @@ function sortOffers(offers: Offer[], order: SortOrder): Offer[] {
       order === "price" ? leftValue - rightValue : rightValue - leftValue;
     return valueDifference || left.name.localeCompare(right.name, "sv");
   });
+}
+
+function toggleSelection(selected: string[], value: string): string[] {
+  return selected.includes(value)
+    ? selected.filter((item) => item !== value)
+    : [...selected, value];
 }
 
 async function loadSnapshot(snapshotUrl: string): Promise<Snapshot> {
@@ -250,6 +257,17 @@ export function App({
     window.addEventListener("popstate", syncLocationFromAddress);
     return () => window.removeEventListener("popstate", syncLocationFromAddress);
   }, []);
+  const [selectedChains, setSelectedChains] = useState<string[]>([]);
+  const [selectedStoreIds, setSelectedStoreIds] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [searchText, setSearchText] = useState("");
+
+  const resetFilters = () => {
+    setSelectedChains([]);
+    setSelectedStoreIds([]);
+    setSelectedCategories([]);
+    setSearchText("");
+  };
 
   useEffect(() => {
     let active = true;
@@ -329,7 +347,33 @@ export function App({
   }
 
   const currentOffers = visibleOffers(snapshot, stockholmDate(new Date()));
-  const sortedOffers = sortOffers(currentOffers, sortOrder);
+  const searchTerms = searchText
+    .trim()
+    .toLocaleLowerCase("sv-SE")
+    .split(/\s+/)
+    .filter(Boolean);
+  const availableStores = snapshot.stores.filter(
+    (store) =>
+      selectedChains.length === 0 || selectedChains.includes(store.chain),
+  );
+  const matchingOffers = currentOffers.filter(
+    (offer) =>
+      (selectedChains.length === 0 || selectedChains.includes(offer.chain)) &&
+      (selectedStoreIds.length === 0 ||
+        selectedStoreIds.includes(offer.storeId)) &&
+      (selectedCategories.length === 0 ||
+        selectedCategories.includes(offer.category)) &&
+      searchTerms.every((term) =>
+        `${offer.name} ${offer.brand ?? ""}`
+          .toLocaleLowerCase("sv-SE")
+          .includes(term),
+      ),
+  );
+  const chainChoices = snapshot.chains.map(({ chain }) => chain);
+  const categoryChoices = CATEGORIES.filter((category) =>
+    currentOffers.some((offer) => offer.category === category),
+  );
+  const sortedOffers = sortOffers(matchingOffers, sortOrder);
   const storeNames = new Map(snapshot.stores.map((store) => [store.id, store.name]));
   const staleChains = new Set(
     snapshot.chains
@@ -375,7 +419,7 @@ export function App({
           </label>
         )}
         <p className="offer-count" aria-live="polite">
-          {currentOffers.length} {currentOffers.length === 1 ? "erbjudande" : "erbjudanden"}
+          {matchingOffers.length} {matchingOffers.length === 1 ? "erbjudande" : "erbjudanden"}
         </p>
         <p className="updated-at">
           Senast uppdaterad {formatTimestamp(snapshot.generatedAt)}
@@ -410,10 +454,106 @@ export function App({
         </aside>
       ))}
 
-      {currentOffers.length === 0 ? (
+      <section className="filter-panel" aria-label="Filtrera erbjudanden">
+        <fieldset className="filter-group">
+          <legend>Kedjor</legend>
+          <div className="filter-options">
+            {chainChoices.map((chain) => (
+              <label className="filter-option" key={chain}>
+                <input
+                  type="checkbox"
+                  checked={selectedChains.includes(chain)}
+                  onChange={() => {
+                    const nextChains = toggleSelection(selectedChains, chain);
+                    setSelectedChains(nextChains);
+                    const availableStoreIds = new Set(
+                      snapshot.stores
+                        .filter(
+                          (store) =>
+                            nextChains.length === 0 ||
+                            nextChains.includes(store.chain),
+                        )
+                        .map((store) => store.id),
+                    );
+                    setSelectedStoreIds((selected) =>
+                      selected.filter((storeId) =>
+                        availableStoreIds.has(storeId),
+                      ),
+                    );
+                  }}
+                />
+                <span>{chain}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset className="filter-group">
+          <legend>Butiker</legend>
+          <div className="filter-options">
+            {availableStores.map((store) => (
+              <label className="filter-option" key={store.id}>
+                <input
+                  type="checkbox"
+                  checked={selectedStoreIds.includes(store.id)}
+                  onChange={() =>
+                    setSelectedStoreIds((selected) =>
+                      toggleSelection(selected, store.id),
+                    )
+                  }
+                />
+                <span>
+                  {store.name} ({store.chain})
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset className="filter-group">
+          <legend>Kategorier</legend>
+          <div className="filter-options">
+            {categoryChoices.map((category) => (
+              <label className="filter-option" key={category}>
+                <input
+                  type="checkbox"
+                  checked={selectedCategories.includes(category)}
+                  onChange={() =>
+                    setSelectedCategories((selected) =>
+                      toggleSelection(selected, category),
+                    )
+                  }
+                />
+                <span>{category}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <div className="search-field">
+          <label htmlFor="offer-search">Sök på produkt eller varumärke</label>
+          <input
+            id="offer-search"
+            type="search"
+            value={searchText}
+            onChange={(event) => setSearchText(event.target.value)}
+            placeholder="Sök erbjudanden"
+          />
+        </div>
+        <button className="reset-filters" type="button" onClick={resetFilters}>
+          Rensa filter
+        </button>
+      </section>
+
+      {matchingOffers.length === 0 ? (
         <section className="empty-state" aria-live="polite">
-          <h2>Inga erbjudanden just nu</h2>
-          <p>Det finns inga giltiga erbjudanden att visa för tillfället.</p>
+          <h2>
+            {currentOffers.length === 0
+              ? "Inga erbjudanden just nu"
+              : "Inga erbjudanden matchar dina filter"}
+          </h2>
+          <p>
+            {currentOffers.length === 0
+              ? "Det finns inga giltiga erbjudanden att visa för tillfället."
+              : "Ändra filtren eller välj Rensa filter för att visa alla erbjudanden."}
+          </p>
         </section>
       ) : (
         <section className="offer-list" aria-label="Erbjudanden">

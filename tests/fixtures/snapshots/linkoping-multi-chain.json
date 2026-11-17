@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "location": {
+    "id": "linkoping",
+    "name": "Linköping"
+  },
+  "generatedAt": "2026-11-17T09:00:00.000Z",
+  "chains": [
+    {
+      "chain": "ICA",
+      "source": "ica-fixture",
+      "status": "ok",
+      "lastAttemptAt": "2026-11-17T09:00:00.000Z",
+      "lastSuccessAt": "2026-11-17T09:00:00.000Z"
+    },
+    {
+      "chain": "Coop",
+      "source": "coop-fixture",
+      "status": "ok",
+      "lastAttemptAt": "2026-11-17T09:00:00.000Z",
+      "lastSuccessAt": "2026-11-17T09:00:00.000Z"
+    },
+    {
+      "chain": "Hemköp",
+      "source": "hemkop-fixture",
+      "status": "ok",
+      "lastAttemptAt": "2026-11-17T09:00:00.000Z",
+      "lastSuccessAt": "2026-11-17T09:00:00.000Z"
+    }
+  ],
+  "stores": [
+    {
+      "id": "ICA:100",
+      "chain": "ICA",
+      "name": "ICA Supermarket Linköping City",
+      "address": "Storgatan 1, Linköping"
+    },
+    {
+      "id": "ICA:101",
+      "chain": "ICA",
+      "name": "ICA Kvantum Tornby",
+      "address": "Tornbyvägen 2, Linköping"
+    },
+    {
+      "id": "Coop:200",
+      "chain": "Coop",
+      "name": "Coop Extra Tannefors",
+      "address": "Tanneforsgatan 3, Linköping"
+    },
+    {
+      "id": "Hemköp:4552",
+      "chain": "Hemköp",
+      "name": "Hemköp Linköping Lucullus",
+      "address": "Stora Torget 5, Linköping"
+    }
+  ],
+  "offers": [
+    {
+      "id": "fixture-ica-yoghurt",
+      "chain": "ICA",
+      "storeId": "ICA:100",
+      "name": "Yoghurt naturell",
+      "brand": "Arla",
+      "mechanicText": "19,90 kr/st",
+      "category": "Mejeri & ost",
+      "validFrom": "2026-11-17",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://example.com/offers/ica-yoghurt"
+    },
+    {
+      "id": "fixture-ica-coffee",
+      "chain": "ICA",
+      "storeId": "ICA:101",
+      "name": "Bryggkaffe",
+      "brand": "ICA",
+      "mechanicText": "49,90 kr/st",
+      "category": "Skafferi",
+      "validFrom": "2026-11-17",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://example.com/offers/ica-coffee"
+    },
+    {
+      "id": "fixture-ica-soda",
+      "chain": "ICA",
+      "storeId": "ICA:101",
+      "name": "Apelsinläsk",
+      "brand": "ICA",
+      "mechanicText": "15 kr/st",
+      "category": "Dryck",
+      "validFrom": "2026-11-17",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://example.com/offers/ica-soda"
+    },
+    {
+      "id": "fixture-coop-coffee",
+      "chain": "Coop",
+      "storeId": "Coop:200",
+      "name": "Bryggkaffe",
+      "brand": "Zoégas",
+      "mechanicText": "59,90 kr/st",
+      "category": "Skafferi",
+      "validFrom": "2026-11-17",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://example.com/offers/coop-coffee"
+    },
+    {
+      "id": "fixture-hemkop-yoghurt",
+      "chain": "Hemköp",
+      "storeId": "Hemköp:4552",
+      "name": "Blåbärsyoghurt",
+      "brand": "Garant",
+      "mechanicText": "22 kr/st",
+      "category": "Mejeri & ost",
+      "validFrom": "2026-11-17",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://example.com/offers/hemkop-yoghurt"
+    },
+    {
+      "id": "fixture-hemkop-tomatoes",
+      "chain": "Hemköp",
+      "storeId": "Hemköp:4552",
+      "name": "Krossade tomater",
+      "brand": "Garant",
+      "mechanicText": "6 kr/st",
+      "category": "Skafferi",
+      "validFrom": "2026-11-17",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://example.com/offers/hemkop-tomatoes"
+    },
+    {
+      "id": "fixture-hemkop-future",
+      "chain": "Hemköp",
+      "storeId": "Hemköp:4552",
+      "name": "Läsk nästa vecka",
+      "brand": "Garant",
+      "mechanicText": "12 kr/st",
+      "category": "Dryck",
+      "validFrom": "2026-11-18",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://example.com/offers/hemkop-future"
+    }
+  ]
+}
