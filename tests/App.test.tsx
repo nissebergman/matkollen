@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "../src/App";
 import snapshotFixture from "./fixtures/snapshots/linkoping.json";
@@ -39,6 +39,193 @@ describe("Offers app", () => {
     expect(screen.getByText("Max 2")).toBeVisible();
     expect(screen.getByText(/t\.o\.m\./i)).toBeVisible();
     expect(screen.getByText(/senast uppdaterad/i)).toBeVisible();
+  });
+
+  it("orders visible Offers by effective price, breaks ties by name, and puts missing prices last", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
+    const sortableSnapshot = JSON.parse(JSON.stringify(snapshotFixture));
+    const baseOffer = sortableSnapshot.offers[0];
+    sortableSnapshot.offers = [
+      {
+        ...baseOffer,
+        id: "price-zero",
+        name: "Kostnadsfri",
+        price: 0,
+        unitPrice: 0,
+      },
+      {
+        ...baseOffer,
+        id: "price-six",
+        name: "Köp en",
+        price: 6,
+        unitPrice: 6,
+        quantity: 1,
+      },
+      {
+        ...baseOffer,
+        id: "price-five-multibuy",
+        name: "Köp två",
+        mechanicText: "2 för 10 kr",
+        price: 10,
+        quantity: 2,
+        unitPrice: 5,
+      },
+      {
+        ...baseOffer,
+        id: "price-five-name-first",
+        name: "Apelsin",
+        price: 25,
+        unitPrice: 5,
+        quantity: 5,
+      },
+      {
+        ...baseOffer,
+        id: "price-three",
+        name: "Zoégas",
+        price: 3,
+        unitPrice: 3,
+      },
+      {
+        ...baseOffer,
+        id: "price-missing",
+        name: "Oprissatt",
+        price: undefined,
+        unitPrice: undefined,
+      },
+      {
+        ...baseOffer,
+        id: "price-future",
+        name: "Framtida lågpris",
+        validFrom: "2026-11-18",
+        price: 0.1,
+        unitPrice: 0.1,
+      },
+    ];
+    vi.stubGlobal("fetch", async () => Response.json(sortableSnapshot));
+
+    render(<App />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(screen.getByRole("combobox", { name: "Sortera efter" })).toHaveValue(
+      "price",
+    );
+    expect(
+      screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent),
+    ).toEqual([
+      "Kostnadsfri",
+      "Zoégas",
+      "Apelsin",
+      "Köp två",
+      "Köp en",
+      "Oprissatt",
+    ]);
+    expect(
+      screen.queryByRole("heading", { name: "Framtida lågpris" }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("orders Offers by largest computable discount and puts missing or unknown-unit discounts last", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
+    const sortableSnapshot = JSON.parse(JSON.stringify(snapshotFixture));
+    const baseOffer = sortableSnapshot.offers[0];
+    sortableSnapshot.offers = [
+      {
+        ...baseOffer,
+        id: "discount-nine",
+        name: "Stor rabatt",
+        price: 1,
+        unitPrice: 1,
+        regularPrice: 10,
+        priceUnit: "st",
+      },
+      {
+        ...baseOffer,
+        id: "discount-five-a",
+        name: "Rabatt Apelsin",
+        price: 2,
+        unitPrice: 2,
+        regularPrice: 7,
+        priceUnit: "kg",
+      },
+      {
+        ...baseOffer,
+        id: "discount-five-b",
+        name: "Rabatt Äpple",
+        price: 5,
+        unitPrice: 5,
+        regularPrice: 10,
+        priceUnit: "l",
+      },
+      {
+        ...baseOffer,
+        id: "discount-missing-regular",
+        name: "Ingen ordinarie",
+        price: 1,
+        unitPrice: 1,
+        regularPrice: undefined,
+        priceUnit: "st",
+      },
+      {
+        ...baseOffer,
+        id: "discount-unknown-unit",
+        name: "Oidentifierad enhet",
+        price: 1,
+        unitPrice: 1,
+        regularPrice: 9,
+        priceUnit: undefined,
+      },
+      {
+        ...baseOffer,
+        id: "discount-missing-effective",
+        name: "Oprissatt",
+        price: undefined,
+        unitPrice: undefined,
+        regularPrice: 10,
+        priceUnit: "st",
+      },
+      {
+        ...baseOffer,
+        id: "discount-future",
+        name: "Framtida rabatt",
+        validFrom: "2026-11-18",
+        price: 0.1,
+        unitPrice: 0.1,
+        regularPrice: 100,
+        priceUnit: "st",
+      },
+    ];
+    vi.stubGlobal("fetch", async () => Response.json(sortableSnapshot));
+
+    render(<App />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    fireEvent.change(screen.getByRole("combobox", { name: "Sortera efter" }), {
+      target: { value: "discount" },
+    });
+
+    expect(
+      screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent),
+    ).toEqual([
+      "Stor rabatt",
+      "Rabatt Apelsin",
+      "Rabatt Äpple",
+      "Ingen ordinarie",
+      "Oidentifierad enhet",
+      "Oprissatt",
+    ]);
+    expect(
+      screen.queryByRole("heading", { name: "Framtida rabatt" }),
+    ).not.toBeInTheDocument();
   });
 
   it("makes a future Offer visible at the start of its Stockholm validity date", async () => {
