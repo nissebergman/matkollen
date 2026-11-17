@@ -971,11 +971,6 @@ async function refreshTjek(
         `Inga ${chain}-butiker återstod i ${discovery.exactCity.value} efter Store-överskrivningar.`,
       );
     }
-    if (chain !== "Coop") {
-      throw new Error(
-        `Tjek-flödet efter Store-discovery är ännu inte verifierat för ${chain}; inga erbjudanden hämtades.`,
-      );
-    }
 
     const offers: Offer[] = [];
     for (const sourceStore of locationStores) {

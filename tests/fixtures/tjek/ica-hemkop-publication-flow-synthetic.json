@@ -1,0 +1,195 @@
+{
+  "ICA": {
+    "businesses": {
+      "value": [
+        {
+          "publicId": "synthetic-ica-brand",
+          "name": "ICA",
+          "chainName": "ICA"
+        }
+      ]
+    },
+    "stores": {
+      "synthetic-ica-brand": {
+        "key": "synthetic",
+        "status": "success",
+        "value": {
+          "data": [
+            {
+              "id": "synthetic-ica-berga",
+              "name": "ICA Supermarket Berga Centrum",
+              "city": "Linköping",
+              "streetAddress": "Berga centrum",
+              "postalCode": "583 03",
+              "coordinates": {
+                "latitude": 58.389,
+                "longitude": 15.605
+              }
+            },
+            {
+              "id": "synthetic-ica-norrkoping",
+              "name": "ICA Supermarket Norrköping",
+              "city": "Norrköping",
+              "streetAddress": "Testgatan 1",
+              "postalCode": "602 10",
+              "coordinates": {
+                "latitude": 58.587,
+                "longitude": 16.192
+              }
+            }
+          ]
+        }
+      }
+    },
+    "fronts": {
+      "key": "synthetic",
+      "status": "success",
+      "value": [
+        {
+          "category": "synthetic",
+          "business": {
+            "publicId": "synthetic-ica-brand"
+          },
+          "publications": [
+            {
+              "id": "synthetic-ica-week",
+              "label": "ICA Berga Centrum",
+              "validFrom": "2026-11-16T00:00:00+01:00",
+              "validUntil": "2026-11-23T00:00:00+01:00"
+            }
+          ]
+        }
+      ]
+    },
+    "publicationPages": {
+      "pages": {
+        "1": {
+          "hotspots": [
+            {
+              "offer": {
+                "id": "synthetic-ica-offer"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "offerLookups": {
+      "synthetic-ica-offer": {
+        "key": "synthetic",
+        "status": "success",
+        "value": {
+          "publicId": "synthetic-ica-offer",
+          "name": "Mjölk 1,5 %",
+          "businessPublicId": "synthetic-ica-brand",
+          "publicationPublicId": "synthetic-ica-week",
+          "priceText": "2 för 40 kr",
+          "quantity": 2,
+          "price": 40,
+          "unitPrice": 20,
+          "baseUnit": "piece",
+          "unitSymbol": "st",
+          "regularPrice": 25,
+          "validFrom": "2026-11-16",
+          "validUntil": "2026-11-22",
+          "departmentSlug": "dairy",
+          "brand": "Arla",
+          "packageSize": "1 l",
+          "sourceUrl": "https://ereklamblad.se/erbjudanden/synthetic-ica-offer"
+        }
+      }
+    }
+  },
+  "Hemköp": {
+    "businesses": {
+      "value": [
+        {
+          "publicId": "synthetic-hemkop-brand",
+          "name": "Hemköp",
+          "chainName": "Hemköp"
+        }
+      ]
+    },
+    "stores": {
+      "synthetic-hemkop-brand": {
+        "key": "synthetic",
+        "status": "success",
+        "value": {
+          "data": [
+            {
+              "id": "synthetic-hemkop-lucullus",
+              "name": "Hemköp Linköping Lucullus",
+              "city": "Linköping",
+              "streetAddress": "Stora Torget 5",
+              "postalCode": "582 19",
+              "coordinates": {
+                "latitude": 58.410,
+                "longitude": 15.621
+              }
+            }
+          ]
+        }
+      }
+    },
+    "fronts": {
+      "key": "synthetic",
+      "status": "success",
+      "value": [
+        {
+          "category": "synthetic",
+          "business": {
+            "publicId": "synthetic-hemkop-brand"
+          },
+          "publications": [
+            {
+              "id": "synthetic-hemkop-week",
+              "label": "Hemköp Linköping Lucullus",
+              "validFrom": "2026-11-16T00:00:00+01:00",
+              "validUntil": "2026-11-23T00:00:00+01:00"
+            }
+          ]
+        }
+      ]
+    },
+    "publicationPages": {
+      "pages": {
+        "1": {
+          "hotspots": [
+            {
+              "offer": {
+                "id": "synthetic-hemkop-offer"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "offerLookups": {
+      "synthetic-hemkop-offer": {
+        "key": "synthetic",
+        "status": "success",
+        "value": {
+          "publicId": "synthetic-hemkop-offer",
+          "name": "Naturell yoghurt",
+          "businessPublicId": "synthetic-hemkop-brand",
+          "publicationPublicId": "synthetic-hemkop-week",
+          "priceText": "29,90 kr/st",
+          "membershipPriceText": "Klubbpris 19,90 kr/st",
+          "price": 29.9,
+          "membershipPrice": 19.9,
+          "unitPrice": 29.9,
+          "baseUnit": "piece",
+          "unitSymbol": "st",
+          "regularPrice": 29.9,
+          "validFrom": "2026-11-16",
+          "validUntil": "2026-11-22",
+          "departmentSlug": "mejeri",
+          "brand": "Arla",
+          "packageSize": "1 kg",
+          "limitText": "Max 2 per hushåll",
+          "sourceUrl": "https://ereklamblad.se/erbjudanden/synthetic-hemkop-offer"
+        }
+      }
+    }
+  }
+}
