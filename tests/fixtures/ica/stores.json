@@ -1,0 +1,37 @@
+{
+  "documents": [
+    {
+      "id": 2151,
+      "name": "ICA Supermarket Berga Centrum, Linköping",
+      "marketingName": "ICA Supermarket Berga Centrum, Linköping",
+      "visitingCity": "Linköping",
+      "accountNumber": "1003586",
+      "url": "https://www.ica.se/butiker/supermarket/linkoping/ica-supermarket-berga-centrum-linkoping-1003586/",
+      "urls": [
+        {
+          "type": "Erbjudande",
+          "url": "https://www.ica.se/erbjudanden/ica-supermarket-berga-centrum-linkoping-1003586/"
+        }
+      ]
+    },
+    {
+      "id": 2137,
+      "name": "ICA Signalen, Linköping",
+      "marketingName": "ICA Signalen, Linköping",
+      "visitingCity": "Linköping",
+      "accountNumber": "1003520",
+      "url": "https://www.ica.se/butiker/kvantum/linkoping/ica-signalen-linkoping-1003520/"
+    },
+    {
+      "id": 9999,
+      "name": "ICA Maxi Mjölby",
+      "marketingName": "ICA Maxi Mjölby",
+      "visitingCity": "Mjölby",
+      "accountNumber": "1009999",
+      "url": "https://www.ica.se/butiker/maxi/mjolby/ica-maxi-mjolby-1009999/"
+    }
+  ],
+  "stats": {
+    "totalHits": 3
+  }
+}

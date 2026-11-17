@@ -11,6 +11,7 @@ import {
   COOP_TJEK_SOURCE,
   type CoopLocation,
 } from "./coop";
+import { buildIcaSnapshot, ICA_SOURCE } from "./ica";
 import type {
   LocationConfig,
   StoreDiscoveryConfig,
@@ -757,6 +758,41 @@ export function snapshotAdaptersFromConfig(
   for (const chain of CHAINS) {
     const configuration = location.chains[chain];
     if (!configuration) {
+      continue;
+    }
+
+    if (chain === "ICA" && configuration.source === ICA_SOURCE) {
+      const discovery = configuration.storeDiscovery;
+      adapters.push({
+        chain,
+        source: ICA_SOURCE,
+        async refresh(location, context) {
+          const snapshot = await buildIcaSnapshot(
+            { id: location.id, name: location.name },
+            discovery,
+            {
+              fetcher: context.fetcher,
+              now: context.now,
+              sleep: context.sleep,
+            },
+          );
+          const status = snapshot.chains.find(
+            (chainStatus) => chainStatus.chain === "ICA",
+          );
+          // Surface ICA failures so the shared runner can apply stale-data fallback.
+          if (!status || status.status !== "ok") {
+            throw new ChainRefreshError(
+              status?.error ?? "ICA-källan returnerade ingen lyckad uppdatering.",
+              snapshot.stores,
+            );
+          }
+          return {
+            stores: snapshot.stores,
+            offers: snapshot.offers,
+            ...(status.error ? { warning: status.error } : {}),
+          };
+        },
+      });
       continue;
     }
 

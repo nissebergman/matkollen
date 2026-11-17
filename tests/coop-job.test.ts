@@ -378,12 +378,19 @@ describe("Coop Snapshot job", () => {
       }
       return new Response("No recorded fixture for this request", { status: 404 });
     };
-    const location = LOCATION_REGISTRY.locations.find(
+    const configuredLocation = LOCATION_REGISTRY.locations.find(
       (candidate) => candidate.id === "linkoping",
     );
-    if (!location) {
+    if (!configuredLocation) {
       throw new Error("Missing Linköping Location configuration");
     }
+    const location = {
+      ...configuredLocation,
+      chains: {
+        Coop: configuredLocation.chains.Coop,
+        Hemköp: configuredLocation.chains.Hemköp,
+      },
+    };
 
     const [snapshot] = await buildSnapshots([location], {
       fetcher,

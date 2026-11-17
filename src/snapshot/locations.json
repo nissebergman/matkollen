@@ -5,6 +5,15 @@
       "id": "linkoping",
       "name": "Linköping",
       "chains": {
+        "ICA": {
+          "source": "ica-first-party",
+          "storeDiscovery": {
+            "exactCity": {
+              "field": "visitingCity",
+              "value": "Linköping"
+            }
+          }
+        },
         "Coop": {
           "source": "coop-tjek",
           "storeDiscovery": {
