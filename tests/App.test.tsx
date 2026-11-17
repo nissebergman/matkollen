@@ -2,14 +2,83 @@ import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "../src/App";
 import snapshotFixture from "./fixtures/snapshots/linkoping.json";
+import norrkopingSnapshotFixture from "./fixtures/snapshots/norrkoping.json";
 
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
   vi.unstubAllGlobals();
+  window.history.replaceState({}, "", "/");
 });
 
 describe("Offers app", () => {
+  it("loads a configured second Location from the page address", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
+    window.history.replaceState({}, "", "/?location=norrkoping");
+    const requestedUrls: string[] = [];
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      const url = String(input);
+      requestedUrls.push(url);
+      return Response.json(
+        url === "/snapshots/norrkoping.json"
+          ? norrkopingSnapshotFixture
+          : snapshotFixture,
+      );
+    });
+
+    render(
+      <App
+        locations={[
+          { id: "linkoping", name: "Linköping" },
+          { id: "norrkoping", name: "Norrköping" },
+        ]}
+      />,
+    );
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(requestedUrls).toEqual(["/snapshots/norrkoping.json"]);
+    expect(screen.getByRole("combobox", { name: "Plats" })).toHaveValue(
+      "norrkoping",
+    );
+    expect(
+      screen.getByRole("heading", {
+        name: "Veckans erbjudanden i Norrköping",
+      }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Norrköpings Testprodukt" }),
+    ).toBeVisible();
+    expect(screen.getByText("Hemköp Testbutik Norrköping")).toBeVisible();
+  });
+
+  it("defaults to the only configured Location without showing a picker", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
+    const requestedUrls: string[] = [];
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      requestedUrls.push(String(input));
+      return Response.json(snapshotFixture);
+    });
+
+    render(<App />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(requestedUrls).toEqual(["/snapshots/linkoping.json"]);
+    expect(screen.getByRole("heading", { name: /i Linköping/ })).toBeVisible();
+    expect(
+      screen.queryByRole("combobox", { name: "Plats" }),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows current Snapshot Offers and hides expired and future Offers", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-11-17T21:59:00.000Z"));

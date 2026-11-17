@@ -1,0 +1,20 @@
+{
+  "defaultLocationId": "linkoping",
+  "locations": [
+    {
+      "id": "linkoping",
+      "name": "Linköping",
+      "chains": {
+        "Hemköp": {
+          "source": "hemkop-first-party",
+          "storeDiscovery": {
+            "exactCity": {
+              "field": "address.town",
+              "value": "Linköping"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

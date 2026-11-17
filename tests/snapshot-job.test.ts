@@ -1,12 +1,12 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildHemkopSnapshot } from "../src/snapshot/job";
+import { buildHemkopSnapshot, buildSnapshots } from "../src/snapshot/job";
 
 const fixtureRoot = resolve(import.meta.dirname, "fixtures/hemkop");
 const stores = JSON.parse(readFileSync(resolve(fixtureRoot, "stores.json"), "utf8"));
 const campaignPages = new Map(
-  ["4552-0", "4552-1", "4552-2", "4701-0"].map((key) => [
+  ["4552-0", "4552-1", "4552-2", "4701-0", "4800-0"].map((key) => [
     key,
     JSON.parse(
       readFileSync(resolve(fixtureRoot, `campaigns/${key}.json`), "utf8"),
@@ -36,6 +36,66 @@ function fixtureFetcher(now: () => number) {
 }
 
 describe("Hemköp Snapshot job", () => {
+  it("builds separate Location Snapshots from exact-city discovery and Store overrides", async () => {
+    let elapsed = 0;
+    const { fetcher } = fixtureFetcher(() => elapsed);
+    const locations = [
+      {
+        id: "linkoping",
+        name: "Linköping",
+        chains: {
+          Hemköp: {
+            source: "hemkop-first-party",
+            storeDiscovery: {
+              exactCity: { field: "address.town", value: "Linköping" },
+              pinStoreIds: ["Hemköp:4800", "4701"],
+              excludeStoreIds: ["Hemköp:4701"],
+            },
+          },
+        },
+      },
+      {
+        id: "norrkoping",
+        name: "Norrköping",
+        chains: {
+          Hemköp: {
+            source: "hemkop-first-party",
+            storeDiscovery: {
+              exactCity: { field: "address.town", value: "Norrköping" },
+            },
+          },
+        },
+      },
+    ];
+
+    const snapshots = await buildSnapshots(locations, {
+      fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async (milliseconds) => {
+        elapsed += milliseconds;
+      },
+    });
+
+    expect(snapshots.map((snapshot) => snapshot.location)).toEqual([
+      { id: "linkoping", name: "Linköping" },
+      { id: "norrkoping", name: "Norrköping" },
+    ]);
+    expect(snapshots[0].stores.map((store) => store.id)).toEqual([
+      "Hemköp:4552",
+      "Hemköp:4800",
+    ]);
+    expect(snapshots[0].offers.every((offer) => offer.storeId !== "Hemköp:4701")).toBe(
+      true,
+    );
+    expect(snapshots[0].offers.some((offer) => offer.storeId === "Hemköp:4800")).toBe(
+      true,
+    );
+    expect(snapshots[1].stores.map((store) => store.id)).toEqual(["Hemköp:4800"]);
+    expect(
+      snapshots[1].offers.every((offer) => offer.storeId === "Hemköp:4800"),
+    ).toBe(true);
+  });
+
   it("publishes the paginated Linköping Offers as a normalized Snapshot", async () => {
     let elapsed = 0;
     const { fetcher, requestTimes } = fixtureFetcher(() => elapsed);

@@ -27,10 +27,12 @@ guarantee shelf prices.
 
 ## Refresh and tests
 
-Run `npm run snapshot:hemkop -- [output-path]` only when the source-access risk
-is accepted. It writes the validated Snapshot even when the Chain is stale or
-failed, then exits unsuccessfully so the failure is not hidden. Automated tests
-replay trimmed, secret-free fixtures and never call Hemköp.
+Run `npm run snapshot:hemkop -- [output-directory]` only when the source-access
+risk is accepted. The job writes one Snapshot for each configured Location,
+even when a Chain is stale or failed, then exits unsuccessfully so the failure
+is not hidden. When only one Location is configured, a `.json` argument can
+still be used as the exact output path. Automated tests replay trimmed,
+secret-free fixtures and never call Hemköp.
 
 Fixture values are based on the observations in
 `.scratch/offers-v1/research/hemkop-offer-data-access.md`; synthetic rows and
