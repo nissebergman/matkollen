@@ -1,0 +1,72 @@
+{
+  "value": {
+    "data": [
+      {
+        "publicId": "coop-offer-unmapped-category",
+        "name": "Okänd kategori",
+        "business": {
+          "publicId": "coop-garnisonen",
+          "name": "Stora Coop Garnisonen"
+        },
+        "publication": {
+          "publicId": "coop-publication-2026-week-47"
+        },
+        "description": "12 kr/st",
+        "priceText": "12 kr/st",
+        "price": 12,
+        "unitPrice": 12,
+        "baseUnit": "piece",
+        "unitSymbol": "st",
+        "currencyCode": "SEK",
+        "validFrom": "2026-11-16T00:00:00+01:00",
+        "validUntil": "2026-11-22T23:59:59+01:00",
+        "departmentSlug": "okand-kategori"
+      },
+      {
+        "publicId": "coop-offer-weight-price",
+        "name": "Laxfilé",
+        "business": {
+          "publicId": "coop-garnisonen",
+          "name": "Stora Coop Garnisonen"
+        },
+        "publication": {
+          "publicId": "coop-publication-2026-week-47"
+        },
+        "description": "69,90 kr/kg",
+        "priceText": "69,90 kr/kg",
+        "price": null,
+        "membershipPrice": null,
+        "unitPrice": 69.9,
+        "baseUnit": "kilogram",
+        "unitSymbol": "kg",
+        "currencyCode": "SEK",
+        "validFrom": "2026-11-16T00:00:00+01:00",
+        "validUntil": "2026-11-22T23:59:59+01:00",
+        "departmentSlug": "fisk"
+      },
+      {
+        "publicId": "coop-offer-member-price-precedence",
+        "name": "Medlemspris före ordinarie pris",
+        "business": {
+          "publicId": "coop-garnisonen",
+          "name": "Stora Coop Garnisonen"
+        },
+        "publication": {
+          "publicId": "coop-publication-2026-week-47"
+        },
+        "description": "Medlemspris 10 kr/st",
+        "priceText": "Medlemspris 10 kr/st",
+        "price": 14,
+        "membershipPrice": 10,
+        "regularPrice": 19,
+        "unitPrice": 10,
+        "baseUnit": "piece",
+        "unitSymbol": "st",
+        "currencyCode": "SEK",
+        "validFrom": "2026-11-16T00:00:00+01:00",
+        "validUntil": "2026-11-22T23:59:59+01:00",
+        "departmentSlug": "mejeri"
+      }
+    ]
+  }
+}

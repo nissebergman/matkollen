@@ -2,7 +2,8 @@
 
 A Swedish, mobile-first view of supermarket Offers. The app reads a versioned
 Snapshot for the Location in the page address (`?location=<id>`), defaulting to
-the configured default Location. It never calls a Chain directly.
+the configured default Location. It never calls a Chain or third-party Offer
+source directly.
 
 ## Locations
 
@@ -18,8 +19,8 @@ precedence over pins.
 Add a Location by adding a configuration entry and publishing a Snapshot named
 `public/snapshots/<id>.json`. The app shows a Location picker only when more
 than one Location is configured. A configured source without a registered
-adapter is reported as a failed Chain; the ICA and Hemköp adapters are
-implemented.
+adapter is reported as a failed Chain; the ICA, Coop Tjek and Hemköp adapters
+are implemented.
 
 Offers are ordered by lowest effective price by default. Choose “Största rabatt”
 to sort by the difference between regular and effective price when both use a
@@ -48,11 +49,13 @@ network.
 `npm run snapshot -- [output-directory]` runs the job for every configured
 Location, one at a time, and writes one Snapshot per Location. When only one
 Location is configured, a `.json` argument can still be used as the exact
-output path. Before refreshing, read the
-[ICA](docs/sources/ica.md) and
-[Hemköp](docs/sources/hemkop.md) source-access notes. ICA fetches an anonymous
-token at runtime for Store discovery, then requests public per-Store Offers
-pages sequentially. Hemköp requests only run during its stated UTC visiting
-window and wait at least ten seconds between requests. Both adapters stop on
-access denials without retries or workarounds, and report a failed or stale
-Chain with a nonzero process exit.
+output path. Before refreshing, read the [ICA](docs/sources/ica.md),
+[Hemköp](docs/sources/hemkop.md) and
+[Coop Tjek](docs/sources/coop-tjek.md) source-access notes. ICA fetches an
+anonymous token at runtime for Store
+discovery, then requests public per-Store Offers pages sequentially. Hemköp
+requests only run during its stated UTC visiting window and wait at least ten
+seconds between requests. Coop Tjek requests are sequential with a one-second
+delay and use no credentials. All adapters stop on access denials without
+retries or workarounds, and report a failed or stale Chain with a nonzero
+process exit. The Coop flyer-PDF fallback is not part of this ticket.

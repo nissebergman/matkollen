@@ -56,6 +56,10 @@ export function mapHemkopCategory(sourceCategory?: string | null): Category {
   return sourceCategoryMap[sourceCategoryKey(firstSegment)] ?? "Övrigt";
 }
 
+export function mapCoopCategory(sourceCategory?: string | null): Category {
+  return sourceCategoryMap[sourceCategoryKey(sourceCategory ?? "")] ?? "Övrigt";
+}
+
 export function mapIcaCategory(sourceCategory?: string | null): Category {
   return sourceCategoryMap[sourceCategoryKey(sourceCategory ?? "")] ?? "Övrigt";
 }

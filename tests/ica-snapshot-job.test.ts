@@ -11,6 +11,13 @@ const hemkopRoot = resolve(fixtureRoot, "hemkop");
 const linkopingLocation = LOCATION_REGISTRY.locations.find(
   (location) => location.id === "linkoping",
 )!;
+const linkopingIcaHemkopLocation = {
+  ...linkopingLocation,
+  chains: {
+    ICA: linkopingLocation.chains.ICA,
+    Hemköp: linkopingLocation.chains.Hemköp,
+  },
+};
 const token = JSON.parse(readFileSync(resolve(icaRoot, "token.json"), "utf8"));
 const icaStores = JSON.parse(readFileSync(resolve(icaRoot, "stores.json"), "utf8"));
 const icaOffers = new Map([
@@ -93,7 +100,7 @@ describe("combined Snapshot job", () => {
     };
 
     const snapshot = await buildLocationSnapshot(
-      linkopingLocation,
+      linkopingIcaHemkopLocation,
       {
         fetcher,
         now: () => new Date("2026-11-17T05:00:00.000Z"),
@@ -217,6 +224,7 @@ describe("combined Snapshot job", () => {
   it("applies configured ICA Store pins and exclusions", async () => {
     const location = structuredClone(linkopingLocation);
     delete location.chains.Hemköp;
+    delete location.chains.Coop;
     location.chains.ICA!.storeDiscovery.exactCity.value = "Mjölby";
     location.chains.ICA!.storeDiscovery.pinStoreIds = ["ICA:2151"];
     location.chains.ICA!.storeDiscovery.excludeStoreIds = ["ICA:9999"];
@@ -280,7 +288,7 @@ describe("combined Snapshot job", () => {
     };
 
     const snapshot = await buildLocationSnapshot(
-      linkopingLocation,
+      linkopingIcaHemkopLocation,
       {
         fetcher,
         now: () => new Date("2026-11-17T05:00:00.000Z"),
@@ -332,7 +340,7 @@ describe("combined Snapshot job", () => {
     };
 
     const snapshot = await buildLocationSnapshot(
-      linkopingLocation,
+      linkopingIcaHemkopLocation,
       {
         fetcher,
         now: () => new Date("2026-11-17T05:00:00.000Z"),
@@ -380,7 +388,7 @@ describe("combined Snapshot job", () => {
     };
 
     const snapshot = await buildLocationSnapshot(
-      linkopingLocation,
+      linkopingIcaHemkopLocation,
       {
         fetcher,
         now: () => new Date("2026-11-17T05:00:00.000Z"),
