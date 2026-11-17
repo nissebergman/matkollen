@@ -9,6 +9,10 @@ to sort by the difference between regular and effective price when both use a
 known, shared unit; Offers without a usable price or computable discount appear
 last.
 
+Use the multi-select Chain, Store and category filters together, or search
+product names and brands by one or more words. Select **Rensa filter** to
+return to all currently valid Offers.
+
 ## Development
 
 ```sh
