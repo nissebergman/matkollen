@@ -1,8 +1,25 @@
 # Matapp
 
-A Swedish, mobile-first view of supermarket Offers for Linköping. The app reads
-the versioned Snapshot at `public/snapshots/linkoping.json`; it never calls
-supermarket data sources directly.
+A Swedish, mobile-first view of supermarket Offers. The app reads a versioned
+Snapshot for the Location in the page address (`?location=<id>`), defaulting to
+the configured default Location. It never calls a Chain directly.
+
+## Locations
+
+`src/snapshot/locations.json` is the shared Location configuration for the
+Snapshot job and the app. Each entry has an id, display name and per-Chain
+source and discovery settings. `storeDiscovery.exactCity` names the exact
+source-record field and value to match; `pinStoreIds` includes Stores even
+when their city does not match, and `excludeStoreIds` removes Stores even if
+they match or are pinned. Store override ids may be source Store ids or their
+normalized Snapshot ids (for example `Hemköp:4552`); exclusions take
+precedence over pins.
+
+Add a Location by adding a configuration entry and publishing a Snapshot named
+`public/snapshots/<id>.json`. The app shows a Location picker only when more
+than one Location is configured. A configured source without a registered
+adapter is reported as a failed Chain; the ICA and Hemköp adapters are
+implemented.
 
 Offers are ordered by lowest effective price by default. Choose “Största rabatt”
 to sort by the difference between regular and effective price when both use a
@@ -28,11 +45,14 @@ network.
 
 ## Snapshot refresh
 
-`npm run snapshot -- [output-path]` runs the Snapshot job for ICA and Hemköp.
-Before refreshing, read the [ICA](docs/sources/ica.md) and
-[Hemköp](docs/sources/hemkop.md) access notes. ICA uses an anonymous token
-fetched at runtime for Store discovery and public per-Store Offers pages;
-Hemköp requests only run during its stated UTC visiting window and wait at
-least ten seconds between requests. Both adapters make sequential, anonymous
-requests, stop on access denials without retries or workarounds, and report a
-failed or stale Chain with a nonzero process exit.
+`npm run snapshot -- [output-directory]` runs the job for every configured
+Location, one at a time, and writes one Snapshot per Location. When only one
+Location is configured, a `.json` argument can still be used as the exact
+output path. Before refreshing, read the
+[ICA](docs/sources/ica.md) and
+[Hemköp](docs/sources/hemkop.md) source-access notes. ICA fetches an anonymous
+token at runtime for Store discovery, then requests public per-Store Offers
+pages sequentially. Hemköp requests only run during its stated UTC visiting
+window and wait at least ten seconds between requests. Both adapters stop on
+access denials without retries or workarounds, and report a failed or stale
+Chain with a nonzero process exit.

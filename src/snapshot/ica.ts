@@ -7,17 +7,26 @@ import {
   type Snapshot,
   type Store,
 } from "../domain/snapshot";
-import type { LocationConfig, SnapshotJobDependencies } from "./types";
+import type {
+  LocationConfig,
+  StoreDiscoveryConfig,
+} from "./config";
 
 export const ICA_REQUEST_DELAY_MS = 1_000;
 
-const ICA_SOURCE = "ica-first-party";
+export const ICA_SOURCE = "ica-first-party";
 const ICA_ORIGIN = "https://www.ica.se";
 const ICA_STORE_SEARCH_ORIGIN = "https://apim-pub.gw.ica.se";
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
 export type IcaLocation = LocationConfig;
-export type IcaJobDependencies = SnapshotJobDependencies;
+
+export interface IcaJobDependencies {
+  fetcher?: typeof fetch;
+  now?: () => Date;
+  sleep?: (milliseconds: number) => Promise<void>;
+  previousSnapshot?: unknown;
+}
 
 const optionalText = z.string().nullable().optional();
 const nonBlankText = z
@@ -419,6 +428,58 @@ function sourceStoreId(store: IcaStoreSearchRecord): string {
   return String(store.id);
 }
 
+function unwrapStoreIdOverride(configuredId: string): string {
+  const prefix = "ICA:";
+  return configuredId.startsWith(prefix) ? configuredId.slice(prefix.length) : configuredId;
+}
+
+function sourceField(value: unknown, path: string): unknown {
+  let current = value;
+  for (const part of path.split(".")) {
+    if (
+      typeof current !== "object" ||
+      current === null ||
+      !Object.hasOwn(current, part)
+    ) {
+      return undefined;
+    }
+    current = (current as Record<string, unknown>)[part];
+  }
+  return current;
+}
+
+function discoverIcaStores(
+  stores: IcaStoreSearchRecord[],
+  discovery: StoreDiscoveryConfig,
+): IcaStoreSearchRecord[] {
+  const pinIds = new Set((discovery.pinStoreIds ?? []).map(unwrapStoreIdOverride));
+  const excludeIds = new Set(
+    (discovery.excludeStoreIds ?? []).map(unwrapStoreIdOverride),
+  );
+  const availableIds = new Set(stores.map(sourceStoreId));
+  const missingPins = [...pinIds].filter((id) => !availableIds.has(id));
+  if (missingPins.length) {
+    throw new Error(`Konfigurerade ICA-butiker hittades inte: ${missingPins.join(", ")}.`);
+  }
+
+  const matchingCityStores = stores.filter(
+    (store) =>
+      sourceField(store, discovery.exactCity.field) === discovery.exactCity.value,
+  );
+  if (matchingCityStores.length === 0 && pinIds.size === 0) {
+    throw new Error(`Inga ICA-butiker hittades för ${discovery.exactCity.value}.`);
+  }
+
+  return stores.filter((store) => {
+    const id = sourceStoreId(store);
+    return (
+      !excludeIds.has(id) &&
+      (pinIds.has(id) ||
+        sourceField(store, discovery.exactCity.field) === discovery.exactCity.value)
+    );
+  });
+}
+
 function offerPageUrl(store: IcaStoreSearchRecord): string {
   const offerUrl = store.urls?.find((entry) => entry.type === "Erbjudande")?.url;
   if (offerUrl) {
@@ -642,6 +703,7 @@ function getPreviousIcaSnapshot(
 
 export async function buildIcaSnapshot(
   location: IcaLocation,
+  discovery: StoreDiscoveryConfig,
   dependencies: IcaJobDependencies = {},
 ): Promise<Snapshot> {
   const fetcher = dependencies.fetcher ?? globalThis.fetch;
@@ -707,7 +769,7 @@ export async function buildIcaSnapshot(
       const page = parseResponse(
         IcaStoreSearchPageSchema,
         await responseJson(
-          requestedStoreSearchUrl(location.city, offset),
+          requestedStoreSearchUrl(discovery.exactCity.value, offset),
           "butikslistan",
           { Authorization: `Bearer ${accessToken}` },
         ),
@@ -728,12 +790,7 @@ export async function buildIcaSnapshot(
       }
     } while (offset < (totalHits ?? 0));
 
-    const matchingStores = sourceStores.filter(
-      (store) => store.visitingCity === location.city,
-    );
-    if (matchingStores.length === 0) {
-      throw new Error(`Inga ICA-butiker hittades för ${location.city}.`);
-    }
+    const matchingStores = discoverIcaStores(sourceStores, discovery);
     const mappedStores = matchingStores.map(storeFromSource);
     discoveredStores = [...new Map(mappedStores.map((store) => [store.id, store])).values()];
     if (discoveredStores.length !== mappedStores.length) {

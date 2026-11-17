@@ -2,11 +2,15 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildLocationSnapshot } from "../src/snapshot/build";
+import { LOCATION_REGISTRY } from "../src/snapshot/config";
 import snapshotFixture from "./fixtures/snapshots/linkoping.json";
 
 const fixtureRoot = resolve(import.meta.dirname, "fixtures");
 const icaRoot = resolve(fixtureRoot, "ica");
 const hemkopRoot = resolve(fixtureRoot, "hemkop");
+const linkopingLocation = LOCATION_REGISTRY.locations.find(
+  (location) => location.id === "linkoping",
+)!;
 const token = JSON.parse(readFileSync(resolve(icaRoot, "token.json"), "utf8"));
 const icaStores = JSON.parse(readFileSync(resolve(icaRoot, "stores.json"), "utf8"));
 const icaOffers = new Map([
@@ -89,7 +93,7 @@ describe("combined Snapshot job", () => {
     };
 
     const snapshot = await buildLocationSnapshot(
-      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      linkopingLocation,
       {
         fetcher,
         now: () => new Date("2026-11-17T05:00:00.000Z"),
@@ -210,6 +214,45 @@ describe("combined Snapshot job", () => {
     ).toBe(true);
   });
 
+  it("applies configured ICA Store pins and exclusions", async () => {
+    const location = structuredClone(linkopingLocation);
+    delete location.chains.Hemköp;
+    location.chains.ICA!.storeDiscovery.exactCity.value = "Mjölby";
+    location.chains.ICA!.storeDiscovery.pinStoreIds = ["ICA:2151"];
+    location.chains.ICA!.storeDiscovery.excludeStoreIds = ["ICA:9999"];
+
+    const fetcher: typeof fetch = async (input) => {
+      const url = new URL(String(input));
+      if (url.pathname === "/e11/public-access-token") {
+        return Response.json(token);
+      }
+      if (url.pathname === "/sverige/digx/storesearch/v1/searchbyquery") {
+        return Response.json(icaStores);
+      }
+      if (url.pathname.startsWith("/erbjudanden/")) {
+        const accountNumber = url.pathname.match(/-(\d+)\/?$/)?.[1];
+        const page = accountNumber ? icaOffers.get(accountNumber) : undefined;
+        return page
+          ? new Response(page, { headers: { "Content-Type": "text/html" } })
+          : new Response("No recorded ICA fixture for this Store", { status: 404 });
+      }
+      return new Response("No recorded fixture for this request", { status: 404 });
+    };
+
+    const snapshot = await buildLocationSnapshot(location, {
+      fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(snapshot.chains).toMatchObject([
+      { chain: "ICA", source: "ica-first-party", status: "ok" },
+    ]);
+    expect(snapshot.stores.map((store) => store.id)).toEqual(["ICA:2151"]);
+    expect(snapshot.offers.length).toBeGreaterThan(0);
+    expect(snapshot.offers.every((offer) => offer.storeId === "ICA:2151")).toBe(true);
+  });
+
   it("reports an ICA access denial without retrying or dropping Hemköp Offers", async () => {
     let storeSearchRequests = 0;
     const fetcher: typeof fetch = async (input) => {
@@ -237,7 +280,7 @@ describe("combined Snapshot job", () => {
     };
 
     const snapshot = await buildLocationSnapshot(
-      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      linkopingLocation,
       {
         fetcher,
         now: () => new Date("2026-11-17T05:00:00.000Z"),
@@ -289,7 +332,7 @@ describe("combined Snapshot job", () => {
     };
 
     const snapshot = await buildLocationSnapshot(
-      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      linkopingLocation,
       {
         fetcher,
         now: () => new Date("2026-11-17T05:00:00.000Z"),
@@ -337,7 +380,7 @@ describe("combined Snapshot job", () => {
     };
 
     const snapshot = await buildLocationSnapshot(
-      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      linkopingLocation,
       {
         fetcher,
         now: () => new Date("2026-11-17T05:00:00.000Z"),

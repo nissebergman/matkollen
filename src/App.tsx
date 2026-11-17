@@ -6,15 +6,21 @@ import {
   type Snapshot,
 } from "./domain/snapshot";
 import { CATEGORIES } from "./domain/categories";
+import {
+  DEFAULT_LOCATION_ID,
+  LOCATION_REGISTRY,
+  type LocationConfig,
+} from "./snapshot/config";
 import "./styles.css";
 
 const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
+type LocationOption = Pick<LocationConfig, "id" | "name">;
 type SortOrder = "price" | "discount";
 
 class SnapshotLoadError extends Error {
   constructor(
     message: string,
-    readonly kind: "version" | "format" | "network",
+    readonly kind: "version" | "format" | "network" | "location",
   ) {
     super(message);
   }
@@ -211,14 +217,46 @@ function OfferCard({
 }
 
 export function App({
-  snapshotUrl = "/snapshots/linkoping.json",
+  snapshotUrl,
+  locations = LOCATION_REGISTRY.locations,
+  defaultLocationId = DEFAULT_LOCATION_ID,
 }: {
   snapshotUrl?: string;
+  locations?: readonly LocationOption[];
+  defaultLocationId?: string;
 } = {}) {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [error, setError] = useState<SnapshotLoadError | null>(null);
   const [loading, setLoading] = useState(true);
   const [sortOrder, setSortOrder] = useState<SortOrder>("price");
+  const [requestedLocationId, setRequestedLocationId] = useState(() =>
+    new URLSearchParams(window.location.search).get("location"),
+  );
+  const activeLocation = requestedLocationId
+    ? locations.find((location) => location.id === requestedLocationId)
+    : locations.find((location) => location.id === defaultLocationId) ??
+      (locations.length === 1 ? locations[0] : undefined);
+  const locationError =
+    requestedLocationId && !activeLocation
+      ? `Platsen "${requestedLocationId}" finns inte konfigurerad.`
+      : locations.length === 0
+        ? "Ingen plats är konfigurerad."
+        : "Ange en plats i sidans adress.";
+  const resolvedSnapshotUrl =
+    snapshotUrl ??
+    (activeLocation
+      ? `/snapshots/${encodeURIComponent(activeLocation.id)}.json`
+      : undefined);
+
+  useEffect(() => {
+    const syncLocationFromAddress = () => {
+      setRequestedLocationId(
+        new URLSearchParams(window.location.search).get("location"),
+      );
+    };
+    window.addEventListener("popstate", syncLocationFromAddress);
+    return () => window.removeEventListener("popstate", syncLocationFromAddress);
+  }, []);
   const [selectedChains, setSelectedChains] = useState<string[]>([]);
   const [selectedStoreIds, setSelectedStoreIds] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -235,8 +273,23 @@ export function App({
     let active = true;
     setLoading(true);
     setError(null);
-    loadSnapshot(snapshotUrl)
+    if (!activeLocation || !resolvedSnapshotUrl) {
+      setSnapshot(null);
+      setError(new SnapshotLoadError(locationError, "location"));
+      setLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    loadSnapshot(resolvedSnapshotUrl)
       .then((loaded) => {
+        if (loaded.location.id !== activeLocation.id) {
+          throw new SnapshotLoadError(
+            "Snapshoten gäller en annan plats än den begärda.",
+            "format",
+          );
+        }
         if (active) {
           setSnapshot(loaded);
           setLoading(false);
@@ -259,12 +312,20 @@ export function App({
     return () => {
       active = false;
     };
-  }, [snapshotUrl]);
+  }, [
+    activeLocation?.id,
+    locationError,
+    resolvedSnapshotUrl,
+  ]);
 
   if (loading) {
     return (
       <main className="app-shell">
-        <h1>Veckans erbjudanden</h1>
+        <h1>
+          {activeLocation
+            ? `Veckans erbjudanden i ${activeLocation.name}`
+            : "Veckans erbjudanden"}
+        </h1>
         <p role="status">Laddar erbjudanden…</p>
       </main>
     );
@@ -273,7 +334,11 @@ export function App({
   if (error || !snapshot) {
     return (
       <main className="app-shell">
-        <h1>Veckans erbjudanden</h1>
+        <h1>
+          {activeLocation
+            ? `Veckans erbjudanden i ${activeLocation.name}`
+            : "Veckans erbjudanden"}
+        </h1>
         <p className="error-message" role="alert">
           {error?.message ?? "Snapshoten kunde inte läsas."}
         </p>
@@ -321,12 +386,38 @@ export function App({
   const isFixtureSnapshot = snapshot.chains.some(
     (chain) => chain.source === "hemkop-fixture",
   );
+  const selectLocation = (locationId: string) => {
+    const nextAddress = new URL(window.location.href);
+    nextAddress.searchParams.set("location", locationId);
+    window.history.pushState(
+      {},
+      "",
+      `${nextAddress.pathname}${nextAddress.search}${nextAddress.hash}`,
+    );
+    setRequestedLocationId(locationId);
+  };
 
   return (
     <main className="app-shell">
       <header className="page-header">
-        <p className="eyebrow">Matapp · Linköping</p>
+        <p className="eyebrow">Matapp · {snapshot.location.name}</p>
         <h1>Veckans erbjudanden i {snapshot.location.name}</h1>
+        {locations.length > 1 && (
+          <label className="location-picker">
+            Plats
+            <select
+              aria-label="Plats"
+              onChange={(event) => selectLocation(event.target.value)}
+              value={snapshot.location.id}
+            >
+              {locations.map((location) => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <p className="offer-count" aria-live="polite">
           {matchingOffers.length} {matchingOffers.length === 1 ? "erbjudande" : "erbjudanden"}
         </p>
