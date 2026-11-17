@@ -38,7 +38,7 @@ const defaultLocationConfig = LOCATION_REGISTRY.locations.find(
   (location) => location.id === DEFAULT_LOCATION_ID,
 )!;
 
-async function readPreviousSnapshot(path: string): Promise<unknown> {
+async function readPreviousSnapshot(path: string): Promise<Snapshot | undefined> {
   let contents: string;
   try {
     contents = await readFile(path, "utf8");

@@ -1,0 +1,104 @@
+{
+  "value": {
+    "data": [
+      {
+        "publicId": "coop-offer-member-price",
+        "name": "Arla Mellanmjölk",
+        "brand": "Arla",
+        "business": {
+          "publicId": "coop-drottninggatan",
+          "name": "Coop Drottninggatan Linköping"
+        },
+        "publication": {
+          "publicId": "coop-publication-2026-week-47"
+        },
+        "description": "Medlemspris 15 kr/l",
+        "priceText": "Medlemspris 15 kr/l",
+        "price": null,
+        "membershipPrice": 15,
+        "appPrice": null,
+        "fromPrice": null,
+        "regularPrice": 17.9,
+        "unitPrice": 15,
+        "baseUnit": "liter",
+        "unitSymbol": "l",
+        "unitSizeFrom": 1,
+        "unitSizeTo": 1,
+        "currencyCode": "SEK",
+        "validFrom": "2026-11-16T00:00:00+01:00",
+        "validUntil": "2026-11-22T23:59:59+01:00",
+        "visibleFrom": "2026-11-16T00:00:00+01:00",
+        "departmentSlug": "mejeri",
+        "image": "https://images.example.test/coop-arla-mellanmjolk.jpg",
+        "limitText": "Max 2 per hushåll"
+      },
+      {
+        "publicId": "coop-offer-multibuy",
+        "name": "Kaffe för helgen",
+        "brand": "Coop",
+        "business": {
+          "publicId": "coop-drottninggatan",
+          "name": "Coop Drottninggatan Linköping"
+        },
+        "publication": {
+          "publicId": "coop-publication-2026-week-47"
+        },
+        "description": "2 för 30 kr",
+        "priceText": "2 för 30 kr",
+        "price": 30,
+        "membershipPrice": null,
+        "appPrice": null,
+        "fromPrice": null,
+        "quantity": 2,
+        "unitPrice": 15,
+        "baseUnit": "piece",
+        "unitSymbol": "st",
+        "currencyCode": "SEK",
+        "validFrom": "2026-11-20T00:00:00+01:00",
+        "validUntil": "2026-11-22T23:59:59+01:00",
+        "visibleFrom": "2026-11-20T00:00:00+01:00",
+        "departmentSlug": "skafferi"
+      },
+      {
+        "publicId": "coop-offer-expired",
+        "name": "Utgånget exempel",
+        "business": {
+          "publicId": "coop-drottninggatan",
+          "name": "Coop Drottninggatan Linköping"
+        },
+        "publication": {
+          "publicId": "coop-publication-2026-week-46"
+        },
+        "description": "9,90 kr/st",
+        "priceText": "9,90 kr/st",
+        "price": 9.9,
+        "membershipPrice": null,
+        "unitPrice": 9.9,
+        "baseUnit": "piece",
+        "unitSymbol": "st",
+        "currencyCode": "SEK",
+        "validFrom": "2026-11-10T00:00:00+01:00",
+        "validUntil": "2026-11-16T23:59:59+01:00",
+        "departmentSlug": "skafferi"
+      },
+      {
+        "publicId": "coop-offer-text-only-mechanic",
+        "name": "Köp tre, betala för två",
+        "business": {
+          "publicId": "coop-drottninggatan",
+          "name": "Coop Drottninggatan Linköping"
+        },
+        "publication": {
+          "publicId": "coop-publication-2026-week-47"
+        },
+        "description": "3 för 2",
+        "priceText": "3 för 2",
+        "price": null,
+        "membershipPrice": null,
+        "validFrom": "2026-11-16T00:00:00+01:00",
+        "validUntil": "2026-11-22T23:59:59+01:00",
+        "departmentSlug": "godis"
+      }
+    ]
+  }
+}

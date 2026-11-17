@@ -1,7 +1,16 @@
 import { z } from "zod";
 import { mapHemkopCategory } from "../domain/categories";
-import type { Offer, Snapshot, Store } from "../domain/snapshot";
-import { CHAINS } from "../domain/snapshot";
+import {
+  CHAINS,
+  type Offer,
+  type Snapshot,
+  type Store,
+} from "../domain/snapshot";
+import {
+  COOP_SOURCE_ADAPTER,
+  COOP_TJEK_SOURCE,
+  type CoopLocation,
+} from "./coop";
 import { buildIcaSnapshot, ICA_SOURCE } from "./ica";
 import type {
   LocationConfig,
@@ -789,6 +798,23 @@ export function snapshotAdaptersFromConfig(
 
     if (chain === "Hemköp" && configuration.source === HEMKOP_SOURCE) {
       adapters.push(HEMKOP_SOURCE_ADAPTER);
+      continue;
+    }
+
+    if (chain === "Coop" && configuration.source === COOP_TJEK_SOURCE) {
+      adapters.push({
+        chain: COOP_SOURCE_ADAPTER.chain,
+        source: COOP_SOURCE_ADAPTER.source,
+        refresh: (snapshotLocation, context) =>
+          COOP_SOURCE_ADAPTER.refresh(
+            {
+              id: snapshotLocation.id,
+              name: snapshotLocation.name,
+              storeDiscovery: configuration.storeDiscovery,
+            } satisfies CoopLocation,
+            context,
+          ),
+      });
       continue;
     }
 

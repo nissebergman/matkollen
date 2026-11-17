@@ -1,0 +1,33 @@
+{
+  "value": [
+    {
+      "publicId": "coop-drottninggatan",
+      "name": "Coop Drottninggatan Linköping",
+      "chain": "Coop",
+      "city": "Linköping",
+      "address": "Drottninggatan 23"
+    },
+    {
+      "publicId": "coop-garnisonen",
+      "name": "Stora Coop Garnisonen",
+      "chain": "Coop",
+      "city": "Linköping",
+      "address": "Linköping"
+    },
+    {
+      "publicId": "coop-norrkoping",
+      "name": "Coop Norrköping",
+      "chain": "Coop",
+      "city": "Norrköping",
+      "address": "Norrköping"
+    },
+    {
+      "publicId": "ica-linkoping",
+      "name": "ICA Supermarket Storgatan",
+      "chain": "ICA",
+      "city": "Linköping",
+      "address": "Storgatan 24",
+      "location": null
+    }
+  ]
+}
