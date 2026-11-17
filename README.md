@@ -66,11 +66,13 @@ Location, one at a time, and writes one Snapshot per Location. When only one
 Location is configured, a `.json` argument can still be used as the exact
 output path. Before refreshing, read the [ICA](docs/sources/ica.md),
 [Hemköp](docs/sources/hemkop.md) and
-[Coop Tjek](docs/sources/coop-tjek.md) source-access notes. ICA fetches an
+[Tjek/eReklamblad](docs/sources/tjek-ereklamblad.md) source-access notes.
+The [Coop-specific Tjek note](docs/sources/coop-tjek.md) records its retained
+Snapshot source id. ICA fetches an
 anonymous token at runtime for Store
 discovery, then requests public per-Store Offers pages sequentially. Hemköp
 requests only run during its stated UTC visiting window and wait at least ten
-seconds between requests. Coop Tjek requests are sequential with a one-second
+seconds between requests. Tjek requests are sequential with a one-second
 delay and use no credentials. All adapters stop on access denials without
 retries or workarounds, and report a failed or stale Chain with a nonzero
 process exit. The Coop flyer-PDF fallback is not part of this ticket.
