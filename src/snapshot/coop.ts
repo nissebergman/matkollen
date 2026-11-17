@@ -2,13 +2,19 @@ import { Buffer } from "node:buffer";
 import { z } from "zod";
 import { mapCoopCategory } from "../domain/categories";
 import {
-  SCHEMA_VERSION,
-  SnapshotSchema,
   type Offer,
   type Snapshot,
   type Store,
 } from "../domain/snapshot";
 import type { StoreDiscoveryConfig } from "./config";
+import {
+  ChainRefreshError,
+  buildSnapshot,
+  type ChainRefreshContext,
+  type ChainRefreshResult,
+  type ChainSourceAdapter,
+  type SnapshotJobDependencies,
+} from "./runner";
 
 export const TJEK_REQUEST_DELAY_MS = 1_000;
 export const COOP_TJEK_SOURCE = "coop-tjek";
@@ -25,12 +31,7 @@ export interface CoopLocation {
   storeDiscovery?: StoreDiscoveryConfig;
 }
 
-export interface CoopJobDependencies {
-  fetcher?: typeof fetch;
-  now?: () => Date;
-  sleep?: (milliseconds: number) => Promise<void>;
-  previousSnapshot?: unknown;
-}
+export type CoopJobDependencies = SnapshotJobDependencies;
 
 const optionalText = z.string().nullable().optional();
 const optionalNumber = z
@@ -164,10 +165,6 @@ const TjekOffersResponseSchema = z
 type TjekBusiness = z.infer<typeof TjekBusinessSchema>;
 type TjekOffer = z.infer<typeof TjekOfferSchema>;
 
-function defaultSleep(milliseconds: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
 function describeValidationError(error: z.ZodError): string {
   const issue = error.issues[0];
   const path = issue.path.length ? issue.path.join(".") : "response";
@@ -226,14 +223,6 @@ function dateFromSource(value: string | number | null | undefined): string | und
 
   const time = Date.parse(normalized);
   return Number.isFinite(time) ? stockholmDate(new Date(time)) : undefined;
-}
-
-function currentOfferWeekEnd(today: string): string {
-  const day = new Date(`${today}T00:00:00.000Z`).getUTCDay();
-  const daysUntilSunday = (7 - day) % 7;
-  const end = new Date(`${today}T00:00:00.000Z`);
-  end.setUTCDate(end.getUTCDate() + daysUntilSunday);
-  return end.toISOString().slice(0, 10);
 }
 
 function parseAmount(value: unknown): number | undefined {
@@ -645,26 +634,20 @@ function requestError(status: number): string {
   return `Tjek svarade med HTTP ${status}.`;
 }
 
-export async function buildCoopSnapshot(
+async function refreshCoop(
   location: CoopLocation,
-  dependencies: CoopJobDependencies = {},
-): Promise<Snapshot> {
-  const fetcher = dependencies.fetcher ?? globalThis.fetch;
-  const now = dependencies.now ?? (() => new Date());
-  const sleep = dependencies.sleep ?? defaultSleep;
-  const attemptAt = now().toISOString();
-  const runDate = stockholmDate(new Date(attemptAt));
-  const weekEnd = currentOfferWeekEnd(runDate);
+  context: ChainRefreshContext,
+): Promise<ChainRefreshResult> {
   let requestStarted = false;
   let discoveredStores: Store[] = [];
 
   const requestJson = async (command: [string, Record<string, unknown>], label: string): Promise<unknown> => {
     if (requestStarted) {
-      await sleep(TJEK_REQUEST_DELAY_MS);
+      await context.sleep(TJEK_REQUEST_DELAY_MS);
     }
     requestStarted = true;
     const encodedCommand = Buffer.from(JSON.stringify(command), "utf8").toString("base64");
-    const response = await fetcher(TJEK_ENDPOINT, {
+    const response = await context.fetcher(TJEK_ENDPOINT, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -779,8 +762,8 @@ export async function buildCoopSnapshot(
             store,
             sourceStoreId,
             sourceOffer,
-            runDate,
-            weekEnd,
+            context.runDate,
+            context.offerWeekEnd,
           );
           if (offer) {
             offers.push(offer);
@@ -806,66 +789,26 @@ export async function buildCoopSnapshot(
       offers.length > 0 && emptyStores.length > 0
         ? `Inga aktuella erbjudanden hämtades från: ${emptyStores.join(", ")}.`
         : undefined;
-    const completedAt = now().toISOString();
-
-    return SnapshotSchema.parse({
-      schemaVersion: SCHEMA_VERSION,
-      location: { id: location.id, name: location.name },
-      generatedAt: completedAt,
-      chains: [
-        {
-          chain: "Coop",
-          source: COOP_TJEK_SOURCE,
-          status: "ok",
-          lastAttemptAt: attemptAt,
-          lastSuccessAt: completedAt,
-          ...(warning ? { error: warning } : {}),
-        },
-      ],
+    return {
       stores: discoveredStores,
       offers,
-    });
+      ...(warning ? { warning } : {}),
+    };
   } catch (error) {
-    const previousResult = dependencies.previousSnapshot
-      ? SnapshotSchema.safeParse(dependencies.previousSnapshot)
-      : undefined;
-    const previous =
-      previousResult?.success && previousResult.data.location.id === location.id
-        ? previousResult.data
-        : undefined;
-    const previousCoop = previous?.chains.find((chain) => chain.chain === "Coop");
-    const canReusePrevious =
-      previousCoop?.source === COOP_TJEK_SOURCE &&
-      previousCoop.status !== "failed";
-    const previousOffers =
-      (canReusePrevious ? previous?.offers : undefined)?.filter(
-        (offer) =>
-          offer.chain === "Coop" &&
-          offer.validTo >= runDate &&
-          (!offer.validFrom || offer.validFrom <= weekEnd),
-      ) ?? [];
-    const stale = previousOffers.length > 0;
     const message = error instanceof Error ? error.message : "Okänt fel.";
-    const failedAt = now().toISOString();
-
-    return SnapshotSchema.parse({
-      schemaVersion: SCHEMA_VERSION,
-      location: { id: location.id, name: location.name },
-      generatedAt: failedAt,
-      chains: [
-        {
-          chain: "Coop",
-          source: COOP_TJEK_SOURCE,
-          status: stale ? "stale" : "failed",
-          lastAttemptAt: attemptAt,
-          lastSuccessAt: canReusePrevious ? previousCoop?.lastSuccessAt ?? null : null,
-          error: message.slice(0, 240),
-        },
-      ],
-      stores: stale
-        ? previous?.stores.filter((store) => store.chain === "Coop") ?? []
-        : discoveredStores,
-      offers: stale ? previousOffers : [],
-    });
+    throw new ChainRefreshError(message.slice(0, 240), discoveredStores);
   }
+}
+
+export const COOP_SOURCE_ADAPTER: ChainSourceAdapter<CoopLocation> = {
+  chain: "Coop",
+  source: COOP_TJEK_SOURCE,
+  refresh: refreshCoop,
+};
+
+export function buildCoopSnapshot(
+  location: CoopLocation,
+  dependencies: CoopJobDependencies = {},
+): Promise<Snapshot> {
+  return buildSnapshot(location, [COOP_SOURCE_ADAPTER], dependencies);
 }

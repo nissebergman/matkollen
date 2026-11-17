@@ -1,0 +1,25 @@
+{
+  "stores": [
+    {
+      "id": "Coop:fixture-1",
+      "chain": "Coop",
+      "name": "Stora Coop Linköping",
+      "address": "Västra Svedengatan 12, Linköping"
+    }
+  ],
+  "offers": [
+    {
+      "id": "coop-current",
+      "chain": "Coop",
+      "storeId": "Coop:fixture-1",
+      "name": "Ekologiska ägg",
+      "mechanicText": "29,90 kr/förpackning",
+      "category": "Mejeri & ost",
+      "validFrom": "2026-11-17",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://www.coop.se/erbjudanden/fixture",
+      "price": 29.9,
+      "unitPrice": 29.9
+    }
+  ]
+}

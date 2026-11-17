@@ -2,19 +2,27 @@ import { z } from "zod";
 import { mapHemkopCategory } from "../domain/categories";
 import {
   CHAINS,
-  SCHEMA_VERSION,
-  SnapshotSchema,
-  type Chain,
   type Offer,
   type Snapshot,
   type Store,
 } from "../domain/snapshot";
-import { buildCoopSnapshot, COOP_TJEK_SOURCE } from "./coop";
+import {
+  COOP_SOURCE_ADAPTER,
+  COOP_TJEK_SOURCE,
+  type CoopLocation,
+} from "./coop";
 import type {
-  ChainLocationConfig,
   LocationConfig,
   StoreDiscoveryConfig,
 } from "./config";
+import {
+  ChainRefreshError,
+  buildSnapshot,
+  type ChainRefreshContext,
+  type ChainRefreshResult,
+  type ChainSourceAdapter,
+  type SnapshotJobDependencies as RunnerJobDependencies,
+} from "./runner";
 
 export const HEMKOP_REQUEST_DELAY_MS = 10_000;
 const HEMKOP_SOURCE = "hemkop-first-party";
@@ -28,15 +36,9 @@ export interface HemkopLocation {
   storeDiscovery?: StoreDiscoveryConfig;
 }
 
-export interface HemkopJobDependencies {
-  fetcher?: typeof fetch;
-  now?: () => Date;
-  sleep?: (milliseconds: number) => Promise<void>;
-  previousSnapshot?: unknown;
-}
+export type HemkopJobDependencies = RunnerJobDependencies;
 
-export interface SnapshotJobDependencies extends Omit<HemkopJobDependencies, "previousSnapshot"> {
-  previousSnapshot?: unknown;
+export interface SnapshotJobDependencies extends RunnerJobDependencies {
   previousSnapshots?: Readonly<Record<string, unknown>>;
 }
 
@@ -191,10 +193,6 @@ type HemkopStore = z.infer<typeof HemkopStoreSchema>;
 type HemkopProduct = z.infer<typeof HemkopProductSchema>;
 type HemkopPromotion = z.infer<typeof HemkopPromotionSchema>;
 
-function defaultSleep(milliseconds: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
 function assertWithinHemkopVisitTime(date: Date): void {
   const utcMinutes = date.getUTCHours() * 60 + date.getUTCMinutes();
   if (utcMinutes < 4 * 60 || utcMinutes >= 8 * 60 + 45) {
@@ -266,14 +264,6 @@ function dateFromSource(value: string | number | null | undefined): string | und
 
   const time = Date.parse(normalized);
   return Number.isFinite(time) ? stockholmDate(new Date(time)) : undefined;
-}
-
-function currentOfferWeekEnd(today: string): string {
-  const day = new Date(`${today}T00:00:00.000Z`).getUTCDay();
-  const daysUntilSunday = (7 - day) % 7;
-  const end = new Date(`${today}T00:00:00.000Z`);
-  end.setUTCDate(end.getUTCDate() + daysUntilSunday);
-  return end.toISOString().slice(0, 10);
 }
 
 function parseAmount(value: unknown): number | undefined {
@@ -604,16 +594,11 @@ function formatRequestError(status: number): string {
   return `Hemköp svarade med HTTP ${status}.`;
 }
 
-export async function buildHemkopSnapshot(
+async function refreshHemkop(
   location: HemkopLocation,
-  dependencies: HemkopJobDependencies = {},
-): Promise<Snapshot> {
-  const fetcher = dependencies.fetcher ?? globalThis.fetch;
-  const now = dependencies.now ?? (() => new Date());
-  const sleep = dependencies.sleep ?? defaultSleep;
-  const attemptAt = now().toISOString();
-  const runDate = stockholmDate(new Date(attemptAt));
-  const weekEnd = currentOfferWeekEnd(runDate);
+  context: ChainRefreshContext,
+): Promise<ChainRefreshResult> {
+  const { fetcher, now, sleep, runDate, offerWeekEnd: weekEnd } = context;
   let requestStarted = false;
   let discoveredStores: Store[] = [];
 
@@ -731,200 +716,121 @@ export async function buildHemkopSnapshot(
       offers.length > 0 && emptyStores.length > 0
         ? `Inga aktuella erbjudanden hämtades från: ${emptyStores.join(", ")}.`
         : undefined;
-    const completedAt = now().toISOString();
-
-    return SnapshotSchema.parse({
-      schemaVersion: SCHEMA_VERSION,
-      location: { id: location.id, name: location.name },
-      generatedAt: completedAt,
-      chains: [
-        {
-          chain: "Hemköp",
-          source: HEMKOP_SOURCE,
-          status: "ok",
-          lastAttemptAt: attemptAt,
-          lastSuccessAt: completedAt,
-          ...(warning ? { error: warning } : {}),
-        },
-      ],
+    return {
       stores: discoveredStores,
       offers,
-    });
+      ...(warning ? { warning } : {}),
+    };
   } catch (error) {
-    const previousResult = dependencies.previousSnapshot
-      ? SnapshotSchema.safeParse(dependencies.previousSnapshot)
-      : undefined;
-    const previous =
-      previousResult?.success && previousResult.data.location.id === location.id
-        ? previousResult.data
-        : undefined;
-    const previousHemkop = previous?.chains.find((chain) => chain.chain === "Hemköp");
-    const canReusePrevious =
-      previousHemkop?.source === HEMKOP_SOURCE &&
-      previousHemkop.status !== "failed";
-    const previousOffers =
-      (canReusePrevious ? previous?.offers : undefined)?.filter(
-        (offer) =>
-          offer.chain === "Hemköp" &&
-          offer.validTo >= runDate &&
-          (!offer.validFrom || offer.validFrom <= weekEnd),
-      ) ?? [];
-    const stale = previousOffers.length > 0;
     const message = error instanceof Error ? error.message : "Okänt fel.";
-    const surfacedMessage = message.slice(0, 240);
-    const failedAt = now().toISOString();
-
-    return SnapshotSchema.parse({
-      schemaVersion: SCHEMA_VERSION,
-      location: { id: location.id, name: location.name },
-      generatedAt: failedAt,
-      chains: [
-        {
-          chain: "Hemköp",
-          source: HEMKOP_SOURCE,
-          status: stale ? "stale" : "failed",
-          lastAttemptAt: attemptAt,
-          lastSuccessAt: canReusePrevious ? previousHemkop?.lastSuccessAt ?? null : null,
-          error: surfacedMessage,
-        },
-      ],
-      stores: stale
-        ? previous?.stores.filter((store) => store.chain === "Hemköp") ?? []
-        : discoveredStores,
-      offers: stale ? previousOffers : [],
-    });
+    throw new ChainRefreshError(message.slice(0, 240), discoveredStores);
   }
 }
 
-function buildUnavailableChainSnapshot(
-  location: LocationConfig,
-  chain: Chain,
-  configuration: ChainLocationConfig,
-  dependencies: SnapshotJobDependencies,
-): Snapshot {
-  const now = dependencies.now ?? (() => new Date());
-  const attemptAt = now().toISOString();
-  const runDate = stockholmDate(new Date(attemptAt));
-  const weekEnd = currentOfferWeekEnd(runDate);
-  const previousValue =
-    dependencies.previousSnapshots?.[location.id] ?? dependencies.previousSnapshot;
-  const previousResult =
-    previousValue !== undefined
-      ? SnapshotSchema.safeParse(previousValue)
-      : undefined;
-  const previous =
-    previousResult?.success && previousResult.data.location.id === location.id
-      ? previousResult.data
-      : undefined;
-  const previousChain = previous?.chains.find(
-    (status) => status.chain === chain,
-  );
-  const canReusePrevious =
-    previousChain?.source === configuration.source &&
-    previousChain.status !== "failed";
-  const previousOffers =
-    (canReusePrevious ? previous?.offers : undefined)?.filter(
-      (offer) =>
-        offer.chain === chain &&
-        offer.validTo >= runDate &&
-        (!offer.validFrom || offer.validFrom <= weekEnd),
-    ) ?? [];
-  const stale = previousOffers.length > 0;
-  const failedAt = now().toISOString();
+export const HEMKOP_SOURCE_ADAPTER: ChainSourceAdapter<HemkopLocation> = {
+  chain: "Hemköp",
+  source: HEMKOP_SOURCE,
+  refresh: refreshHemkop,
+};
 
-  return SnapshotSchema.parse({
-    schemaVersion: SCHEMA_VERSION,
-    location: { id: location.id, name: location.name },
-    generatedAt: failedAt,
-    chains: [
-      {
-        chain,
-        source: configuration.source,
-        status: stale ? "stale" : "failed",
-        lastAttemptAt: attemptAt,
-        lastSuccessAt: canReusePrevious ? previousChain?.lastSuccessAt ?? null : null,
-        error: `Källan "${configuration.source}" för ${chain} är inte implementerad i Snapshot-jobbet.`,
+export function snapshotLocationFromConfig(
+  location: LocationConfig,
+): HemkopLocation {
+  const hemkopConfiguration = location.chains.Hemköp;
+  return {
+    id: location.id,
+    name: location.name,
+    ...(hemkopConfiguration
+      ? {
+          city: hemkopConfiguration.storeDiscovery.exactCity.value,
+          storeDiscovery: hemkopConfiguration.storeDiscovery,
+        }
+      : {}),
+  };
+}
+
+export function snapshotAdaptersFromConfig(
+  location: LocationConfig,
+): ChainSourceAdapter<HemkopLocation>[] {
+  const adapters: ChainSourceAdapter<HemkopLocation>[] = [];
+
+  for (const chain of CHAINS) {
+    const configuration = location.chains[chain];
+    if (!configuration) {
+      continue;
+    }
+
+    if (chain === "Hemköp" && configuration.source === HEMKOP_SOURCE) {
+      adapters.push(HEMKOP_SOURCE_ADAPTER);
+      continue;
+    }
+
+    if (chain === "Coop" && configuration.source === COOP_TJEK_SOURCE) {
+      adapters.push({
+        chain: COOP_SOURCE_ADAPTER.chain,
+        source: COOP_SOURCE_ADAPTER.source,
+        refresh: (snapshotLocation, context) =>
+          COOP_SOURCE_ADAPTER.refresh(
+            {
+              id: snapshotLocation.id,
+              name: snapshotLocation.name,
+              storeDiscovery: configuration.storeDiscovery,
+            } satisfies CoopLocation,
+            context,
+          ),
+      });
+      continue;
+    }
+
+    const source = configuration.source;
+    adapters.push({
+      chain,
+      source,
+      async refresh() {
+        throw new Error(
+          `Källan "${source}" för ${chain} är inte implementerad i Snapshot-jobbet.`,
+        );
       },
-    ],
-    stores: stale
-      ? previous?.stores.filter((store) => store.chain === chain) ?? []
-      : [],
-    offers: stale ? previousOffers : [],
-  });
+    });
+  }
+
+  return adapters;
+}
+
+export async function buildSnapshotForLocation(
+  location: LocationConfig,
+  dependencies: SnapshotJobDependencies = {},
+): Promise<Snapshot> {
+  const {
+    previousSnapshot: sharedPreviousSnapshot,
+    previousSnapshots,
+    ...runnerDependencies
+  } = dependencies;
+  return buildSnapshot(
+    snapshotLocationFromConfig(location),
+    snapshotAdaptersFromConfig(location),
+    {
+      ...runnerDependencies,
+      previousSnapshot:
+        previousSnapshots?.[location.id] ?? sharedPreviousSnapshot,
+    },
+  );
 }
 
 export async function buildSnapshots(
   locations: readonly LocationConfig[],
   dependencies: SnapshotJobDependencies = {},
 ): Promise<Snapshot[]> {
-  const now = dependencies.now ?? (() => new Date());
   const snapshots: Snapshot[] = [];
-
   for (const location of locations) {
-    const previousSnapshot =
-      dependencies.previousSnapshots?.[location.id] ?? dependencies.previousSnapshot;
-    const chainSnapshots: Snapshot[] = [];
-
-    for (const chain of CHAINS) {
-      const configuration = location.chains[chain];
-      if (!configuration) {
-        continue;
-      }
-
-      if (chain === "Coop" && configuration.source === COOP_TJEK_SOURCE) {
-        chainSnapshots.push(
-          await buildCoopSnapshot(
-            {
-              id: location.id,
-              name: location.name,
-              storeDiscovery: configuration.storeDiscovery,
-            },
-            {
-              fetcher: dependencies.fetcher,
-              now,
-              sleep: dependencies.sleep,
-              previousSnapshot,
-            },
-          ),
-        );
-      } else if (chain === "Hemköp" && configuration.source === HEMKOP_SOURCE) {
-        chainSnapshots.push(
-          await buildHemkopSnapshot(
-            {
-              id: location.id,
-              name: location.name,
-              storeDiscovery: configuration.storeDiscovery,
-            },
-            {
-              fetcher: dependencies.fetcher,
-              now,
-              sleep: dependencies.sleep,
-              previousSnapshot,
-            },
-          ),
-        );
-      } else {
-        chainSnapshots.push(
-          buildUnavailableChainSnapshot(location, chain, configuration, {
-            ...dependencies,
-            now,
-            previousSnapshot,
-          }),
-        );
-      }
-    }
-
-    snapshots.push(
-      SnapshotSchema.parse({
-        schemaVersion: SCHEMA_VERSION,
-        location: { id: location.id, name: location.name },
-        generatedAt: now().toISOString(),
-        chains: chainSnapshots.flatMap((snapshot) => snapshot.chains),
-        stores: chainSnapshots.flatMap((snapshot) => snapshot.stores),
-        offers: chainSnapshots.flatMap((snapshot) => snapshot.offers),
-      }),
-    );
+    snapshots.push(await buildSnapshotForLocation(location, dependencies));
   }
-
   return snapshots;
+}
+
+export function buildHemkopSnapshot(
+  location: HemkopLocation,
+  dependencies: HemkopJobDependencies = {},
+): Promise<Snapshot> {
+  return buildSnapshot(location, [HEMKOP_SOURCE_ADAPTER], dependencies);
 }
