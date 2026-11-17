@@ -22,6 +22,15 @@ sent no key and called no Store API. The actual PDF fallback therefore remains
 unverified and the adapter fails closed before Store discovery. Keep Tjek
 configured; no access workaround or further diagnostic was used.
 
+**Status note (2026-11-18):** A direct GET of the previously observed Coop
+Vallaplan flyer URL (`056019`) returned HTTP 200 as a 1,025,085-byte PDF. The
+production parser used the recorded Store-detail fixture (validity
+2026-11-18–24), so live Store discovery and flyer dates were not revalidated.
+It emitted one false Offer (`vid inköp för`, 8,000 kr), so this sample did not
+validate extraction. A regression now rejects this purchase-threshold pattern
+and requires a failed Chain with no Offers; the live PDF was not saved, and
+post-fix live validation remains pending. Keep this ticket blocked.
+
 - [ ] Discover the configured Location's Coop Stores and their current Store-specific flyers, obtaining any public-page configuration needed at runtime without storing credentials.
 - [ ] Extract representative Offers from flyer PDF fixtures with the correct Store, validity, name and mechanic; preserve available product and price details and never invent a numeric price.
 - [ ] The fallback produces the shared Snapshot contract and displays Offers without app changes; configuration can switch back to Tjek.

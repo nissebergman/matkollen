@@ -54,3 +54,13 @@ types. It sent no key and made no Store API request.
 Image-only PDFs, unusual text ordering, and changed layouts may fail parsing;
 ambiguous rows must fail rather than be published as Offers. Keep the configured
 Coop primary source on Tjek until real-flyer extraction is validated.
+
+On 2026-11-18, a direct GET of the previously observed Coop Vallaplan flyer URL
+(`056019`) returned HTTP 200 and a 1,025,085-byte PDF, kept in memory only. The
+production parser was run with the recorded Store-detail fixture (which
+declares validity 2026-11-18–24), so this check did not revalidate live Store
+discovery or flyer dates. It returned a false-positive Offer named “vid inköp
+för” at 8,000 kr. This is a purchase threshold, not a product; the parser now
+rejects that ambiguous pattern and the Snapshot-job tests require the Chain to
+fail closed. The PDF was not saved, and post-fix live revalidation is pending.
+Keep Tjek configured until a real flyer is parsed accurately.

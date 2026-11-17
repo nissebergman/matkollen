@@ -14,6 +14,13 @@ same adapter with the compatibility source id `coop-tjek` so existing Coop
 Snapshots keep their identity. A complete Coop refresh is documented below,
 but a later bounded attempt stopped before a complete Snapshot.
 
+A follow-up ICA check on 2026-11-18 looked up three Offers from pages 12–14 of
+Signalen publication `0xK8wQA9`. All three linked to ICA business `9cb4wA` and
+that publication, and their validity fell within 2026-11-16 through 2026-11-22.
+None contained a member-price field. The previous sample's Offer IDs were not
+retained, so distinctness from that sample could not be confirmed. Hemköp
+remains unprobed.
+
 ## Live compatibility status
 
 The adapter now treats `businesses` as a brand directory, then queries

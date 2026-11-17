@@ -611,7 +611,7 @@ function productFromSuffix(value: string): {
 function isNonProductName(value: string): boolean {
   return (
     !/[a-zåäö]/iu.test(value) ||
-    /(?:välkomstbonus|passa på nu|jfr[- ]?pris|(?:^|\s)fredag\b|(?:^|\s)vid köp av\b|(?:^|\s)(?:så får du|och är du inte medlem)|(?:^|\s)medlemskap\b)/iu.test(
+    /(?:välkomstbonus|passa på nu|jfr[- ]?pris|(?:^|\s)fredag\b|(?:^|\s)vid köp av\b|(?:^|\s)vid\s+(?:inköp|köp)\s+för\b|(?:^|\s)(?:så får du|och är du inte medlem)|(?:^|\s)medlemskap\b)/iu.test(
       value,
     )
   );

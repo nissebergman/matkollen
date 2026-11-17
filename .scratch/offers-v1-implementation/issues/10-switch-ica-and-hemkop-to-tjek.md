@@ -20,6 +20,13 @@ member-price field. Hemköp was not probed. This limited sample does not
 establish broader ICA coverage, member-price behavior, or Hemköp compatibility;
 keep this ticket in progress.
 
+**Status note (2026-11-18):** Three individual Offer lookups from pages 12–14
+of Signalen publication `0xK8wQA9` were linked to ICA business `9cb4wA` and the
+same publication; their dates fell within the current Offer Week, and none
+contained a member-price field. The prior Offer IDs were not retained, so
+distinctness from the earlier sample could not be confirmed. Hemköp is still
+awaiting its permitted UTC window. Keep this ticket in progress.
+
 - [x] Each Chain can independently select Tjek through Location configuration.
 - [ ] Each fallback Chain discovers its Stores and produces Offers in the existing Snapshot contract.
 - [ ] Verify live Store association, member prices, validity and representative mechanics for ICA and Hemköp.

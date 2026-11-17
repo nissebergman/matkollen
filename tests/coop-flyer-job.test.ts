@@ -35,6 +35,7 @@ type FixtureOptions = {
   malformedFlyerFor?: string;
   missingFlyerFor?: string;
   nonProductFlyerFor?: string;
+  ambiguousThresholdFlyerFor?: string;
   observedLayoutFor?: string;
   categoryFallbackFor?: string;
 };
@@ -160,6 +161,11 @@ function recordedFetcher(options: FixtureOptions = {}) {
       }
       if (options.nonProductFlyerFor === ledgerAccountNumber) {
         return new Response(createTextPdf(["FREDAG 99 kr"]), {
+          headers: { "Content-Type": "application/pdf" },
+        });
+      }
+      if (options.ambiguousThresholdFlyerFor === ledgerAccountNumber) {
+        return new Response(createTextPdf(["vid inköp för 8000 kr"]), {
           headers: { "Content-Type": "application/pdf" },
         });
       }
@@ -427,6 +433,32 @@ describe("Coop flyer-PDF Snapshot job", () => {
     const { snapshot } = await buildConfiguredCoopSnapshot({
       nonProductFlyerFor: "056010",
     });
+
+    expect(snapshot.chains[0]).toMatchObject({
+      status: "failed",
+      source: "coop-flyer-pdf",
+    });
+    expect(snapshot.chains[0].error).toContain("produktrad");
+    expect(snapshot.offers).toHaveLength(0);
+  });
+
+  it("fails when a purchase threshold is parsed as a product name", async () => {
+    const vallaplanOnlyLocation = {
+      ...coopOnlyLinkoping,
+      chains: {
+        Coop: {
+          ...linkopingCoop,
+          storeDiscovery: {
+            ...linkopingCoop.storeDiscovery,
+            excludeStoreIds: ["Coop:2303", "Coop:8888"],
+          },
+        },
+      },
+    };
+    const { snapshot } = await buildConfiguredCoopSnapshot(
+      { ambiguousThresholdFlyerFor: "056019" },
+      vallaplanOnlyLocation,
+    );
 
     expect(snapshot.chains[0]).toMatchObject({
       status: "failed",

@@ -30,3 +30,10 @@ Hemköp was not probed. This does not verify broader ICA/Hemköp compatibility o
 complete multi-Chain deployment data. Actual publication and Pages verification
 remain pending; do not enable Pages, deploy, or publish the fixture as part of
 this repair.
+
+**Status note (2026-11-18):** The user has now authorized public Pages
+deployment after source validation, using fresh live Snapshots only. GitHub
+reports Pages is disabled (`has_pages: false`) and no workflow is listed on the
+remote default branch; the integration branch has not been pushed. No Pages
+setting, push, or deployment has been changed. Hemköp validation remains
+pending its permitted UTC window.
