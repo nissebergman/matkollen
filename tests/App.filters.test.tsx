@@ -5,6 +5,7 @@ import snapshotFixture from "./fixtures/snapshots/linkoping-multi-chain.json";
 
 afterEach(() => {
   cleanup();
+  window.history.replaceState({}, "", "/");
   vi.useRealTimers();
   vi.unstubAllGlobals();
 });

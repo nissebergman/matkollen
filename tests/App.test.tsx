@@ -7,6 +7,7 @@ import multiChainFixture from "./fixtures/snapshots/multi-chain-previous.json";
 
 afterEach(() => {
   cleanup();
+  window.history.replaceState({}, "", "/");
   vi.useRealTimers();
   vi.unstubAllGlobals();
   window.history.replaceState({}, "", "/");
