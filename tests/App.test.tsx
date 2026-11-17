@@ -10,6 +10,7 @@ afterEach(() => {
   window.history.replaceState({}, "", "/");
   vi.useRealTimers();
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
   window.history.replaceState({}, "", "/");
 });
 
@@ -79,6 +80,27 @@ describe("Offers app", () => {
     expect(
       screen.queryByRole("combobox", { name: "Plats" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("loads the Snapshot below the configured static-site base path", async () => {
+    vi.stubEnv("BASE_URL", "/matapp/");
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
+    const requestedUrls: string[] = [];
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      requestedUrls.push(String(input));
+      return Response.json(snapshotFixture);
+    });
+
+    render(<App />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(requestedUrls).toEqual(["/matapp/snapshots/linkoping.json"]);
+    expect(screen.getByRole("heading", { name: /i Linköping/ })).toBeVisible();
   });
 
   it("shows current Snapshot Offers and hides expired and future Offers", async () => {
