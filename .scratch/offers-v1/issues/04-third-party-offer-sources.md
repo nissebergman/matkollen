@@ -2,7 +2,7 @@
 
 Type: research
 Status: resolved
-Implementation status: partial (Coop publication/Offer sample verified; full flow blocked)
+Implementation status: partial (complete Coop refresh and bounded ICA sample; Hemköp unprobed; broader compatibility incomplete)
 Blocked by:
 Parent: ../map.md
 
@@ -41,8 +41,12 @@ The observed `{key, status, value: [{category, business, publications}]}` shape
 is now represented in a sanitized fixture; the key, status and category
 values are redacted/placeholders. The adapter verifies each front's business
 ID against the brand ID associated with its Store before flattening nested
-publications. Only one of five Linköping Stores and a small set of Offer IDs
-were checked; complete coverage, other Coop Stores, ICA and Hemköp remain
-unverified. The adapter fails closed on unsupported or inconsistent
-responses. Keep the existing source configuration unchanged; Tjek remains a
-partial, not complete, live Offer source.
+publications. A complete Coop refresh subsequently validated all six
+configured Linköping Stores, six publications and 293 Offers; the saved
+sanitized fixture still captures one Store/publication sample. A bounded ICA
+check verified one Store-specific publication and three Offers with Store
+association and date normalization, but none contained a member-price field.
+Hemköp was not probed. Broader ICA coverage/member-price behavior and Hemköp
+compatibility remain unverified. The adapter fails closed on unsupported or
+inconsistent responses. Keep the existing source configuration unchanged;
+Tjek compatibility remains partial rather than complete across all Chains.

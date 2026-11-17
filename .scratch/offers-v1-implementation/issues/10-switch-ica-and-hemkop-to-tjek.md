@@ -14,9 +14,11 @@ scope and, for Hemköp, the documented window.
 
 **Status note (2026-11-17):** The Tjek adapter can be selected independently by
 Chain and now implements a partially verified Coop publication/Offer path.
-That evidence does not establish ICA or Hemköp compatibility: no live
-ICA/Hemköp Store-specific publication or structured Offer response has been
-verified. Keep this ticket blocked.
+A bounded ICA Tjek check verified one Store-specific publication and three
+Offers, including Store association and date normalization. None contained a
+member-price field. Hemköp was not probed. This limited sample does not
+establish broader ICA coverage, member-price behavior, or Hemköp compatibility;
+keep this ticket in progress.
 
 - [x] Each Chain can independently select Tjek through Location configuration.
 - [ ] Each fallback Chain discovers its Stores and produces Offers in the existing Snapshot contract.

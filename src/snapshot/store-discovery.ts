@@ -3,7 +3,17 @@ import type { StoreDiscoveryConfig } from "./config";
 
 function sourceField(value: unknown, path: string): unknown {
   let current = value;
-  for (const part of path.split(".")) {
+  const parts = path.split(".");
+  if (
+    !parts.every(
+      (part) =>
+        /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(part) &&
+        !["__proto__", "prototype", "constructor"].includes(part),
+    )
+  ) {
+    return undefined;
+  }
+  for (const part of parts) {
     if (
       typeof current !== "object" ||
       current === null ||

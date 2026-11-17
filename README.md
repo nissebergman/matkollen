@@ -3,7 +3,8 @@
 A Swedish, mobile-first view of supermarket Offers. The app reads a versioned
 Snapshot for the Location in the page address (`?location=<id>`), defaulting to
 the configured default Location. It never calls a Chain or third-party Offer
-source directly, and does not load remote Offer images.
+source directly. Offer image display is deferred: the current placeholder
+remains, and the browser does not load remote `imageUrl`s.
 
 ## Locations
 
@@ -22,11 +23,14 @@ than one Location is configured. A configured source without a registered
 adapter is reported as a failed Chain. The ICA and Hemköp adapters and both Coop source adapters are implemented.
 Linköping keeps `coop-tjek` configured as Coop's source. The shared Tjek
 adapter discovers Stores and implements the observed Store-specific
-`fronts` → publication pages → individual Offer lookup flow. One Coop Store
-and publication were verified, with a small sample of structured Offers. The
-sanitized fixture now preserves the observed nested `fronts` envelope and
-business-to-Store association. The other Linköping Coop Stores, complete Offer
-coverage, ICA and Hemköp remain unverified. The adapter fails closed on
+`fronts` → publication pages → individual Offer lookup flow. A 2026-11-17
+Coop refresh validated all six configured Linköping Stores, six publications
+and 293 Offers. A separate bounded ICA check verified one Store-specific
+publication and three Offers with Store association and date normalization;
+none contained a member-price field. Hemköp was not probed. ICA's broader
+coverage and member-price behavior, and Hemköp compatibility, remain
+unverified. The sanitized fixture preserves the observed nested `fronts`
+envelope and business-to-Store association. The adapter fails closed on
 unsupported or inconsistent responses; do not switch sources automatically.
 The flyer-PDF adapter is available as an experimental, manually selected
 fallback; a read-only check of a real flyer showed a layout that the parser
@@ -60,8 +64,12 @@ network.
 `.github/workflows/publish.yml` refreshes and publishes the app and Snapshots
 daily at 05:00 UTC, or on a manual `workflow_dispatch`. It commits the generated
 Snapshots, builds them alongside the app, and deploys the resulting static site.
-If a Chain refresh fails, the successful and retained stale data is still
-committed and deployed before the workflow reports failure.
+It stages Snapshots in a clean directory and validates one schema-valid
+Snapshot per configured Location before copying or building. If a Chain refresh
+fails but still produces valid successful/stale results, those results are
+committed and deployed before the workflow reports failure. An unhandled job
+failure or incomplete output stops before deployment; the checked-in fixture is
+not used as refresh output.
 
 The workflow stores no source credentials and requires no CI source secrets.
 GitHub Actions' automatically provided token is used only to commit Snapshot
@@ -75,7 +83,10 @@ household data. The workflow does not enable Pages.
 `npm run snapshot -- [output-directory]` runs the job for every configured
 Location, one at a time, and writes one Snapshot per Location. When only one
 Location is configured, a `.json` argument can still be used as the exact
-output path. Before refreshing, read the
+output path. Set `SNAPSHOT_PREVIOUS_DIRECTORY` to read stale-data fallbacks from
+a different directory; `npm run snapshot:validate -- [output-directory]`
+checks every configured Location Snapshot before publication. Before
+refreshing, read the
 [ICA](docs/sources/ica.md), [Hemköp](docs/sources/hemkop.md),
 [Tjek/eReklamblad](docs/sources/tjek-ereklamblad.md),
 [Coop flyer-PDF](docs/sources/coop-pdf.md), and

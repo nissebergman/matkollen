@@ -4,6 +4,7 @@ import { z } from "zod";
 import { mapCoopCategory } from "../domain/categories";
 import type { Offer, Snapshot, Store } from "../domain/snapshot";
 import type { StoreDiscoveryConfig } from "./config";
+import { discoverStores } from "./store-discovery";
 import {
   ChainRefreshError,
   buildSnapshot,
@@ -156,38 +157,6 @@ function sourceId(value: string | number): string {
   return String(value);
 }
 
-function coopSourceStoreId(configuredId: string): string {
-  return configuredId.startsWith("Coop:")
-    ? configuredId.slice("Coop:".length)
-    : configuredId;
-}
-
-function sourceField(value: unknown, path: string): unknown {
-  const parts = path.split(".");
-  if (
-    !parts.every(
-      (part) =>
-        /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(part) &&
-        !["__proto__", "prototype", "constructor"].includes(part),
-    )
-  ) {
-    return undefined;
-  }
-
-  let current = value;
-  for (const part of parts) {
-    if (
-      typeof current !== "object" ||
-      current === null ||
-      !Object.hasOwn(current, part)
-    ) {
-      return undefined;
-    }
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-}
-
 function mapStoresFromResponse(value: unknown): CoopMapStore[] {
   const parsed = parseResponse(
     CoopStoreMapResponseSchema,
@@ -227,27 +196,12 @@ function discoverCoopStores(
     throw new Error("Coops butikskarta innehåller dubbla Store ids.");
   }
 
-  const pinIds = new Set((discovery.pinStoreIds ?? []).map(coopSourceStoreId));
-  const excludeIds = new Set(
-    (discovery.excludeStoreIds ?? []).map(coopSourceStoreId),
+  const matching = discoverStores(
+    sourceStores,
+    discovery,
+    "Coop",
+    (store) => sourceId(store.storeId),
   );
-  const availableIds = new Set(ids);
-  const missingPins = [...pinIds].filter((id) => !availableIds.has(id));
-  if (missingPins.length) {
-    throw new Error(
-      `Konfigurerade Coop-butiker hittades inte: ${missingPins.join(", ")}.`,
-    );
-  }
-
-  const matching = sourceStores.filter((store) => {
-    const id = sourceId(store.storeId);
-    return (
-      !excludeIds.has(id) &&
-      (pinIds.has(id) ||
-        sourceField(store, discovery.exactCity.field) ===
-          discovery.exactCity.value)
-    );
-  });
   if (matching.length === 0) {
     throw new Error(
       `Inga Coop-butiker hittades för ${discovery.exactCity.value}.`,
@@ -691,7 +645,12 @@ function parseFlyerOffers(
     }
 
     const mappedCategory = mapCoopCategory(line);
-    if (mappedCategory !== "Övrigt" && line.length <= 48) {
+    const isFallbackCategoryHeading =
+      line.toLocaleLowerCase("sv-SE") === "övrigt";
+    if (
+      line.length <= 48 &&
+      (mappedCategory !== "Övrigt" || isFallbackCategoryHeading)
+    ) {
       category = mappedCategory;
       sourceCategory = line;
       pendingNameLines.length = 0;
@@ -901,17 +860,16 @@ async function refreshCoopFlyerPdf(
   location: CoopLocation,
   context: ChainRefreshContext,
 ): Promise<ChainRefreshResult> {
-  let requestStarted = false;
   let discoveredStores: Store[] = [];
   const request = async (
     url: string,
     init: RequestInit,
     label: string,
   ): Promise<Response> => {
-    if (requestStarted) {
-      await context.sleep(COOP_PDF_REQUEST_DELAY_MS);
-    }
-    requestStarted = true;
+    await context.waitForRequest(
+      COOP_FLYER_PDF_SOURCE,
+      COOP_PDF_REQUEST_DELAY_MS,
+    );
     let response: Response;
     try {
       response = await context.fetcher(url, {

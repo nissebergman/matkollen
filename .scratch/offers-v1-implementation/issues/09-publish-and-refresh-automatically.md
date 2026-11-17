@@ -23,6 +23,10 @@ history cleanup. Pages must remain public only as already approved.
 Live validation on 2026-11-17 completed the Coop refresh across all six
 configured Linköping Stores, six publications and 293 Offers. The validated
 Snapshot remains under session state; the checked-in public Snapshot still
-contains demo fixture data and must not be published. ICA/Hemköp fallback
-compatibility and complete multi-Chain deployment data are not yet verified.
-Deployment is not part of this repair.
+contains demo fixture data and must not be published. A bounded ICA Tjek check
+verified one Store-specific publication and three Offers with Store
+association and date normalization, but none contained a member-price field;
+Hemköp was not probed. This does not verify broader ICA/Hemköp compatibility or
+complete multi-Chain deployment data. Actual publication and Pages verification
+remain pending; do not enable Pages, deploy, or publish the fixture as part of
+this repair.

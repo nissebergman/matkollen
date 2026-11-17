@@ -61,6 +61,46 @@ async function readPreviousSnapshot(path: string): Promise<Snapshot | undefined>
   }
 }
 
+export async function validateSnapshotDirectory(directory: string): Promise<void> {
+  const outputDirectory = resolve(directory);
+  for (const location of LOCATION_REGISTRY.locations) {
+    const snapshotPath = resolve(outputDirectory, `${location.id}.json`);
+    let contents: string;
+    try {
+      contents = await readFile(snapshotPath, "utf8");
+    } catch (error) {
+      if (
+        typeof error === "object" &&
+        error !== null &&
+        "code" in error &&
+        error.code === "ENOENT"
+      ) {
+        throw new Error(
+          `Genererad Snapshot saknas för Location ${location.id}: ${snapshotPath}`,
+        );
+      }
+      throw error;
+    }
+
+    let snapshot: Snapshot;
+    try {
+      snapshot = parseSnapshot(JSON.parse(contents));
+    } catch {
+      throw new Error(
+        `Genererad Snapshot är ogiltig för Location ${location.id}: ${snapshotPath}`,
+      );
+    }
+    if (
+      snapshot.location.id !== location.id ||
+      snapshot.location.name !== location.name
+    ) {
+      throw new Error(
+        `Genererad Snapshot har fel Location: ${snapshotPath}`,
+      );
+    }
+  }
+}
+
 async function writeSnapshotFile(path: string, snapshot: Snapshot): Promise<void> {
   await mkdir(dirname(path), { recursive: true });
   await writeFile(path, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
@@ -106,6 +146,13 @@ export async function runSnapshotCli<
 async function main(): Promise<void> {
   try {
     const outputArgument = process.argv[2];
+    if (outputArgument === "--validate") {
+      const directory = resolve(process.argv[3] ?? "public/snapshots");
+      await validateSnapshotDirectory(directory);
+      console.log(`Snapshots validerade: ${directory}`);
+      return;
+    }
+
     const isJsonFile = outputArgument?.toLowerCase().endsWith(".json") ?? false;
     if (isJsonFile && LOCATION_REGISTRY.locations.length !== 1) {
       throw new Error("Ange en utdatamapp när fler än en Location är konfigurerad.");
@@ -116,11 +163,18 @@ async function main(): Promise<void> {
     const singleOutputFile = isJsonFile ? resolve(outputArgument!) : undefined;
     const outputPathFor = (locationId: string): string =>
       singleOutputFile ?? resolve(outputDirectory, `${locationId}.json`);
+    const previousDirectory = process.env.SNAPSHOT_PREVIOUS_DIRECTORY
+      ? resolve(process.env.SNAPSHOT_PREVIOUS_DIRECTORY)
+      : outputDirectory;
+    const previousPathFor = (locationId: string): string =>
+      process.env.SNAPSHOT_PREVIOUS_DIRECTORY
+        ? resolve(previousDirectory, `${locationId}.json`)
+        : singleOutputFile ?? resolve(previousDirectory, `${locationId}.json`);
     const previousSnapshots: Record<string, unknown> = {};
 
     for (const location of LOCATION_REGISTRY.locations) {
       previousSnapshots[location.id] = await readPreviousSnapshot(
-        outputPathFor(location.id),
+        previousPathFor(location.id),
       );
     }
 

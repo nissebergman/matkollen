@@ -21,7 +21,6 @@ import type {
   StoreDiscoveryConfig,
 } from "./config";
 import {
-  createTjekRequestThrottle,
   createTjekSourceAdapter,
   TJEK_SOURCE,
 } from "./tjek";
@@ -540,16 +539,18 @@ async function refreshHemkop(
   location: HemkopLocation,
   context: ChainRefreshContext,
 ): Promise<ChainRefreshResult> {
-  const { fetcher, now, sleep, runDate, offerWeekEnd: weekEnd } = context;
-  let requestStarted = false;
+  const {
+    fetcher,
+    now,
+    waitForRequest,
+    runDate,
+    offerWeekEnd: weekEnd,
+  } = context;
   let discoveredStores: Store[] = [];
 
   const requestJson = async (url: string, label: string): Promise<unknown> => {
-    if (requestStarted) {
-      await sleep(HEMKOP_REQUEST_DELAY_MS);
-    }
+    await waitForRequest(HEMKOP_SOURCE, HEMKOP_REQUEST_DELAY_MS);
     assertWithinHemkopVisitTime(now());
-    requestStarted = true;
     const response = await fetcher(url, {
       method: "GET",
       headers: { Accept: "application/json" },
@@ -700,7 +701,6 @@ export function snapshotAdaptersFromConfig(
   location: LocationConfig,
 ): ChainSourceAdapter<HemkopLocation>[] {
   const adapters: ChainSourceAdapter<HemkopLocation>[] = [];
-  const tjekThrottle = createTjekRequestThrottle();
 
   for (const chain of CHAINS) {
     const configuration = location.chains[chain];
@@ -721,6 +721,7 @@ export function snapshotAdaptersFromConfig(
               fetcher: context.fetcher,
               now: context.now,
               sleep: context.sleep,
+              waitForRequest: context.waitForRequest,
             },
           );
           const status = snapshot.chains.find(
@@ -757,7 +758,6 @@ export function snapshotAdaptersFromConfig(
           chain,
           configuration.storeDiscovery,
           configuration.source,
-          tjekThrottle,
         ),
       );
       continue;
@@ -820,8 +820,16 @@ export async function buildSnapshots(
   dependencies: SnapshotJobDependencies = {},
 ): Promise<Snapshot[]> {
   const snapshots: Snapshot[] = [];
+  const requestPacingState = dependencies.requestPacingState ?? {
+    startedSources: new Set<string>(),
+  };
   for (const location of locations) {
-    snapshots.push(await buildSnapshotForLocation(location, dependencies));
+    snapshots.push(
+      await buildSnapshotForLocation(location, {
+        ...dependencies,
+        requestPacingState,
+      }),
+    );
   }
   return snapshots;
 }

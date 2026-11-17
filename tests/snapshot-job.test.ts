@@ -139,6 +139,54 @@ describe("Hemköp Snapshot job", () => {
     ).toBe(true);
   });
 
+  it("keeps Hemköp's ten-second request spacing across Location snapshots", async () => {
+    let elapsed = 0;
+    const { fetcher, requestTimes } = fixtureFetcher(() => elapsed);
+
+    await buildSnapshots(
+      [
+        {
+          id: "linkoping",
+          name: "Linköping",
+          chains: {
+            Hemköp: {
+              source: "hemkop-first-party",
+              storeDiscovery: {
+                exactCity: { field: "address.town", value: "Linköping" },
+              },
+            },
+          },
+        },
+        {
+          id: "norrkoping",
+          name: "Norrköping",
+          chains: {
+            Hemköp: {
+              source: "hemkop-first-party",
+              storeDiscovery: {
+                exactCity: { field: "address.town", value: "Norrköping" },
+              },
+            },
+          },
+        },
+      ],
+      {
+        fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        sleep: async (milliseconds) => {
+          elapsed += milliseconds;
+        },
+      },
+    );
+
+    expect(requestTimes.length).toBeGreaterThan(2);
+    expect(
+      requestTimes
+        .slice(1)
+        .every((requestTime, index) => requestTime - requestTimes[index] >= 10_000),
+    ).toBe(true);
+  });
+
   it("publishes the paginated Linköping Offers as a normalized Snapshot", async () => {
     let elapsed = 0;
     const { fetcher, requestTimes } = fixtureFetcher(() => elapsed);

@@ -36,11 +36,22 @@ type FixtureOptions = {
   missingFlyerFor?: string;
   nonProductFlyerFor?: string;
   observedLayoutFor?: string;
+  categoryFallbackFor?: string;
 };
 
 function createTextPdf(lines: string[]): ArrayBuffer {
   const escapePdfString = (value: string) =>
-    value.replaceAll("\\", "\\\\").replaceAll("(", "\\(").replaceAll(")", "\\)");
+    value
+      .replaceAll("\\", "\\\\")
+      .replaceAll("(", "\\(")
+      .replaceAll(")", "\\)")
+      .replace(/[^\x20-\x7e]/gu, (character) => {
+        const code = character.charCodeAt(0);
+        if (code > 0xff) {
+          throw new Error("Generated PDF fixture contains unsupported text.");
+        }
+        return `\\${code.toString(8).padStart(3, "0")}`;
+      });
   const stream = [
     "BT",
     "/F1 12 Tf",
@@ -52,7 +63,7 @@ function createTextPdf(lines: string[]): ArrayBuffer {
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
     "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>",
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>",
     `<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}\nendstream`,
   ];
   let pdf = "%PDF-1.4\n";
@@ -152,6 +163,19 @@ function recordedFetcher(options: FixtureOptions = {}) {
           headers: { "Content-Type": "application/pdf" },
         });
       }
+      if (options.categoryFallbackFor === ledgerAccountNumber) {
+        return new Response(
+          createTextPdf([
+            "Mejeri & ost",
+            "Arla Mellanmjölk 1 l",
+            "Medlemspris 15 kr/l",
+            "Övrigt",
+            "Äpplen",
+            "10 kr/kg",
+          ]),
+          { headers: { "Content-Type": "application/pdf" } },
+        );
+      }
       return new Response(
         readFileSync(
           resolve(fixtureRoot, `flyers/${ledgerAccountNumber}.pdf`),
@@ -195,6 +219,25 @@ async function buildConfiguredCoopSnapshot(
 }
 
 describe("Coop flyer-PDF Snapshot job", () => {
+  it("resets Offers to Övrigt after an unmapped section heading", async () => {
+    const { snapshot } = await buildConfiguredCoopSnapshot({
+      categoryFallbackFor: "056010",
+    });
+
+    expect(snapshot.offers).toContainEqual(
+      expect.objectContaining({
+        name: "Arla Mellanmjölk 1 l",
+        category: "Mejeri & ost",
+      }),
+    );
+    expect(snapshot.offers).toContainEqual(
+      expect.objectContaining({
+        name: "Äpplen",
+        category: "Övrigt",
+      }),
+    );
+  });
+
   it("extracts a price-first Offer and does not treat Jfr-pris as a sale price", async () => {
     const observedLayoutLocation = {
       ...coopOnlyLinkoping,

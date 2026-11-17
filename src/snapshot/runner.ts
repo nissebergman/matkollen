@@ -14,17 +14,23 @@ export interface SnapshotLocation {
   name: string;
 }
 
+export interface SnapshotRequestPacingState {
+  startedSources: Set<string>;
+}
+
 export interface SnapshotJobDependencies {
   fetcher?: typeof fetch;
   now?: () => Date;
   sleep?: (milliseconds: number) => Promise<void>;
   previousSnapshot?: unknown;
+  requestPacingState?: SnapshotRequestPacingState;
 }
 
 export interface ChainRefreshContext {
   fetcher: typeof fetch;
   now: () => Date;
   sleep: (milliseconds: number) => Promise<void>;
+  waitForRequest: (source: string, minimumDelayMs: number) => Promise<void>;
   attemptAt: string;
   runDate: string;
   offerWeekEnd: string;
@@ -223,6 +229,9 @@ export async function buildSnapshot<Location extends SnapshotLocation>(
     dependencies.sleep ??
     ((milliseconds: number) =>
       new Promise<void>((resolve) => setTimeout(resolve, milliseconds)));
+  const requestPacingState = dependencies.requestPacingState ?? {
+    startedSources: new Set<string>(),
+  };
   const runDate = stockholmDate(now());
   const weekEnd = currentOfferWeekEnd(runDate);
   const previousResult =
@@ -237,12 +246,22 @@ export async function buildSnapshot<Location extends SnapshotLocation>(
 
   for (const adapter of adapters) {
     const attemptAt = now().toISOString();
+    const waitForRequest = async (
+      source: string,
+      minimumDelayMs: number,
+    ): Promise<void> => {
+      if (requestPacingState.startedSources.has(source)) {
+        await sleep(minimumDelayMs);
+      }
+      requestPacingState.startedSources.add(source);
+    };
     let result: Snapshot;
     try {
       const refreshed = await adapter.refresh(location, {
         fetcher,
         now,
         sleep,
+        waitForRequest,
         attemptAt,
         runDate,
         offerWeekEnd: weekEnd,

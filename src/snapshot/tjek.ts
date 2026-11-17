@@ -25,14 +25,6 @@ const TJEK_PUBLICATION_PAGES_ENDPOINT =
   "https://publication-viewer.tjek.com/api/paged-publications";
 const TJEK_STORE_LIMIT = 3_000;
 
-export interface TjekRequestThrottle {
-  requestStarted: boolean;
-}
-
-export function createTjekRequestThrottle(): TjekRequestThrottle {
-  return { requestStarted: false };
-}
-
 export interface TjekLocation extends SnapshotLocation {
   city?: string;
   storeDiscovery?: StoreDiscoveryConfig;
@@ -824,9 +816,7 @@ async function refreshTjek(
   chain: Chain,
   discovery: StoreDiscoveryConfig,
   context: ChainRefreshContext,
-  throttle?: TjekRequestThrottle,
 ): Promise<ChainRefreshResult> {
-  let requestStarted = false;
   let discoveredStores: Store[] = [];
 
   const requestJson = async (
@@ -834,13 +824,7 @@ async function refreshTjek(
     init: RequestInit,
     label: string,
   ): Promise<unknown> => {
-    if (requestStarted || throttle?.requestStarted) {
-      await context.sleep(TJEK_REQUEST_DELAY_MS);
-    }
-    requestStarted = true;
-    if (throttle) {
-      throttle.requestStarted = true;
-    }
+    await context.waitForRequest(TJEK_SOURCE, TJEK_REQUEST_DELAY_MS);
     const response = await context.fetcher(url, { ...init, credentials: "omit" });
     if (!response.ok) {
       throw new Error(requestError(response.status));
@@ -1083,12 +1067,11 @@ export function createTjekSourceAdapter<Location extends SnapshotLocation>(
   chain: Chain,
   discovery: StoreDiscoveryConfig,
   source = TJEK_SOURCE,
-  throttle?: TjekRequestThrottle,
 ): ChainSourceAdapter<Location> {
   return {
     chain,
     source,
     refresh: (_location, context) =>
-      refreshTjek(chain, discovery, context, throttle),
+      refreshTjek(chain, discovery, context),
   };
 }

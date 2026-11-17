@@ -6,12 +6,13 @@ fallback for ICA or Hemköp by setting a Location's
 in `src/snapshot/locations.json`; the checked-in defaults remain their
 first-party sources. An explicitly selected ICA or Hemköp fallback now attempts
 the same Store-specific `fronts` → publication pages → individual `offer`
-flow used by Coop. That shared code path is exercised with synthetic offline
-fixtures only; no ICA or Hemköp response compatibility has been verified. Coop
-uses the same adapter with the compatibility source id `coop-tjek` so existing
-Coop Snapshots keep their identity. The earlier Coop sample is verified, but a
-later bounded refresh stopped before a complete Snapshot; full live coverage
-is not established.
+flow used by Coop. A bounded live ICA check on 2026-11-17 verified one
+Store-specific publication and three Offers, including Store association and
+date normalization; none contained a member-price field. Hemköp was not
+probed, and the checked-in ICA/Hemköp fixtures remain synthetic. Coop uses the
+same adapter with the compatibility source id `coop-tjek` so existing Coop
+Snapshots keep their identity. A complete Coop refresh is documented below,
+but a later bounded attempt stopped before a complete Snapshot.
 
 ## Live compatibility status
 
@@ -77,17 +78,21 @@ publication, a current publication without hotspot IDs, or a refresh with no
 current Offers fails closed. Automated end-to-end tests replay sanitized
 fixtures and never contact Tjek.
 
-Compatibility remains partial: a later bounded Coop-only refresh reached
-only a subset of configured Stores, publications and Offers before the
-cumulative request cap. The failed Snapshot did not publish partial Offers.
-The exact live `fronts` body was not saved verbatim, but its response and
-nested shape are represented in the sanitized fixture. Full Coop coverage,
-ICA and Hemköp remain unverified. When either fallback is explicitly selected,
-the adapter attempts the shared publication/Offer flow and fails closed on
-unsupported responses or mismatched associations. Synthetic fixtures exercise
-that path and Snapshot contract only; they are not evidence of live
-compatibility. Keep the configured source unchanged; do not claim complete
-live coverage or replace failures with synthetic-success data.
+Compatibility remains partial. A complete Coop refresh on 2026-11-17 verified
+all six configured Linköping Stores, six publications and 293 Offers; a later
+bounded Coop-only attempt reached only a subset before the cumulative request
+cap, so one complete refresh does not establish ongoing completeness. The
+bounded ICA check verified only one Store-specific publication and three
+Offers, with no sampled member-price field. Hemköp was not probed. Broader ICA
+coverage and member-price behavior, and Hemköp compatibility, remain
+unverified. The exact live `fronts` body was not saved verbatim, but its
+response and nested shape are represented in the sanitized fixture. When an
+ICA or Hemköp fallback is explicitly selected, the adapter attempts the shared
+publication/Offer flow and fails closed on unsupported responses or mismatched
+associations. Synthetic fixtures exercise that path and Snapshot contract
+only; they are not evidence of live compatibility. Keep the configured source
+unchanged; do not claim complete live coverage or replace failures with
+synthetic-success data.
 
 The adapter sends anonymous JSON `POST` requests to `https://ereklamblad.se/`
 with a base64-encoded command, plus a GET to the observed publication-pages

@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { validateSnapshotDirectory } from "../src/snapshot/cli";
 
 const workflow = readFileSync(
   resolve(import.meta.dirname, "../.github/workflows/publish.yml"),
@@ -15,6 +16,46 @@ describe("static publication workflow", () => {
 
   it("does not depend on stored source credentials", () => {
     expect(workflow).not.toMatch(/secrets\./);
+  });
+
+  it("validates a clean generated Snapshot set before copying or deploying", () => {
+    const clean = workflow.indexOf("rm -rf generated/snapshots");
+    const refresh = workflow.indexOf(
+      "npm run snapshot -- generated/snapshots",
+    );
+    const validate = workflow.indexOf(
+      "npm run snapshot:validate -- generated/snapshots",
+    );
+    const copy = workflow.indexOf(
+      "cp generated/snapshots/*.json public/snapshots/",
+    );
+    const build = workflow.indexOf("npm run build");
+    const deploy = workflow.indexOf("actions/deploy-pages@");
+
+    expect(workflow).toContain(
+      "SNAPSHOT_PREVIOUS_DIRECTORY: public/snapshots",
+    );
+    expect(
+      [clean, refresh, validate, copy, build, deploy].every(
+        (index) => index >= 0,
+      ),
+    ).toBe(true);
+    expect(clean).toBeLessThan(refresh);
+    expect(refresh).toBeLessThan(validate);
+    expect(validate).toBeLessThan(copy);
+    expect(copy).toBeLessThan(build);
+    expect(build).toBeLessThan(deploy);
+  });
+
+  it("accepts valid Snapshots and rejects missing configured Locations", async () => {
+    await expect(
+      validateSnapshotDirectory(resolve(import.meta.dirname, "fixtures/snapshots")),
+    ).resolves.toBeUndefined();
+    await expect(
+      validateSnapshotDirectory(
+        resolve(import.meta.dirname, "fixtures/snapshots/absent"),
+      ),
+    ).rejects.toThrow("Genererad Snapshot saknas för Location linkoping");
   });
 
   it("deploys persisted Snapshot artifacts before reporting refresh failures", () => {

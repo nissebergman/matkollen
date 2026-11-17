@@ -26,6 +26,7 @@ export interface IcaJobDependencies {
   fetcher?: typeof fetch;
   now?: () => Date;
   sleep?: (milliseconds: number) => Promise<void>;
+  waitForRequest?: (source: string, minimumDelayMs: number) => Promise<void>;
   previousSnapshot?: unknown;
 }
 
@@ -647,10 +648,18 @@ export async function buildIcaSnapshot(
   const fetcher = dependencies.fetcher ?? globalThis.fetch;
   const now = dependencies.now ?? (() => new Date());
   const sleep = dependencies.sleep ?? defaultSleep;
+  const startedSources = new Set<string>();
+  const waitForRequest =
+    dependencies.waitForRequest ??
+    (async (source: string, minimumDelayMs: number) => {
+      if (startedSources.has(source)) {
+        await sleep(minimumDelayMs);
+      }
+      startedSources.add(source);
+    });
   const attemptAt = now().toISOString();
   const runDate = stockholmDate(new Date(attemptAt));
   const weekEnd = currentOfferWeekEnd(runDate);
-  let requestStarted = false;
   let discoveredStores: Store[] = [];
 
   const request = async (
@@ -658,10 +667,7 @@ export async function buildIcaSnapshot(
     label: string,
     headers: Record<string, string> = {},
   ): Promise<Response> => {
-    if (requestStarted) {
-      await sleep(ICA_REQUEST_DELAY_MS);
-    }
-    requestStarted = true;
+    await waitForRequest(ICA_SOURCE, ICA_REQUEST_DELAY_MS);
     const response = await fetcher(url, {
       method: "GET",
       headers: { Accept: "application/json", ...headers },

@@ -73,6 +73,10 @@ The app never calls the Chains live. A scheduled job fetches each Chain's Offers
 53. As the maintainer, I want the ToS and robots risks of each source documented next to its adapter, so that the trade-off we accepted stays visible.
 54. As the maintainer, I want free, static hosting for the app and Snapshot, so that running the household tool costs nothing.
 
+**Decision (2026-11-17):** Offer image display is deferred. Keep the current
+placeholder and do not load remote `imageUrl`s in the browser. Image fetching
+or proxying is out of scope.
+
 ## Implementation Decisions
 
 ### Architecture

@@ -37,10 +37,21 @@ jobs:
       - name: Run offline tests
         run: npm test
 
+      - name: Clean generated Snapshots
+        run: rm -rf generated/snapshots && mkdir -p generated/snapshots
+
       - name: Refresh Snapshots
         id: refresh
         continue-on-error: true
-        run: npm run snapshot
+        run: npm run snapshot -- generated/snapshots
+        env:
+          SNAPSHOT_PREVIOUS_DIRECTORY: public/snapshots
+
+      - name: Validate generated Snapshots
+        run: npm run snapshot:validate -- generated/snapshots
+
+      - name: Copy generated Snapshots
+        run: cp generated/snapshots/*.json public/snapshots/
 
       - name: Commit refreshed Snapshots
         run: |
@@ -75,5 +86,5 @@ jobs:
       - name: Report Snapshot refresh failure
         if: steps.refresh.outcome == 'failure'
         run: |
-          echo "::error::At least one Chain refresh failed; the partial Snapshot was published."
+          echo "::error::At least one Chain refresh failed; the validated Snapshots were published."
           exit 1
