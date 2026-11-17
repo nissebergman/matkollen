@@ -1,12 +1,14 @@
 import { Buffer } from "node:buffer";
 import { z } from "zod";
 import { mapTjekCategory } from "../domain/categories";
+import { STOCKHOLM_TIME_ZONE, stockholmDate } from "../domain/date";
 import {
   type Chain,
   type Offer,
   type Store,
 } from "../domain/snapshot";
 import type { StoreDiscoveryConfig } from "./config";
+import { discoverStores } from "./store-discovery";
 import {
   ChainRefreshError,
   type ChainRefreshContext,
@@ -19,9 +21,9 @@ export const TJEK_REQUEST_DELAY_MS = 1_000;
 export const TJEK_SOURCE = "tjek-ereklamblad";
 
 const TJEK_ENDPOINT = "https://ereklamblad.se/";
-const TJEK_PAGE_SIZE = 100;
-const TJEK_MAX_PAGES = 40;
-const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
+const TJEK_PUBLICATION_PAGES_ENDPOINT =
+  "https://publication-viewer.tjek.com/api/paged-publications";
+const TJEK_STORE_LIMIT = 3_000;
 
 export interface TjekRequestThrottle {
   requestStarted: boolean;
@@ -48,20 +50,6 @@ const sourceIdentifier = z.union([
   z.string().min(1).refine((value) => value.trim().length > 0),
   z.number().int().nonnegative().finite(),
 ]);
-const sourceAddressSchema = z.union([
-  z.string().nullable(),
-  z
-    .object({
-      city: optionalText,
-      town: optionalText,
-      street: optionalText,
-      streetAddress: optionalText,
-      streetName: optionalText,
-      line1: optionalText,
-      postalCode: optionalText,
-    })
-    .passthrough(),
-]);
 const sourceChainSchema = z.union([
   z.string(),
   z.object({ name: optionalText }).passthrough(),
@@ -78,11 +66,79 @@ const TjekBusinessSchema = z
     retailerName: optionalText,
     brand: sourceChainSchema.optional(),
     brandName: optionalText,
-    city: optionalText,
-    locality: optionalText,
-    postalCity: optionalText,
-    address: sourceAddressSchema.optional(),
-    location: z.unknown().optional(),
+  })
+  .passthrough();
+
+const TjekStoreSchema = z
+  .object({
+    id: sourceIdentifier,
+    name: z.string(),
+    city: z.string().min(1).refine((value) => value.trim().length > 0),
+    streetAddress: optionalText,
+    postalCode: optionalText,
+    coordinates: z
+      .object({
+        latitude: z.number().finite(),
+        longitude: z.number().finite(),
+      })
+      .passthrough()
+      .nullable()
+      .optional(),
+  })
+  .passthrough();
+
+const sourceDateValue = z.union([
+  z.string(),
+  z.number().finite(),
+  z.null(),
+]);
+
+const TjekPublicationSchema = z
+  .object({
+    id: sourceIdentifier,
+    label: z.string().min(1).refine((value) => value.trim().length > 0),
+    validFrom: sourceDateValue,
+    validUntil: sourceDateValue,
+  })
+  .passthrough();
+
+const TjekFrontSchema = z
+  .object({
+    category: z.unknown().refine((value) => value !== undefined),
+    business: z
+      .object({ publicId: sourceIdentifier })
+      .passthrough(),
+    publications: z.array(TjekPublicationSchema),
+  })
+  .passthrough();
+const TjekFrontsResponseSchema = z
+  .object({
+    key: z.unknown().refine((value) => value !== undefined),
+    status: z.unknown().refine((value) => value !== undefined),
+    value: z.array(TjekFrontSchema),
+  })
+  .passthrough();
+
+const TjekPublicationPagesResponseSchema = z
+  .object({
+    pages: z.record(
+      z.string(),
+      z
+        .object({
+          hotspots: z
+            .array(
+              z
+                .object({
+                  offer: z
+                    .object({ id: sourceIdentifier })
+                    .passthrough(),
+                })
+                .passthrough(),
+            )
+            .optional(),
+        })
+        .passthrough(),
+    ),
   })
   .passthrough();
 
@@ -108,6 +164,7 @@ const TjekOfferSchema = z
     business: sourceBusinessSchema.optional(),
     businessId: sourceIdentifier.optional(),
     businessPublicId: sourceIdentifier.optional(),
+    publicationPublicId: sourceIdentifier.optional(),
     publication: sourcePublicationSchema.optional(),
     description: optionalText,
     priceText: optionalText,
@@ -163,16 +220,26 @@ const TjekOfferSchema = z
 const TjekBusinessesResponseSchema = z
   .object({ value: z.array(TjekBusinessSchema) })
   .passthrough();
-const TjekOffersResponseSchema = z
+const TjekStoresResponseSchema = z
   .object({
+    key: z.unknown().refine((value) => value !== undefined),
+    status: z.unknown().refine((value) => value !== undefined),
     value: z
-      .object({ data: z.array(TjekOfferSchema) })
+      .object({ data: z.array(TjekStoreSchema) })
       .passthrough(),
+  })
+  .passthrough();
+const TjekOfferResponseSchema = z
+  .object({
+    key: z.string().min(1),
+    status: z.literal("success"),
+    value: TjekOfferSchema,
   })
   .passthrough();
 
 type TjekBusiness = z.infer<typeof TjekBusinessSchema>;
-type TjekOffer = z.infer<typeof TjekOfferSchema>;
+export type TjekOffer = z.infer<typeof TjekOfferSchema>;
+type TjekStore = z.infer<typeof TjekStoreSchema>;
 
 function describeValidationError(error: z.ZodError): string {
   const issue = error.issues[0];
@@ -186,17 +253,6 @@ function parseResponse<T>(schema: z.ZodType<T>, value: unknown, label: string): 
     throw new Error(`Ogiltigt svar från Tjek (${label}): ${describeValidationError(result.error)}.`);
   }
   return result.data;
-}
-
-function stockholmDate(date: Date): string {
-  const parts = new Intl.DateTimeFormat("sv-SE", {
-    timeZone: STOCKHOLM_TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  const value = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
-  return `${value.year}-${value.month}-${value.day}`;
 }
 
 function isIsoDate(value: string): boolean {
@@ -232,6 +288,94 @@ function dateFromSource(value: string | number | null | undefined): string | und
 
   const time = Date.parse(normalized);
   return Number.isFinite(time) ? stockholmDate(new Date(time)) : undefined;
+}
+
+function publicationEndDateFromSource(
+  value: string | number | null | undefined,
+): string | undefined {
+  const date = dateFromSource(value);
+  if (!date || (typeof value === "string" && isIsoDate(value.trim()))) {
+    return date;
+  }
+
+  let timestamp: number;
+  if (typeof value === "number") {
+    timestamp = value;
+  } else if (typeof value === "string" && /^\d{10,13}$/.test(value.trim())) {
+    const rawTimestamp = Number(value.trim());
+    timestamp = value.trim().length === 10 ? rawTimestamp * 1_000 : rawTimestamp;
+  } else if (typeof value === "string") {
+    timestamp = Date.parse(value.trim());
+  } else {
+    return date;
+  }
+  const instant = new Date(timestamp);
+  if (!Number.isFinite(instant.getTime()) || instant.getUTCMilliseconds() !== 0) {
+    return date;
+  }
+
+  const localTime = Object.fromEntries(
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: STOCKHOLM_TIME_ZONE,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(instant)
+      .map(({ type, value: part }) => [type, part]),
+  );
+  if (
+    localTime.hour !== "00" ||
+    localTime.minute !== "00" ||
+    localTime.second !== "00"
+  ) {
+    return date;
+  }
+
+  const previousDay = new Date(`${date}T00:00:00.000Z`);
+  previousDay.setUTCDate(previousDay.getUTCDate() - 1);
+  return previousDay.toISOString().slice(0, 10);
+}
+
+function publicationsFromResponse(
+  value: unknown,
+  label: string,
+  expectedBusinessId: string,
+): z.infer<typeof TjekPublicationSchema>[] {
+  const fronts = parseResponse(TjekFrontsResponseSchema, value, label).value;
+  const publications: z.infer<typeof TjekPublicationSchema>[] = [];
+  for (const front of fronts) {
+    if (sourceId(front.business.publicId) !== expectedBusinessId) {
+      throw new Error(
+        `Tjek returnerade en front för ett annat varumärke än ${expectedBusinessId}.`,
+      );
+    }
+    publications.push(...front.publications);
+  }
+  return publications;
+}
+
+function publicationDetails(
+  publication: z.infer<typeof TjekPublicationSchema>,
+): { id: string; validFrom: string; validTo: string } {
+  const { id, label } = publication;
+  const validFrom = dateFromSource(publication.validFrom);
+  const validTo = publicationEndDateFromSource(publication.validUntil);
+  if (id === undefined || !label || !validFrom || !validTo) {
+    throw new Error(
+      "Tjek returnerade en publikation utan verifierat ID, etikett eller giltighetsintervall.",
+    );
+  }
+  if (
+    (publication.validFrom != null && !validFrom) ||
+    (publication.validUntil != null &&
+      !publicationEndDateFromSource(publication.validUntil)) ||
+    validFrom > validTo
+  ) {
+    throw new Error("Tjek returnerade en publikation med ogiltigt giltighetsintervall.");
+  }
+  return { id: sourceId(id), validFrom, validTo };
 }
 
 function parseAmount(value: unknown): number | undefined {
@@ -291,59 +435,6 @@ function sourceId(value: string | number): string {
   return String(value);
 }
 
-function sourceField(value: unknown, path: string): unknown {
-  const parts = path.split(".");
-  if (
-    !parts.every(
-      (part) =>
-        /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(part) &&
-        !["__proto__", "prototype", "constructor"].includes(part),
-    )
-  ) {
-    return undefined;
-  }
-
-  let current = value;
-  for (const part of parts) {
-    if (
-      typeof current !== "object" ||
-      current === null ||
-      !Object.hasOwn(current, part)
-    ) {
-      return undefined;
-    }
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-}
-
-function sourceStoreId(configuredId: string, chain: Chain): string {
-  const prefix = `${chain}:`;
-  return configuredId.startsWith(prefix)
-    ? configuredId.slice(prefix.length)
-    : configuredId;
-}
-
-function businessCity(business: TjekBusiness): string | undefined {
-  const address =
-    business.address && typeof business.address === "object"
-      ? business.address
-      : undefined;
-  const location =
-    business.location && typeof business.location === "object"
-      ? (business.location as Record<string, unknown>)
-      : undefined;
-  return (
-    sourceText(business.city) ??
-    sourceText(business.locality) ??
-    sourceText(business.postalCity) ??
-    sourceText(address?.city) ??
-    sourceText(address?.town) ??
-    sourceText(typeof location?.city === "string" ? location.city : undefined) ??
-    sourceText(typeof location?.town === "string" ? location.town : undefined)
-  );
-}
-
 function chainLabels(value: unknown): string[] {
   if (typeof value === "string") {
     return sourceText(value) ? [value] : [];
@@ -379,54 +470,37 @@ function isBusinessForChain(business: TjekBusiness, chain: Chain): boolean {
   );
 }
 
-function storeAddress(business: TjekBusiness, city: string): string {
-  if (typeof business.address === "string" && business.address.trim()) {
-    const address = business.address.trim();
-    return normalizedKey(address).includes(normalizedKey(city))
-      ? address
-      : `${address}, ${city}`;
-  }
-
-  const address = business.address;
-  if (address && typeof address === "object") {
-    const value = [
-      sourceText(address.streetAddress) ??
-        sourceText(address.street) ??
-        sourceText(address.streetName) ??
-        sourceText(address.line1),
-      sourceText(address.postalCode),
-      city,
-    ]
-      .filter(Boolean)
-      .join(", ");
-    if (value) {
-      return value;
-    }
-  }
-  return city;
-}
-
-function storeFromBusiness(
-  business: TjekBusiness,
-  chain: Chain,
-  city: string,
-): Store {
-  const id = sourceId(business.publicId);
+function storeFromTjekStore(store: TjekStore, chain: Chain): Store {
+  const city = store.city.trim();
+  const address = [
+    sourceText(store.streetAddress),
+    sourceText(store.postalCode),
+    city,
+  ]
+    .filter(Boolean)
+    .join(", ");
   return {
-    id: `${chain}:${id}`,
+    id: `${chain}:${sourceId(store.id)}`,
     chain,
-    name: business.name.trim(),
-    address: storeAddress(business, city),
+    name: store.name.trim(),
+    address,
   };
 }
 
-function businessIdFromOffer(offer: TjekOffer): string | undefined {
-  const value =
-    offer.business?.publicId ??
-    offer.businessPublicId ??
-    offer.businessId ??
-    offer.business?.id;
-  return value === undefined ? undefined : sourceId(value);
+function businessIdsFromOffer(offer: TjekOffer): string[] {
+  return [
+    offer.business?.publicId,
+    offer.businessPublicId,
+    offer.businessId,
+  ]
+    .filter((value): value is string | number => value !== undefined)
+    .map(sourceId);
+}
+
+function publicationIdsFromOffer(offer: TjekOffer): string[] {
+  return [offer.publicationPublicId, offer.publication?.publicId]
+    .filter((value): value is string | number => value !== undefined)
+    .map(sourceId);
 }
 
 function amountText(value: number): string {
@@ -436,6 +510,20 @@ function amountText(value: number): string {
 function amountFromMechanic(text: string): number | undefined {
   const match = text.match(/(\d[\d\s.,]*)\s*kr\b/i);
   return match ? parseAmount(match[1]) : undefined;
+}
+
+function memberPriceText(offer: TjekOffer): string | undefined {
+  return (
+    sourceText(offer.membershipPriceText) ?? sourceText(offer.memberPriceText)
+  );
+}
+
+function memberPriceAmount(offer: TjekOffer): number | undefined {
+  const text = memberPriceText(offer);
+  return (
+    parseAmount(offer.membershipPrice) ??
+    (text ? amountFromMechanic(text) : undefined)
+  );
 }
 
 function priceUnitFrom(...values: Array<string | null | undefined>): Offer["priceUnit"] {
@@ -454,24 +542,38 @@ function priceUnitFrom(...values: Array<string | null | undefined>): Offer["pric
 
 function mechanicText(offer: TjekOffer): string {
   const direct =
+    memberPriceText(offer) ??
     sourceText(offer.priceText) ??
     sourceText(offer.mechanicText) ??
-    sourceText(offer.offerText) ??
-    sourceText(offer.membershipPriceText) ??
-    sourceText(offer.memberPriceText) ??
-    sourceText(offer.description);
+    sourceText(offer.offerText);
   if (direct) {
     return direct;
   }
 
   const priceUnit = priceUnitFrom(offer.baseUnit, offer.unitSymbol, offer.priceUnit);
-  const price =
-    parseAmount(offer.membershipPrice) ??
-    parseAmount(offer.fromPrice) ??
-    parseAmount(offer.price) ??
-    parseAmount(offer.unitPrice);
-  if (price !== undefined) {
-    return `${amountText(price)} kr${priceUnit ? `/${priceUnit}` : ""}`;
+  const memberPrice = memberPriceAmount(offer);
+  if (memberPrice !== undefined) {
+    const sourceUnitPrice = parseAmount(offer.unitPrice);
+    const priceIsPerUnit =
+      (priceUnit === "kg" || priceUnit === "l") &&
+      sourceUnitPrice === memberPrice;
+    return `${amountText(memberPrice)} kr${priceIsPerUnit ? `/${priceUnit}` : ""}`;
+  }
+
+  const productPrice =
+    parseAmount(offer.fromPrice) ?? parseAmount(offer.price);
+  if (productPrice !== undefined) {
+    return `${amountText(productPrice)} kr`;
+  }
+
+  const unitPrice = parseAmount(offer.unitPrice);
+  if (unitPrice !== undefined) {
+    return `${amountText(unitPrice)} kr${priceUnit ? `/${priceUnit}` : ""}`;
+  }
+
+  const description = sourceText(offer.description);
+  if (description) {
+    return description;
   }
   throw new Error(`Tjek-erbjudandet "${offer.name}" saknar en visbar erbjudandetext.`);
 }
@@ -537,26 +639,57 @@ function packageSize(offer: TjekOffer): string | undefined {
   const sizeTo = parseAmount(offer.unitSizeTo);
   if (sizeFrom !== undefined && sizeFrom === sizeTo) {
     const unit = sourceText(offer.unitSymbol);
+    if (
+      unit &&
+      priceUnitFrom(unit) !== undefined &&
+      priceUnitFrom(unit) === priceUnitFrom(offer.baseUnit)
+    ) {
+      return undefined;
+    }
     return `${amountText(sizeFrom)}${unit ? ` ${unit}` : ""}`;
   }
   return undefined;
 }
 
-function normalizedOffer(
+function limitText(offer: TjekOffer): string | undefined {
+  const direct = sourceText(offer.limitText);
+  if (direct) {
+    return direct;
+  }
+  const match = offer.description?.match(
+    /\bmax\s+(\d+)\s*(?:(?:st\s*\/\s*)|(?:per\s+))?hushåll\b/i,
+  );
+  return match ? `Max ${match[1]} per hushåll` : undefined;
+}
+
+export function normalizeTjekOffer(
   store: Store,
   chain: Chain,
   sourceStoreId: string,
+  sourceBusinessId: string,
+  expectedPublicationId: string,
   offer: TjekOffer,
   runDate: string,
   weekEnd: string,
 ): Offer | undefined {
-  const linkedBusinessId = businessIdFromOffer(offer);
-  if (!linkedBusinessId) {
-    throw new Error(`Tjek-erbjudandet "${offer.name}" saknar Store-koppling.`);
+  const linkedBusinessIds = businessIdsFromOffer(offer);
+  if (linkedBusinessIds.length === 0) {
+    throw new Error(`Tjek-erbjudandet "${offer.name}" saknar varumärkeskoppling.`);
   }
-  if (linkedBusinessId !== sourceStoreId) {
+  if (linkedBusinessIds.some((businessId) => businessId !== sourceBusinessId)) {
     throw new Error(
-      `Tjek kopplade ett erbjudande till fel ${chain}-butik (${offer.name}).`,
+      `Tjek kopplade ett erbjudande till fel ${chain}-varumärke (${offer.name}).`,
+    );
+  }
+  const linkedPublicationIds = publicationIdsFromOffer(offer);
+  if (
+    linkedPublicationIds.length === 0 ||
+    linkedPublicationIds.some(
+      (publicationId) => publicationId !== expectedPublicationId,
+    )
+  ) {
+    throw new Error(
+      `Tjek kopplade ett erbjudande till fel publikation (${offer.name}).`,
     );
   }
 
@@ -605,21 +738,42 @@ function normalizedOffer(
     quantity > 1 && /(\d+)\s*(?:för|for)\s*\d+/iu.test(text)
       ? mechanicAmount
       : undefined;
+  const memberText = memberPriceText(offer);
+  const memberTextAmount = memberText
+    ? amountFromMechanic(memberText)
+    : undefined;
+  const memberPrice = parseAmount(offer.membershipPrice) ?? memberTextAmount;
   const price =
     bundlePrice ??
-    parseAmount(offer.membershipPrice) ??
+    memberPrice ??
     parseAmount(offer.fromPrice) ??
     parseAmount(offer.price) ??
     (priceUnit === "kg" || priceUnit === "l" ? undefined : mechanicAmount);
   const sourceUnitPrice = parseAmount(offer.unitPrice);
+  const memberUnitPrice =
+    parseAmount(offer.membershipPrice) ??
+    (memberTextAmount !== undefined
+      ? quantity > 1 && /(\d+)\s*(?:för|for)\s*\d+/iu.test(memberText ?? "")
+        ? memberTextAmount / quantity
+        : memberTextAmount
+      : undefined);
   const unitPrice =
-    sourceUnitPrice && sourceUnitPrice > 0
-      ? sourceUnitPrice
-      : priceUnit === "kg" || priceUnit === "l"
-        ? mechanicAmount
-        : price !== undefined
-          ? price / quantity
-          : undefined;
+    priceUnit === "kg" || priceUnit === "l"
+      ? memberTextAmount !== undefined &&
+        priceUnitFrom(memberText) === priceUnit
+        ? memberTextAmount
+        : sourceUnitPrice && sourceUnitPrice > 0
+          ? sourceUnitPrice
+          : mechanicAmount
+      : (memberPrice !== undefined && sourceUnitPrice === memberPrice
+          ? memberPrice
+          : undefined) ??
+        memberUnitPrice ??
+        (sourceUnitPrice && sourceUnitPrice > 0
+          ? sourceUnitPrice
+          : price !== undefined
+            ? price / quantity
+            : undefined);
   const regularPrice =
     parseAmount(offer.regularPrice) ??
     parseAmount(offer.ordinaryPrice) ??
@@ -633,7 +787,7 @@ function normalizedOffer(
   const comparison = comparisonPriceText(offer, unitPrice, priceUnit);
   const size = packageSize(offer);
   const image = imageUrl(offer);
-  const limit = sourceText(offer.limitText);
+  const limit = limitText(offer);
 
   return {
     id: `${normalizedKey(chain).replace(/\s+/g, "-")}:${encodeURIComponent(sourceStoreId)}:${encodeURIComponent(sourceId(offer.publicId))}`,
@@ -660,7 +814,7 @@ function normalizedOffer(
 }
 
 function requestError(status: number): string {
-  if (status === 403 || status === 429) {
+  if (status === 401 || status === 403 || status === 429) {
     return `Tjek nekade begäran (HTTP ${status}); uppdateringen avbryts utan återförsök.`;
   }
   return `Tjek svarade med HTTP ${status}.`;
@@ -675,7 +829,11 @@ async function refreshTjek(
   let requestStarted = false;
   let discoveredStores: Store[] = [];
 
-  const requestJson = async (command: [string, Record<string, unknown>], label: string): Promise<unknown> => {
+  const requestJson = async (
+    url: string,
+    init: RequestInit,
+    label: string,
+  ): Promise<unknown> => {
     if (requestStarted || throttle?.requestStarted) {
       await context.sleep(TJEK_REQUEST_DELAY_MS);
     }
@@ -683,16 +841,7 @@ async function refreshTjek(
     if (throttle) {
       throttle.requestStarted = true;
     }
-    const encodedCommand = Buffer.from(JSON.stringify(command), "utf8").toString("base64");
-    const response = await context.fetcher(TJEK_ENDPOINT, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ data: [encodedCommand] }),
-      credentials: "omit",
-    });
+    const response = await context.fetcher(url, { ...init, credentials: "omit" });
     if (!response.ok) {
       throw new Error(requestError(response.status));
     }
@@ -703,8 +852,41 @@ async function refreshTjek(
     }
   };
 
+  const requestAction = (
+    action: string,
+    parameters: Record<string, unknown>,
+    label: string,
+  ) => {
+    const encodedCommand = Buffer.from(
+      JSON.stringify([action, parameters]),
+      "utf8",
+    ).toString("base64");
+    return requestJson(
+      TJEK_ENDPOINT,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: [encodedCommand] }),
+      },
+      label,
+    );
+  };
+
+  const requestPublicationPages = (publicationId: string) =>
+    requestJson(
+      `${TJEK_PUBLICATION_PAGES_ENDPOINT}/${encodeURIComponent(publicationId)}/pages?from=1&to=20`,
+      {
+        method: "GET",
+        headers: { Accept: "application/json" },
+      },
+      "publikationssidor",
+    );
+
   try {
-    const businessesResponse = await requestJson(["businesses", {}], "butiker");
+    const businessesResponse = await requestAction("businesses", {}, "butiker");
     const businesses = parseResponse(
       TjekBusinessesResponseSchema,
       businessesResponse,
@@ -713,130 +895,189 @@ async function refreshTjek(
     const chainBusinesses = businesses.filter((business) =>
       isBusinessForChain(business, chain),
     );
-    const pinnedIds = new Set(
-      (discovery.pinStoreIds ?? []).map((id) => sourceStoreId(id, chain)),
-    );
-    const excludedIds = new Set(
-      (discovery.excludeStoreIds ?? []).map((id) => sourceStoreId(id, chain)),
-    );
-    const availableIds = new Set(
-      chainBusinesses.map((business) => sourceId(business.publicId)),
-    );
-    const missingPins = [...pinnedIds].filter((id) => !availableIds.has(id));
-    if (missingPins.length) {
+    if (chainBusinesses.length === 0) {
       throw new Error(
-        `Konfigurerade ${chain}-butiker hittades inte: ${missingPins.join(", ")}.`,
-      );
-    }
-    const matchingBusinesses = chainBusinesses.filter((business) => {
-      const id = sourceId(business.publicId);
-      const configuredCity = sourceField(business, discovery.exactCity.field);
-      const city =
-        typeof configuredCity === "string" && configuredCity.trim()
-          ? configuredCity.trim()
-          : businessCity(business);
-      return (
-        !excludedIds.has(id) &&
-        (pinnedIds.has(id) ||
-          city === discovery.exactCity.value)
-      );
-    });
-    if (matchingBusinesses.length === 0) {
-      throw new Error(
-        `Inga ${chain}-butiker hittades för ${discovery.exactCity.value}.`,
+        `Tjek saknar ett verifierat ${chain}-varumärke för butiksupptäckt.`,
       );
     }
 
-    discoveredStores = matchingBusinesses.map((business) => {
-      const configuredCity = sourceField(business, discovery.exactCity.field);
-      const city =
-        (typeof configuredCity === "string" && configuredCity.trim()) ||
-        businessCity(business) ||
-        discovery.exactCity.value;
-      return storeFromBusiness(business, chain, city);
-    });
-    const uniqueStores = new Map(
-      discoveredStores.map((store) => [store.id, store]),
+    const sourceStoresById = new Map<string, TjekStore>();
+    const sourceBusinessIdsByStoreId = new Map<string, string>();
+    for (const business of chainBusinesses) {
+      const businessId = sourceId(business.publicId);
+      const storesResponse = await requestAction(
+        "stores",
+        {
+          businessId,
+          pagination: { offset: 0, limit: TJEK_STORE_LIMIT },
+        },
+        "butiker",
+      );
+      const sourceStores = parseResponse(
+        TjekStoresResponseSchema,
+        storesResponse,
+        "butiker",
+      ).value.data;
+      if (sourceStores.length === TJEK_STORE_LIMIT) {
+        throw new Error(
+          `Tjek-listan över ${chain}-butiker nådde den verifierade gränsen på ${TJEK_STORE_LIMIT} poster.`,
+        );
+      }
+
+      for (const store of sourceStores) {
+        const id = sourceId(store.id);
+        const previous = sourceStoresById.get(id);
+        if (
+          previous &&
+          (previous.name !== store.name ||
+            previous.city !== store.city ||
+            previous.streetAddress !== store.streetAddress)
+        ) {
+          throw new Error(`Tjek returnerade motstridiga data för Store ${id}.`);
+        }
+        sourceStoresById.set(id, store);
+        const previousBusinessId = sourceBusinessIdsByStoreId.get(id);
+        if (previousBusinessId && previousBusinessId !== businessId) {
+          throw new Error(
+            `Tjek kopplade Store ${id} till flera ${chain}-varumärken.`,
+          );
+        }
+        sourceBusinessIdsByStoreId.set(id, businessId);
+      }
+    }
+
+    const locationStores = discoverStores(
+      [...sourceStoresById.values()],
+      {
+        ...discovery,
+        exactCity: {
+          field: "city",
+          value: discovery.exactCity.value,
+        },
+      },
+      chain,
+      (store) => sourceId(store.id),
     );
-    if (uniqueStores.size !== discoveredStores.length) {
-      throw new Error("Tjeks butikslista innehåller dubbla Store ids.");
+    if (locationStores.some((store) => !store.name.trim())) {
+      throw new Error(
+        `Tjek returnerade en ${chain}-butik utan visningsnamn i ${discovery.exactCity.value}.`,
+      );
+    }
+    discoveredStores = locationStores.map((store) =>
+      storeFromTjekStore(store, chain),
+    );
+    if (discoveredStores.length === 0) {
+      throw new Error(
+        `Inga ${chain}-butiker återstod i ${discovery.exactCity.value} efter Store-överskrivningar.`,
+      );
+    }
+    if (chain !== "Coop") {
+      throw new Error(
+        `Tjek-flödet efter Store-discovery är ännu inte verifierat för ${chain}; inga erbjudanden hämtades.`,
+      );
     }
 
     const offers: Offer[] = [];
-    const offersByStore = new Map<string, number>();
-    for (const business of matchingBusinesses) {
-      const sourceIdForStore = sourceId(business.publicId);
-      const store = uniqueStores.get(`${chain}:${sourceIdForStore}`);
-      if (!store) {
-        throw new Error(`Tjek-butiken kunde inte kopplas till en ${chain} Store.`);
+    for (const sourceStore of locationStores) {
+      const sourceStoreId = sourceId(sourceStore.id);
+      const store = storeFromTjekStore(sourceStore, chain);
+      const businessId = sourceBusinessIdsByStoreId.get(sourceStoreId);
+      if (!businessId) {
+        throw new Error(`Tjek saknar varumärkeskoppling för Store ${sourceStoreId}.`);
+      }
+      if (!sourceStore.coordinates) {
+        throw new Error(
+          `Tjek-Store ${sourceStoreId} saknar koordinater för publikationssökning.`,
+        );
       }
 
-      const seenOfferIds = new Set<string>();
-      let expectedLastPage = false;
-      let activeOfferCount = 0;
-      for (let page = 0; page < TJEK_MAX_PAGES; page += 1) {
-        const offset = page * TJEK_PAGE_SIZE;
-        const offersResponse = await requestJson(
-          [
-            "offers",
-            {
-              hideUpcoming: false,
-              pagination: { limit: TJEK_PAGE_SIZE, offset },
-              sort: ["score_desc"],
-              businessIds: [sourceIdForStore],
-            },
-          ],
-          "erbjudanden",
+      const frontsResponse = await requestAction(
+        "fronts",
+        {
+          businessIds: [businessId],
+          localBusinessIds: [sourceStoreId],
+          coordinates: {
+            latitude: sourceStore.coordinates.latitude,
+            longitude: sourceStore.coordinates.longitude,
+          },
+        },
+        "publikationer",
+      );
+      const publications = publicationsFromResponse(
+        frontsResponse,
+        "publikationer",
+        businessId,
+      );
+      const currentPublications = publications
+        .map(publicationDetails)
+        .filter(
+          (publication) =>
+            publication.validTo >= context.runDate &&
+            publication.validFrom <= context.offerWeekEnd,
         );
-        const sourceOffers = parseResponse(
-          TjekOffersResponseSchema,
-          offersResponse,
-          "erbjudanden",
-        ).value.data;
+      if (currentPublications.length === 0) {
+        throw new Error(
+          `Tjek returnerade ingen verifierad aktuell publikation för Store ${sourceStoreId}.`,
+        );
+      }
 
-        for (const sourceOffer of sourceOffers) {
-          const offerId = sourceId(sourceOffer.publicId);
-          if (seenOfferIds.has(offerId)) {
-            continue;
+      for (const publication of currentPublications) {
+        const pagesResponse = await requestPublicationPages(publication.id);
+        const pages = parseResponse(
+          TjekPublicationPagesResponseSchema,
+          pagesResponse,
+          "publikationssidor",
+        ).pages;
+        const offerIds = new Set(
+          Object.values(pages).flatMap((page) =>
+            page.hotspots?.map((hotspot) => sourceId(hotspot.offer.id)) ?? [],
+          ),
+        );
+        if (offerIds.size === 0) {
+          throw new Error(
+            `Tjek-publikationen ${publication.id} saknar verifierade Offer-ID:n.`,
+          );
+        }
+
+        for (const offerId of offerIds) {
+          const offerResponse = await requestAction(
+            "offer",
+            { publicId: offerId },
+            "erbjudanden",
+          );
+          const sourceOffer = parseResponse(
+            TjekOfferResponseSchema,
+            offerResponse,
+            `erbjudande ${offerId}`,
+          ).value;
+          if (sourceId(sourceOffer.publicId) !== offerId) {
+            throw new Error(
+              `Tjek returnerade fel Offer-ID för publikationen ${publication.id}.`,
+            );
           }
-          seenOfferIds.add(offerId);
-          const offer = normalizedOffer(
+          const offer = normalizeTjekOffer(
             store,
             chain,
-            sourceIdForStore,
+            sourceStoreId,
+            businessId,
+            publication.id,
             sourceOffer,
             context.runDate,
             context.offerWeekEnd,
           );
           if (offer) {
             offers.push(offer);
-            activeOfferCount += 1;
           }
         }
-
-        if (sourceOffers.length < TJEK_PAGE_SIZE) {
-          expectedLastPage = true;
-          break;
-        }
       }
-      if (!expectedLastPage) {
-        throw new Error(`Tjek-pagineringen för ${store.name} saknar sista sidan.`);
-      }
-      offersByStore.set(store.id, activeOfferCount);
+    }
+    if (offers.length === 0) {
+      throw new Error(
+        `Tjek returnerade inga aktuella erbjudanden för ${chain} i ${discovery.exactCity.value}.`,
+      );
     }
 
-    const emptyStores = discoveredStores
-      .filter((store) => offersByStore.get(store.id) === 0)
-      .map((store) => store.name);
-    const warning =
-      offers.length > 0 && emptyStores.length > 0
-        ? `Inga aktuella erbjudanden hämtades från: ${emptyStores.join(", ")}.`
-        : undefined;
-    return {
-      stores: discoveredStores,
-      offers,
-      ...(warning ? { warning } : {}),
-    };
+    return { stores: discoveredStores, offers };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Okänt fel.";
     throw new ChainRefreshError(message.slice(0, 240), discoveredStores);

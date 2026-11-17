@@ -2,6 +2,7 @@
 
 Type: research
 Status: resolved
+Implementation status: partial (Coop publication/Offer sample verified; full flow blocked)
 Blocked by:
 Parent: ../map.md
 
@@ -17,3 +18,31 @@ Do third-party aggregators or flyer platforms (for example Matpriskollen, eTilbu
 - Neither source showed a freshness SLA or a clearly licensed public API, so scheduled reuse has material ToS/content-rights and endpoint-breakage risks.
 - OSS examples show Matpriskollen, Tjek and all three Chain fetch methods; the chain-specific repo uses Uppsala Stores, and the ICA example now requires a browser upload.
 - See [third-party offer source research](../research/third-party-offer-sources.md).
+
+## Current Tjek adapter status (2026-11-17)
+
+The research finding remains resolved, but it does not establish a stable
+runtime contract. The adapter now queries the documented `stores` action and
+validates Store records. An authorized anonymous request for Coop brand
+`63eeoD` returned 621 records, including five Linköping Coop Stores. The
+sanitized fixture `stores-coop-63eeoD.json` retains one Store row.
+
+The first anonymous `businesses` request returned HTTP 401; an exact
+user-authorized retry returned HTTP 200 with 188 global brand entries. An
+authorized exact retry of a Store-specific `fronts` request returned the
+current publication `NV_F04Kb`, labelled “Coop Drottninggatan Linköping” and
+valid 2026-11-16 through 2026-11-22. Its publication pages exposed Offer
+hotspots. A bulk `offers` lookup returned an empty data array for known IDs,
+but individual `offer` lookups returned structured records identifying both
+the Coop brand and publication. Three sanitized individual Offer fixtures
+now cover sample normalization.
+
+The observed `{key, status, value: [{category, business, publications}]}` shape
+is now represented in a sanitized fixture; the key, status and category
+values are redacted/placeholders. The adapter verifies each front's business
+ID against the brand ID associated with its Store before flattening nested
+publications. Only one of five Linköping Stores and a small set of Offer IDs
+were checked; complete coverage, other Coop Stores, ICA and Hemköp remain
+unverified. The adapter fails closed on unsupported or inconsistent
+responses. Keep the existing source configuration unchanged; Tjek remains a
+partial, not complete, live Offer source.

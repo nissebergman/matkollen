@@ -88,17 +88,18 @@ The app never calls the Chains live. A scheduled job fetches each Chain's Offers
 - The Snapshot job runs as a GitHub Actions workflow. It runs on a daily cron and can also be started by hand (`workflow_dispatch`).
 - The cron runs once a day at around 05:00 UTC, inside Hemköp's stated 04:00–08:45 UTC visiting window. Monday's run picks up the new Offer Week.
 - The job commits the updated Snapshot files to the repository, and the SPA and Snapshots are deployed together as static files to GitHub Pages.
-- No secrets are stored. ICA's anonymous public access token is fetched at runtime on every run. Coop is read through Tjek, which needs no key. Coop's page-embedded subscription key is not copied into the project.
+- No secrets are stored. ICA's anonymous public access token is fetched at runtime on every run. Coop remains configured to use Tjek's consumer endpoint anonymously. One authorized Store-specific `fronts` retry returned a Coop publication; its viewer pages and sample individual Offer lookups also succeeded. The observed nested `fronts` envelope is captured in a sanitized fixture, but complete coverage across Linköping Stores remains unverified. Coop's page-embedded subscription key is not copied into the project.
 
 ### Source per Chain (resolves ticket 05)
 
 | Chain | Primary source | Fallback |
 |---|---|---|
-| ICA | First-party: the anonymous-token Store search, then each Store's public offers page and its embedded weekly-Offer state | Tjek/eReklamblad |
-| Coop | Tjek/eReklamblad's structured Offers for Coop's Linköping Stores. This avoids parsing Coop's PDF flyers, which are the only first-party per-Store source | Coop flyer PDF parsing, only if Tjek fails for a long time |
-| Hemköp | First-party: the Axfood Store listing, then the per-Store paginated campaign JSON | Tjek/eReklamblad |
+| ICA | First-party: the anonymous-token Store search, then each Store's public offers page and its embedded weekly-Offer state | Tjek/eReklamblad (Store/publication/Offer flow unverified for ICA) |
+| Coop | Target: Tjek/eReklamblad structured Offers for Coop's Linköping Stores. One Store/publication/sample Offer path is verified; complete response shape and Store coverage remain blocked | Coop flyer PDF parsing, only if Tjek fails for a long time |
+| Hemköp | First-party: the Axfood Store listing, then the per-Store paginated campaign JSON | Tjek/eReklamblad (Store/publication/Offer flow unverified for Hemköp) |
 
 - Each source is implemented as a **Chain adapter** with one shared interface. Given a Location config, it discovers that Chain's Stores and returns their Offers in the normalised Offer shape. A Location config picks which adapter each Chain uses, so moving to a fallback is a configuration change.
+- **Current Tjek compatibility (2026-11-17):** Tjek remains selected in the existing configuration. The shared adapter uses the observed `stores` action and one Coop Store-list response (621 records, including five Linköping Stores). An authorized exact Store-specific `fronts` retry, a publication-pages GET and sample individual Offer lookups succeeded. The observed `{key, status, value: [{business, publications}]}` shape is represented in a sanitized fixture, and the adapter checks front business IDs against the Store's brand ID. Only one of five Linköping Stores plus a small Offer sample was checked; complete live coverage remains blocked. See [ticket 04](04-third-party-offer-sources.md) and the [Tjek source note](../../../docs/sources/tjek-ereklamblad.md); do not change the configured source as part of this work.
 - ToS and robots risk is accepted for this personal household tool and must be recorded with each adapter. ICA's offers page is an undocumented extraction surface. Hemköp's robots.txt disallows the campaign query route. Tjek's API is customer-only and its consumer endpoint is undocumented. The job must not disguise itself or work around blocks. When a source blocks the job, that Chain fails and is reported.
 - Politeness rules: requests to a source are sequential, never parallel. There is at least a 10-second delay between Hemköp requests, and a small fixed delay between requests to other sources. Back off and fail the Chain on 403/429 responses or repeated errors. Pagination is always followed until the source reports the last page.
 
@@ -276,5 +277,5 @@ The app never calls the Chains live. A scheduled job fetches each Chain's Offers
 
 - This spec settles open tickets 05 (source per Chain), 06 (Offer data model), 07 (stack and hosting) and the map's "Not yet specified" items: category taxonomy, refresh cadence, adding a Location and source breakage. Ticket 08's filter-view prototype can still refine the visual layout of rows and filter controls within the behaviour fixed here.
 - "Snapshot" is used here as a new domain term: one Location's published, normalised set of Stores and current Offers plus per-Chain freshness status. It should be added to the glossary.
-- The research found that a public open-source project started getting 403 from scripted ICA requests on 2026-10-28, while our low-rate probes on 2026-11-17 succeeded. ICA is therefore the Chain most likely to need its Tjek fallback early. The adapter seam and configuration-only switch exist for exactly this case.
+- The research found that a public open-source project started getting 403 from scripted ICA requests on 2026-10-28, while our low-rate probes on 2026-11-17 succeeded. ICA is therefore the Chain most likely to need its Tjek fallback early. The configuration seam exists; the Coop sample does not verify ICA's Store-specific publication and Offer-ID flow.
 - Research details (endpoints, sample fields, Store ids, citations) are in `../research/`. Implementers should read them before building each adapter but should not hard-code the Store lists found there, because Stores are discovered at runtime.

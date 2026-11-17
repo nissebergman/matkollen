@@ -170,7 +170,9 @@ describe("Offers app", () => {
     expect(
       screen.queryByRole("heading", { name: "Utgånget ICA-exempel" }),
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("img", { name: "Ingen produktbild" })).toBeInTheDocument();
+    expect(
+      screen.getAllByRole("img", { name: "Ingen produktbild" }),
+    ).toHaveLength(3);
     expect(screen.getByText("Max 2")).toBeVisible();
     expect(screen.getAllByText(/t\.o\.m\./i)).toHaveLength(3);
     expect(screen.getByText(/senast uppdaterad/i)).toBeVisible();
@@ -454,13 +456,17 @@ describe("Offers app", () => {
     }
   });
 
-  it("shows a product image when the Snapshot provides one", async () => {
+  it("does not load a third-party product image from the Snapshot", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
     const snapshotWithImage = JSON.parse(JSON.stringify(snapshotFixture));
     snapshotWithImage.offers[0].imageUrl =
       "https://assets.axfood.se/image/fixture-product.jpg";
-    vi.stubGlobal("fetch", async () => Response.json(snapshotWithImage));
+    const requestedUrls: string[] = [];
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL) => {
+      requestedUrls.push(String(input));
+      return Response.json(snapshotWithImage);
+    });
 
     render(<App />);
     await act(async () => {
@@ -470,8 +476,12 @@ describe("Offers app", () => {
     });
 
     expect(
-      screen.getByRole("img", { name: "Krossade tomater" }),
-    ).toBeInTheDocument();
+      screen.getAllByRole("img", { name: "Ingen produktbild" }),
+    ).toHaveLength(3);
+    expect(
+      screen.queryByRole("img", { name: "Krossade tomater" }),
+    ).not.toBeInTheDocument();
+    expect(requestedUrls).toEqual(["/snapshots/linkoping.json"]);
   });
 
   it("shows a clear error for an unsupported Snapshot version", async () => {

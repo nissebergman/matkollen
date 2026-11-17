@@ -1,0 +1,24 @@
+{
+  "pages": {
+    "1": {
+      "hotspots": [
+        {
+          "offer": {
+            "id": "U-I8EtMIBykwiBusR4IQ1"
+          }
+        },
+        {
+          "offer": {
+            "id": "if-FEwMj9_SuqzsDZ7fOj"
+          }
+        },
+        {
+          "offer": {
+            "id": "1pXJA6RFdEjXUMq444vlS"
+          }
+        }
+      ],
+      "decorations": []
+    }
+  }
+}

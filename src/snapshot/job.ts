@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { mapHemkopCategory } from "../domain/categories";
+import { stockholmDate } from "../domain/date";
 import {
   CHAINS,
   type Offer,
@@ -24,6 +25,7 @@ import {
   createTjekSourceAdapter,
   TJEK_SOURCE,
 } from "./tjek";
+import { discoverStores } from "./store-discovery";
 import {
   ChainRefreshError,
   buildSnapshot,
@@ -36,7 +38,6 @@ import {
 export const HEMKOP_REQUEST_DELAY_MS = 10_000;
 const HEMKOP_SOURCE = "hemkop-first-party";
 const HEMKOP_ORIGIN = "https://www.hemkop.se";
-const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
 export interface HemkopLocation {
   id: string;
@@ -221,17 +222,6 @@ function parseResponse<T>(schema: z.ZodType<T>, value: unknown, label: string): 
     throw new Error(`Ogiltigt svar från Hemköp (${label}): ${describeValidationError(result.error)}.`);
   }
   return result.data;
-}
-
-function stockholmDate(date: Date): string {
-  const parts = new Intl.DateTimeFormat("sv-SE", {
-    timeZone: STOCKHOLM_TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  const value = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
-  return `${value.year}-${value.month}-${value.day}`;
 }
 
 function isIsoDate(value: string): boolean {
@@ -422,63 +412,6 @@ function storeFromSource(store: HemkopStore): Store {
   };
 }
 
-function unwrapStoreIdOverride(configuredId: string): string {
-  const prefix = "Hemköp:";
-  return configuredId.startsWith(prefix) ? configuredId.slice(prefix.length) : configuredId;
-}
-
-function sourceField(value: unknown, path: string): unknown {
-  let current = value;
-  for (const part of path.split(".")) {
-    if (
-      typeof current !== "object" ||
-      current === null ||
-      !Object.hasOwn(current, part)
-    ) {
-      return undefined;
-    }
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-}
-
-function discoverHemkopStores(
-  stores: HemkopStore[],
-  discovery: StoreDiscoveryConfig,
-): HemkopStore[] {
-  const pinIds = new Set((discovery.pinStoreIds ?? []).map(unwrapStoreIdOverride));
-  const excludeIds = new Set(
-    (discovery.excludeStoreIds ?? []).map(unwrapStoreIdOverride),
-  );
-  const availableIds = new Set(stores.map((store) => String(store.storeId)));
-  const missingPins = [...pinIds].filter((id) => !availableIds.has(id));
-  if (missingPins.length) {
-    throw new Error(
-      `Konfigurerade Hemköp-butiker hittades inte: ${missingPins.join(", ")}.`,
-    );
-  }
-
-  const matchingCityStores = stores.filter(
-    (store) =>
-      sourceField(store, discovery.exactCity.field) === discovery.exactCity.value,
-  );
-  if (matchingCityStores.length === 0 && pinIds.size === 0) {
-    throw new Error(
-      `Inga Hemköp-butiker hittades för ${discovery.exactCity.value}.`,
-    );
-  }
-
-  const selected = stores.filter((store) => {
-    const id = String(store.storeId);
-    return (
-      !excludeIds.has(id) &&
-      (pinIds.has(id) ||
-        sourceField(store, discovery.exactCity.field) === discovery.exactCity.value)
-    );
-  });
-  return selected;
-}
-
 function stableOfferId(
   storeId: string,
   product: HemkopProduct,
@@ -654,7 +587,12 @@ async function refreshHemkop(
     if (!discovery) {
       throw new Error("Hemköp saknar konfigurerade kriterier för butiksupptäckt.");
     }
-    const matchingStores = discoverHemkopStores(sourceStores, discovery);
+    const matchingStores = discoverStores(
+      sourceStores,
+      discovery,
+      "Hemköp",
+      (store) => String(store.storeId),
+    );
     const mappedStores = matchingStores.map(storeFromSource);
     discoveredStores = [
       ...new Map(mappedStores.map((store) => [store.id, store])).values(),

@@ -1,0 +1,19 @@
+{
+  "key": "[redacted]",
+  "status": "success",
+  "value": {
+    "publicId": "1pXJA6RFdEjXUMq444vlS",
+    "name": "Kexchoklad",
+    "unitPrice": 125,
+    "baseUnit": "kilogram",
+    "price": 15,
+    "validFrom": "2026-11-16",
+    "validUntil": "2026-11-22",
+    "businessPublicId": "63eeoD",
+    "publicationPublicId": "NV_F04Kb",
+    "unitSymbol": "g",
+    "unitSizeFrom": 60,
+    "unitSizeTo": 60,
+    "departmentSlug": "snacks-and-candies"
+  }
+}

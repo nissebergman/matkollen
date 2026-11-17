@@ -1,0 +1,20 @@
+{
+  "key": "[redacted]",
+  "status": "success",
+  "value": {
+    "publicId": "U-I8EtMIBykwiBusR4IQ1",
+    "name": "Färdigkokt julskinka",
+    "description": "Max 2 per hushåll. Ca 1800-3200 g.",
+    "unitPrice": 44.9,
+    "baseUnit": "kilogram",
+    "membershipPrice": 44.9,
+    "validFrom": "2026-11-16",
+    "validUntil": "2026-11-22",
+    "businessPublicId": "63eeoD",
+    "publicationPublicId": "NV_F04Kb",
+    "unitSymbol": "kg",
+    "unitSizeFrom": 1,
+    "unitSizeTo": 1,
+    "departmentSlug": "cold-cuts"
+  }
+}

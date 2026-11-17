@@ -1,0 +1,20 @@
+{
+  "key": "[redacted]",
+  "status": "[redacted]",
+  "value": [
+    {
+      "category": "[redacted]",
+      "business": {
+        "publicId": "63eeoD"
+      },
+      "publications": [
+        {
+          "id": "NV_F04Kb",
+          "label": "Coop Drottninggatan Linköping",
+          "validFrom": "2026-11-15T23:00:00.000Z",
+          "validUntil": "2026-11-22T23:00:00.000Z"
+        }
+      ]
+    }
+  ]
+}

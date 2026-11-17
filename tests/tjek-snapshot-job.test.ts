@@ -17,6 +17,87 @@ const linkopingLocation = LOCATION_REGISTRY.locations.find(
 const tjekBusinesses = JSON.parse(
   readFileSync(resolve(tjekRoot, "businesses.json"), "utf8"),
 );
+const tjekCoopBrandExcerpt = JSON.parse(
+  readFileSync(resolve(tjekRoot, "businesses-coop-brand.json"), "utf8"),
+);
+const tjekCoopStoreExcerpt = JSON.parse(
+  readFileSync(resolve(tjekRoot, "stores-coop-63eeoD.json"), "utf8"),
+);
+const tjekCoopFronts = JSON.parse(
+  readFileSync(resolve(tjekRoot, "fronts-coop-drottninggatan.json"), "utf8"),
+);
+const tjekCoopPublicationPages = JSON.parse(
+  readFileSync(
+    resolve(tjekRoot, "publication-pages-coop-NV_F04Kb.json"),
+    "utf8",
+  ),
+);
+const tjekCoopOfferLookups = new Map(
+  [
+    "U-I8EtMIBykwiBusR4IQ1",
+    "if-FEwMj9_SuqzsDZ7fOj",
+    "1pXJA6RFdEjXUMq444vlS",
+  ].map((publicId) => [
+    publicId,
+    JSON.parse(
+      readFileSync(resolve(tjekRoot, `offer-${publicId}.json`), "utf8"),
+    ),
+  ]),
+);
+const tjekStoreResponses = new Map<string, unknown>([
+  ["63eeoD", tjekCoopStoreExcerpt],
+  [
+    "ica-berga",
+    {
+      key: "synthetic",
+      status: "synthetic",
+      value: {
+        data: [
+          {
+            id: "ica-berga",
+            name: "ICA Supermarket Berga Centrum",
+            city: "Linköping",
+            streetAddress: "Berga centrum",
+          },
+        ],
+      },
+    },
+  ],
+  [
+    "hemkop-lucullus",
+    {
+      key: "synthetic",
+      status: "synthetic",
+      value: {
+        data: [
+          {
+            id: "hemkop-lucullus",
+            name: "Hemköp Linköping Lucullus",
+            city: "Linköping",
+            streetAddress: "Stora Torget 5",
+          },
+        ],
+      },
+    },
+  ],
+  [
+    "ica-norrkoping",
+    {
+      key: "synthetic",
+      status: "synthetic",
+      value: {
+        data: [
+          {
+            id: "ica-norrkoping",
+            name: "ICA Supermarket Norrköping",
+            city: "Norrköping",
+            streetAddress: "Testgatan 1",
+          },
+        ],
+      },
+    },
+  ],
+]);
 const tjekOffers = new Map<string, unknown[]>([
   [
     "ica-berga",
@@ -81,15 +162,28 @@ function fixtureFetcher(
   options: {
     businesses?: unknown;
     offers?: Map<string, unknown[]>;
+    stores?: Map<string, unknown>;
+    fronts?: unknown;
+    frontsStatus?: number;
+    publicationPages?: unknown;
+    offerLookups?: Map<string, unknown>;
     tjekStatus?: number;
   } = {},
 ) {
   const tjekCommands: TjekCommand[] = [];
-  const requests: Array<{ hostname: string; pathname: string }> = [];
+  const requests: Array<{
+    hostname: string;
+    pathname: string;
+    search: string;
+    at: number;
+    headers: Headers;
+    credentials?: RequestCredentials;
+  }> = [];
   let activeRequests = 0;
   let maxConcurrentRequests = 0;
   const sourceBusinesses = options.businesses ?? tjekBusinesses;
   const sourceOffers = options.offers ?? tjekOffers;
+  const sourceStores = options.stores ?? tjekStoreResponses;
 
   const fetcher: typeof fetch = async (input, init) => {
     activeRequests += 1;
@@ -97,7 +191,20 @@ function fixtureFetcher(
     try {
       await Promise.resolve();
       const url = new URL(String(input));
-      requests.push({ hostname: url.hostname, pathname: url.pathname });
+      requests.push({
+        hostname: url.hostname,
+        pathname: url.pathname,
+        search: url.search,
+        at: now(),
+        headers: new Headers(init?.headers),
+        credentials: init?.credentials,
+      });
+
+      if (url.hostname === "publication-viewer.tjek.com") {
+        return options.publicationPages === undefined
+          ? new Response("No recorded publication fixture", { status: 404 })
+          : Response.json(options.publicationPages);
+      }
 
       if (url.hostname === "ereklamblad.se") {
         const body = JSON.parse(String(init?.body)) as { data: string[] };
@@ -118,6 +225,33 @@ function fixtureFetcher(
         }
         if (action === "businesses") {
           return Response.json(sourceBusinesses);
+        }
+        if (action === "stores") {
+          const businessId = String(parameters.businessId ?? "");
+          return Response.json(
+            sourceStores.get(businessId) ?? {
+              key: "synthetic",
+              status: "synthetic",
+              value: { data: [] },
+            },
+          );
+        }
+        if (action === "fronts") {
+          if (options.frontsStatus !== undefined) {
+            return new Response("Tjek fronts fixture denial", {
+              status: options.frontsStatus,
+            });
+          }
+          return options.fronts === undefined
+            ? new Response("No recorded Tjek fronts fixture", { status: 404 })
+            : Response.json(options.fronts);
+        }
+        if (action === "offer") {
+          const publicId = String(parameters.publicId ?? "");
+          const offer = options.offerLookups?.get(publicId);
+          return offer === undefined
+            ? new Response("No recorded Tjek Offer fixture", { status: 404 })
+            : Response.json(offer);
         }
         if (action === "offers") {
           const businessId = String(
@@ -182,7 +316,406 @@ function fixtureFetcher(
 }
 
 describe("Tjek Snapshot adapter", () => {
-  it("normalizes Tjek Stores and Offers for ICA and Hemköp through the shared Snapshot contract", async () => {
+  it("discovers a Coop publication and normalizes its structured Offers", async () => {
+    let elapsed = 0;
+    const replay = fixtureFetcher(() => elapsed, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", tjekCoopStoreExcerpt]]),
+      fronts: tjekCoopFronts,
+      publicationPages: tjekCoopPublicationPages,
+      offerLookups: tjekCoopOfferLookups,
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async (milliseconds) => {
+        elapsed += milliseconds;
+      },
+    });
+
+    expect(snapshot.chains).toContainEqual(
+      expect.objectContaining({
+        chain: "Coop",
+        source: "coop-tjek",
+        status: "ok",
+      }),
+    );
+    expect(snapshot.stores.filter((store) => store.chain === "Coop")).toMatchObject([
+      {
+        id: "Coop:lSegmZB4MZVpS_3lKyiRv",
+        chain: "Coop",
+        name: "Coop Drottninggatan Linköping",
+        address: "Drottninggatan 23, Linköping",
+      },
+    ]);
+    const offersByName = new Map(
+      snapshot.offers
+        .filter((offer) => offer.chain === "Coop")
+        .map((offer) => [offer.name, offer]),
+    );
+    expect([...offersByName.keys()]).toEqual([
+      "Färdigkokt julskinka",
+      "Snacktomater",
+      "Kexchoklad",
+    ]);
+    expect(offersByName.get("Färdigkokt julskinka")).toMatchObject({
+      storeId: "Coop:lSegmZB4MZVpS_3lKyiRv",
+      mechanicText: "44,9 kr/kg",
+      category: "Kött & chark",
+      validFrom: "2026-11-16",
+      validTo: "2026-11-22",
+      price: 44.9,
+      unitPrice: 44.9,
+      priceUnit: "kg",
+      limitText: "Max 2 per hushåll",
+    });
+    expect(offersByName.get("Färdigkokt julskinka")).not.toHaveProperty("packageSize");
+    expect(offersByName.get("Snacktomater")).toMatchObject({
+      mechanicText: "29 kr",
+      category: "Frukt & grönt",
+      packageSize: "400 g",
+      price: 29,
+      unitPrice: 72.5,
+      priceUnit: "kg",
+      comparisonPriceText: "72,5 kr/kg",
+    });
+    expect(offersByName.get("Kexchoklad")).toMatchObject({
+      mechanicText: "15 kr",
+      category: "Godis & snacks",
+      packageSize: "60 g",
+      price: 15,
+      unitPrice: 125,
+      priceUnit: "kg",
+      comparisonPriceText: "125 kr/kg",
+    });
+    expect(replay.tjekCommands.map(({ action }) => action)).toEqual([
+      "businesses",
+      "stores",
+      "fronts",
+      "offer",
+      "offer",
+      "offer",
+    ]);
+    expect(replay.tjekCommands[1]?.parameters).toEqual({
+      businessId: "63eeoD",
+      pagination: { offset: 0, limit: 3000 },
+    });
+    expect(replay.tjekCommands[2]?.parameters).toEqual({
+      businessIds: ["63eeoD"],
+      localBusinessIds: ["lSegmZB4MZVpS_3lKyiRv"],
+      coordinates: { latitude: 58.4043977, longitude: 15.6242393 },
+    });
+    expect(
+      replay.tjekCommands
+        .filter(({ action }) => action === "offer")
+        .map(({ parameters }) => parameters.publicId),
+    ).toEqual([
+      "U-I8EtMIBykwiBusR4IQ1",
+      "if-FEwMj9_SuqzsDZ7fOj",
+      "1pXJA6RFdEjXUMq444vlS",
+    ]);
+    expect(replay.requests).toContainEqual(
+      expect.objectContaining({
+        hostname: "publication-viewer.tjek.com",
+        pathname: "/api/paged-publications/NV_F04Kb/pages",
+        search: "?from=1&to=20",
+      }),
+    );
+    expect(replay.maxConcurrentRequests).toBe(1);
+    const tjekRequests = replay.requests.filter(
+      ({ hostname }) =>
+        hostname === "ereklamblad.se" ||
+        hostname === "publication-viewer.tjek.com",
+    );
+    expect(
+      tjekRequests.every(
+        ({ credentials, headers }) =>
+          credentials === "omit" && headers.get("Authorization") === null,
+      ),
+    ).toBe(true);
+    expect(
+      tjekRequests.slice(1).every(
+        (request, index) => request.at - tjekRequests[index]!.at >= 1_000,
+      ),
+    ).toBe(true);
+  });
+
+  it("ignores a blank Store name outside the configured Location", async () => {
+    const stores = structuredClone(tjekCoopStoreExcerpt) as {
+      value: { data: Array<Record<string, unknown>> };
+    };
+    stores.value.data.push({
+      id: "synthetic-off-location-store",
+      name: "",
+      city: "Norrköping",
+      streetAddress: "Synthetic street",
+    });
+    const replay = fixtureFetcher(() => 0, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", stores]]),
+      fronts: tjekCoopFronts,
+      publicationPages: tjekCoopPublicationPages,
+      offerLookups: tjekCoopOfferLookups,
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.chains.find(({ chain }) => chain === "Coop"),
+    ).toMatchObject({ status: "ok" });
+    expect(snapshot.stores.filter(({ chain }) => chain === "Coop")).toHaveLength(1);
+  });
+
+  it("fails closed before publication lookup when a selected Store has a blank name", async () => {
+    const stores = structuredClone(tjekCoopStoreExcerpt) as {
+      value: { data: Array<Record<string, unknown>> };
+    };
+    stores.value.data[0]!.name = "";
+    const replay = fixtureFetcher(() => 0, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", stores]]),
+      fronts: tjekCoopFronts,
+      publicationPages: tjekCoopPublicationPages,
+      offerLookups: tjekCoopOfferLookups,
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.chains.find(({ chain }) => chain === "Coop"),
+    ).toMatchObject({
+      status: "failed",
+      error: expect.stringContaining("visningsnamn"),
+    });
+    expect(snapshot.stores.filter(({ chain }) => chain === "Coop")).toEqual([]);
+    expect(replay.tjekCommands.map(({ action }) => action)).toEqual([
+      "businesses",
+      "stores",
+    ]);
+  });
+
+  it.each([
+    ["Offer", "publicId", "not-the-requested-id"],
+    ["brand", "businessPublicId", "other-brand"],
+    ["publication", "publicationPublicId", "other-publication"],
+  ] as const)(
+    "fails closed when a structured Offer has a mismatched %s association",
+    async (_association, field, value) => {
+      const publicId = "U-I8EtMIBykwiBusR4IQ1";
+      const tampered = structuredClone(
+        tjekCoopOfferLookups.get(publicId),
+      ) as { value: Record<string, unknown> };
+      tampered.value[field] = value;
+      const replay = fixtureFetcher(() => 0, {
+        businesses: tjekCoopBrandExcerpt,
+        stores: new Map([["63eeoD", tjekCoopStoreExcerpt]]),
+        fronts: tjekCoopFronts,
+        publicationPages: tjekCoopPublicationPages,
+        offerLookups: new Map([[publicId, tampered]]),
+      });
+
+      const snapshot = await buildLocationSnapshot(linkopingLocation, {
+        fetcher: replay.fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        sleep: async () => {},
+      });
+
+      expect(
+        snapshot.chains.find(({ chain }) => chain === "Coop"),
+      ).toMatchObject({ status: "failed" });
+      expect(snapshot.offers.filter(({ chain }) => chain === "Coop")).toEqual([]);
+      expect(
+        replay.tjekCommands.map(({ action }) => action),
+      ).toEqual(["businesses", "stores", "fronts", "offer"]);
+    },
+  );
+
+  it("fails closed when the Store fronts response has an unsupported shape", async () => {
+    const replay = fixtureFetcher(() => 0, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", tjekCoopStoreExcerpt]]),
+      fronts: { value: { unexpected: [] } },
+      publicationPages: tjekCoopPublicationPages,
+      offerLookups: tjekCoopOfferLookups,
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.chains.find(({ chain }) => chain === "Coop"),
+    ).toMatchObject({ status: "failed" });
+    expect(snapshot.offers.filter(({ chain }) => chain === "Coop")).toEqual([]);
+    expect(replay.tjekCommands.map(({ action }) => action)).toEqual([
+      "businesses",
+      "stores",
+      "fronts",
+    ]);
+  });
+
+  it("fails closed when a front belongs to a different business than the Store", async () => {
+    const fronts = structuredClone(tjekCoopFronts) as {
+      value: Array<{ business: { publicId: string } }>;
+    };
+    fronts.value[0]!.business.publicId = "other-brand";
+    const replay = fixtureFetcher(() => 0, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", tjekCoopStoreExcerpt]]),
+      fronts,
+      publicationPages: tjekCoopPublicationPages,
+      offerLookups: tjekCoopOfferLookups,
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.chains.find(({ chain }) => chain === "Coop"),
+    ).toMatchObject({ status: "failed" });
+    expect(snapshot.offers.filter(({ chain }) => chain === "Coop")).toEqual([]);
+    expect(replay.tjekCommands.map(({ action }) => action)).toEqual([
+      "businesses",
+      "stores",
+      "fronts",
+    ]);
+    expect(
+      replay.requests.some(
+        ({ hostname }) => hostname === "publication-viewer.tjek.com",
+      ),
+    ).toBe(false);
+  });
+
+  it("fails closed when a discovered Coop Store has no current publication", async () => {
+    const replay = fixtureFetcher(() => 0, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", tjekCoopStoreExcerpt]]),
+      fronts: {
+        key: "[redacted]",
+        status: "success",
+        value: [],
+      },
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.chains.find(({ chain }) => chain === "Coop"),
+    ).toMatchObject({ status: "failed" });
+    expect(snapshot.offers.filter(({ chain }) => chain === "Coop")).toEqual([]);
+    expect(replay.tjekCommands.map(({ action }) => action)).toEqual([
+      "businesses",
+      "stores",
+      "fronts",
+    ]);
+  });
+
+  it("treats a local-midnight publication end as an exclusive boundary", async () => {
+    const fronts = structuredClone(tjekCoopFronts) as {
+      value: Array<{ publications: Array<{ validUntil: string }> }>;
+    };
+    fronts.value[0]!.publications[0]!.validUntil =
+      "2026-11-16T23:00:00.000Z";
+    const replay = fixtureFetcher(() => 0, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", tjekCoopStoreExcerpt]]),
+      fronts,
+      publicationPages: tjekCoopPublicationPages,
+      offerLookups: tjekCoopOfferLookups,
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.chains.find(({ chain }) => chain === "Coop"),
+    ).toMatchObject({ status: "failed" });
+    expect(replay.tjekCommands.map(({ action }) => action)).toEqual([
+      "businesses",
+      "stores",
+      "fronts",
+    ]);
+  });
+
+  it("stops a Store-specific publication denial without retrying", async () => {
+    const replay = fixtureFetcher(() => 0, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", tjekCoopStoreExcerpt]]),
+      frontsStatus: 403,
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.chains.find(({ chain }) => chain === "Coop"),
+    ).toMatchObject({
+      status: "failed",
+      error: expect.stringContaining("HTTP 403"),
+    });
+    expect(snapshot.offers.filter(({ chain }) => chain === "Coop")).toEqual([]);
+    expect(replay.tjekCommands.map(({ action }) => action)).toEqual([
+      "businesses",
+      "stores",
+      "fronts",
+    ]);
+  });
+
+  it("filters expired individual Offers after the publication pages are fetched", async () => {
+    const expiredPublicId = "U-I8EtMIBykwiBusR4IQ1";
+    const expiredOffer = structuredClone(
+      tjekCoopOfferLookups.get(expiredPublicId),
+    ) as { value: Record<string, unknown> };
+    expiredOffer.value.validUntil = "2026-11-16T22:59:59+0000";
+    const offerLookups = new Map(tjekCoopOfferLookups);
+    offerLookups.set(expiredPublicId, expiredOffer);
+    const replay = fixtureFetcher(() => 0, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", tjekCoopStoreExcerpt]]),
+      fronts: tjekCoopFronts,
+      publicationPages: tjekCoopPublicationPages,
+      offerLookups,
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.chains.find(({ chain }) => chain === "Coop"),
+    ).toMatchObject({ status: "ok" });
+    expect(
+      snapshot.offers.filter(({ chain }) => chain === "Coop").map(({ name }) => name),
+    ).toEqual(["Snacktomater", "Kexchoklad"]);
+  });
+
+  it.skip("normalizes Tjek Offers for ICA and Hemköp through the shared Snapshot contract (live publication and Offer IDs remain unverified)", async () => {
     let elapsed = 0;
     const replay = fixtureFetcher(() => elapsed);
     const snapshot = await buildLocationSnapshot(
@@ -282,7 +815,41 @@ describe("Tjek Snapshot adapter", () => {
       .toBe(true);
   });
 
-  it("follows Tjek Offer pages through the final short page", async () => {
+  it.skip("uses member-specific Offer text before ordinary prices in the legacy bulk flow (synthetic bulk fixtures are unverified)", async () => {
+    const ordinaryAndMemberOffer = {
+      ...(tjekOffers.get("ica-berga")![0] as Record<string, unknown>),
+      publicId: "ica-member-price-precedence",
+      name: "Medlemspris före ordinarie pris",
+      description: null,
+      priceText: "29,90 kr/st",
+      membershipPriceText: "Medlemspris 19,90 kr/st",
+      price: 29.9,
+      membershipPrice: 19.9,
+      unitPrice: 29.9,
+    };
+    const replay = fixtureFetcher(() => 0, {
+      offers: new Map([["ica-berga", [ordinaryAndMemberOffer]]]),
+    });
+
+    const snapshot = await buildLocationSnapshot(locationWithTjek(["ICA"]), {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.offers.find(
+        (offer) => offer.name === "Medlemspris före ordinarie pris",
+      ),
+    ).toMatchObject({
+      mechanicText: "Medlemspris 19,90 kr/st",
+      price: 19.9,
+      unitPrice: 19.9,
+      priceUnit: "st",
+    });
+  });
+
+  it.skip("follows Tjek bulk Offer pages through the final short page (the documented bulk lookup returned no sampled records)", async () => {
     const template = tjekOffers.get("ica-berga")![0] as Record<string, unknown>;
     const manyOffers = Array.from({ length: 101 }, (_, index) => ({
       ...template,
@@ -332,6 +899,10 @@ describe("Tjek Snapshot adapter", () => {
       TJEK_SOURCE,
       TJEK_SOURCE,
     ]);
+    expect(bothTjek.chains.every(({ status }) => status === "failed")).toBe(true);
+    expect(
+      bothTjek.offers.filter((offer) => ["ICA", "Hemköp"].includes(offer.chain)),
+    ).toEqual([]);
 
     location.chains.ICA!.source = "ica-first-party";
     const icaPrimary = await buildLocationSnapshot(location, dependencies);
@@ -339,7 +910,10 @@ describe("Tjek Snapshot adapter", () => {
       "ica-first-party",
       TJEK_SOURCE,
     ]);
-    expect(icaPrimary.chains.every(({ status }) => status === "ok")).toBe(true);
+    expect(icaPrimary.chains.map(({ status }) => status)).toEqual([
+      "ok",
+      "failed",
+    ]);
 
     location.chains.Hemköp!.source = "hemkop-first-party";
     const bothPrimary = await buildLocationSnapshot(location, dependencies);
@@ -350,43 +924,46 @@ describe("Tjek Snapshot adapter", () => {
     expect(bothPrimary.chains.every(({ status }) => status === "ok")).toBe(true);
   });
 
-  it("reports a blocked Tjek source without retrying or bypassing it, while the other Chain succeeds", async () => {
-    const replay = fixtureFetcher(
-      () => 0,
-      { tjekStatus: 403 },
-    );
-    const location = locationWithTjek(["ICA"]);
+  it.each([401, 403])(
+    "reports a Tjek HTTP %i denial without retrying or bypassing it, while another Chain succeeds",
+    async (status) => {
+      const replay = fixtureFetcher(
+        () => 0,
+        { tjekStatus: status },
+      );
+      const location = locationWithTjek(["ICA"]);
 
-    const snapshot = await buildLocationSnapshot(location, {
-      fetcher: replay.fetcher,
-      now: () => new Date("2026-11-17T05:00:00.000Z"),
-      sleep: async () => {},
-    });
+      const snapshot = await buildLocationSnapshot(location, {
+        fetcher: replay.fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        sleep: async () => {},
+      });
 
-    expect(snapshot.chains).toMatchObject([
-      {
-        chain: "ICA",
-        source: TJEK_SOURCE,
-        status: "failed",
-        error: expect.stringContaining("HTTP 403"),
-      },
-      {
-        chain: "Hemköp",
-        source: "hemkop-first-party",
-        status: "ok",
-      },
-    ]);
-    expect(snapshot.offers.some((offer) => offer.chain === "ICA")).toBe(false);
-    expect(snapshot.offers.some((offer) => offer.chain === "Hemköp")).toBe(true);
-    expect(replay.tjekCommands).toHaveLength(1);
-    expect(
-      replay.requests.some(
-        ({ hostname }) => hostname === "www.ica.se" || hostname === "apim-pub.gw.ica.se",
-      ),
-    ).toBe(false);
-  });
+      expect(snapshot.chains).toMatchObject([
+        {
+          chain: "ICA",
+          source: TJEK_SOURCE,
+          status: "failed",
+          error: expect.stringContaining(`HTTP ${status}`),
+        },
+        {
+          chain: "Hemköp",
+          source: "hemkop-first-party",
+          status: "ok",
+        },
+      ]);
+      expect(snapshot.offers.some((offer) => offer.chain === "ICA")).toBe(false);
+      expect(snapshot.offers.some((offer) => offer.chain === "Hemköp")).toBe(true);
+      expect(replay.tjekCommands).toHaveLength(1);
+      expect(
+        replay.requests.some(
+          ({ hostname }) => hostname === "www.ica.se" || hostname === "apim-pub.gw.ica.se",
+        ),
+      ).toBe(false);
+    },
+  );
 
-  it("treats a malformed Tjek Store response as a source failure", async () => {
+  it("treats a malformed Tjek business response as a source failure", async () => {
     const replay = fixtureFetcher(
       () => 0,
       { businesses: { value: [{ name: "Store without a source id" }] } },

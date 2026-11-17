@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import {
+  STOCKHOLM_TIME_ZONE,
+  stockholmDate,
+} from "./domain/date";
+import {
   SCHEMA_VERSION,
   parseSnapshot,
   type Offer,
@@ -13,7 +17,6 @@ import {
 } from "./snapshot/config";
 import "./styles.css";
 
-const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 type LocationOption = Pick<LocationConfig, "id" | "name">;
 type SortOrder = "price" | "discount";
 type OfferView = {
@@ -31,17 +34,6 @@ class SnapshotLoadError extends Error {
   ) {
     super(message);
   }
-}
-
-function stockholmDate(date: Date): string {
-  const parts = new Intl.DateTimeFormat("sv-SE", {
-    timeZone: STOCKHOLM_TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  const value = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
-  return `${value.year}-${value.month}-${value.day}`;
 }
 
 function formatDate(value: string): string {
@@ -242,13 +234,9 @@ function OfferCard({
   return (
     <article className="offer-card">
       <div className="offer-image">
-        {offer.imageUrl ? (
-          <img src={offer.imageUrl} alt={offer.name} loading="lazy" />
-        ) : (
-          <div className="image-placeholder" role="img" aria-label="Ingen produktbild">
-            <span aria-hidden="true">Bild saknas</span>
-          </div>
-        )}
+        <div className="image-placeholder" role="img" aria-label="Ingen produktbild">
+          <span aria-hidden="true">Bild saknas</span>
+        </div>
       </div>
       <div className="offer-content">
         <p className="offer-category">{offer.category}</p>

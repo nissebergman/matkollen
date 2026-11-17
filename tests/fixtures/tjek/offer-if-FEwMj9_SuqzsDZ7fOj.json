@@ -1,0 +1,19 @@
+{
+  "key": "[redacted]",
+  "status": "success",
+  "value": {
+    "publicId": "if-FEwMj9_SuqzsDZ7fOj",
+    "name": "Snacktomater",
+    "unitPrice": 72.5,
+    "baseUnit": "kilogram",
+    "membershipPrice": 29,
+    "validFrom": "2026-11-16",
+    "validUntil": "2026-11-22",
+    "businessPublicId": "63eeoD",
+    "publicationPublicId": "NV_F04Kb",
+    "unitSymbol": "g",
+    "unitSizeFrom": 400,
+    "unitSizeTo": 400,
+    "departmentSlug": "fruits-and-vegetables"
+  }
+}

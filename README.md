@@ -3,7 +3,7 @@
 A Swedish, mobile-first view of supermarket Offers. The app reads a versioned
 Snapshot for the Location in the page address (`?location=<id>`), defaulting to
 the configured default Location. It never calls a Chain or third-party Offer
-source directly.
+source directly, and does not load remote Offer images.
 
 ## Locations
 
@@ -19,12 +19,19 @@ precedence over pins.
 Add a Location by adding a configuration entry and publishing a Snapshot named
 `public/snapshots/<id>.json`. The app shows a Location picker only when more
 than one Location is configured. A configured source without a registered
-adapter is reported as a failed Chain. The ICA and Hemköp adapters and both Coop sources are implemented. Linköping
-uses `coop-tjek` as Coop's primary source. The flyer-PDF adapter is available
-as an experimental, manually selected fallback; a read-only check of a real
-flyer showed a layout that the parser correctly rejects rather than publishing
-misidentified Offers. Keep Tjek selected until real-flyer extraction is
-validated.
+adapter is reported as a failed Chain. The ICA and Hemköp adapters and both Coop source adapters are implemented.
+Linköping keeps `coop-tjek` configured as Coop's source. The shared Tjek
+adapter discovers Stores and implements the observed Store-specific
+`fronts` → publication pages → individual Offer lookup flow. One Coop Store
+and publication were verified, with a small sample of structured Offers. The
+sanitized fixture now preserves the observed nested `fronts` envelope and
+business-to-Store association. The other Linköping Coop Stores, complete Offer
+coverage, ICA and Hemköp remain unverified. The adapter fails closed on
+unsupported or inconsistent responses; do not switch sources automatically.
+The flyer-PDF adapter is available as an experimental, manually selected
+fallback; a read-only check of a real flyer showed a layout that the parser
+correctly rejects rather than publishing misidentified Offers. The configured
+source remains unchanged; do not switch sources automatically.
 
 Offers are ordered by lowest effective price by default. Choose “Största rabatt”
 to sort by the difference between regular and effective price when both use a

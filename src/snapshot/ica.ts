@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { mapIcaCategory } from "../domain/categories";
+import { stockholmDate } from "../domain/date";
 import {
   SCHEMA_VERSION,
   SnapshotSchema,
@@ -11,13 +12,13 @@ import type {
   LocationConfig,
   StoreDiscoveryConfig,
 } from "./config";
+import { discoverStores } from "./store-discovery";
 
 export const ICA_REQUEST_DELAY_MS = 1_000;
 
 export const ICA_SOURCE = "ica-first-party";
 const ICA_ORIGIN = "https://www.ica.se";
 const ICA_STORE_SEARCH_ORIGIN = "https://apim-pub.gw.ica.se";
-const STOCKHOLM_TIME_ZONE = "Europe/Stockholm";
 
 export type IcaLocation = Pick<LocationConfig, "id" | "name">;
 
@@ -233,17 +234,6 @@ function parseResponse<T>(schema: z.ZodType<T>, value: unknown, label: string): 
   return result.data;
 }
 
-function stockholmDate(date: Date): string {
-  const parts = new Intl.DateTimeFormat("sv-SE", {
-    timeZone: STOCKHOLM_TIME_ZONE,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).formatToParts(date);
-  const value = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
-  return `${value.year}-${value.month}-${value.day}`;
-}
-
 function isIsoDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return false;
@@ -426,58 +416,6 @@ function weeklyOffersFromHtml(html: string): unknown {
 
 function sourceStoreId(store: IcaStoreSearchRecord): string {
   return String(store.id);
-}
-
-function unwrapStoreIdOverride(configuredId: string): string {
-  const prefix = "ICA:";
-  return configuredId.startsWith(prefix) ? configuredId.slice(prefix.length) : configuredId;
-}
-
-function sourceField(value: unknown, path: string): unknown {
-  let current = value;
-  for (const part of path.split(".")) {
-    if (
-      typeof current !== "object" ||
-      current === null ||
-      !Object.hasOwn(current, part)
-    ) {
-      return undefined;
-    }
-    current = (current as Record<string, unknown>)[part];
-  }
-  return current;
-}
-
-function discoverIcaStores(
-  stores: IcaStoreSearchRecord[],
-  discovery: StoreDiscoveryConfig,
-): IcaStoreSearchRecord[] {
-  const pinIds = new Set((discovery.pinStoreIds ?? []).map(unwrapStoreIdOverride));
-  const excludeIds = new Set(
-    (discovery.excludeStoreIds ?? []).map(unwrapStoreIdOverride),
-  );
-  const availableIds = new Set(stores.map(sourceStoreId));
-  const missingPins = [...pinIds].filter((id) => !availableIds.has(id));
-  if (missingPins.length) {
-    throw new Error(`Konfigurerade ICA-butiker hittades inte: ${missingPins.join(", ")}.`);
-  }
-
-  const matchingCityStores = stores.filter(
-    (store) =>
-      sourceField(store, discovery.exactCity.field) === discovery.exactCity.value,
-  );
-  if (matchingCityStores.length === 0 && pinIds.size === 0) {
-    throw new Error(`Inga ICA-butiker hittades för ${discovery.exactCity.value}.`);
-  }
-
-  return stores.filter((store) => {
-    const id = sourceStoreId(store);
-    return (
-      !excludeIds.has(id) &&
-      (pinIds.has(id) ||
-        sourceField(store, discovery.exactCity.field) === discovery.exactCity.value)
-    );
-  });
 }
 
 function offerPageUrl(store: IcaStoreSearchRecord): string {
@@ -790,7 +728,12 @@ export async function buildIcaSnapshot(
       }
     } while (offset < (totalHits ?? 0));
 
-    const matchingStores = discoverIcaStores(sourceStores, discovery);
+    const matchingStores = discoverStores(
+      sourceStores,
+      discovery,
+      "ICA",
+      sourceStoreId,
+    );
     const mappedStores = matchingStores.map(storeFromSource);
     discoveredStores = [...new Map(mappedStores.map((store) => [store.id, store])).values()];
     if (discoveredStores.length !== mappedStores.length) {

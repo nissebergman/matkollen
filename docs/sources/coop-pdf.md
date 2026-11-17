@@ -42,6 +42,15 @@ could not safely be identified as a product, so the adapter failed the Chain
 and published zero Offers. The real PDF was not saved. A synthetic fixture
 covers the observed Libero row, but accurate extraction across real flyers remains
 unverified.
+
+A subsequent bounded attempt on 2026-11-17 received HTTP 200 for Coop's public
+Store page and script, but the configured parser found no readable API key in
+the public configuration and stopped before calling the Store API. No key,
+Store data, or PDF content was retained from that attempt.
+
+A separate two-request diagnostic found public key-marker strings in the
+linked script but could not establish their assignment structure or value
+types. It sent no key and made no Store API request.
 Image-only PDFs, unusual text ordering, and changed layouts may fail parsing;
 ambiguous rows must fail rather than be published as Offers. Keep the configured
 Coop primary source on Tjek until real-flyer extraction is validated.

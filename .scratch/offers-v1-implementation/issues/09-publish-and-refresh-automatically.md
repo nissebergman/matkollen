@@ -19,3 +19,10 @@ The workflow is integrated and the user approved publishing to the public
 the remote is configured, and the approved public commit email is set locally.
 Actual publication and GitHub Pages verification are pending final review and
 history cleanup. Pages must remain public only as already approved.
+
+Live validation on 2026-11-17 completed the Coop refresh across all six
+configured Linköping Stores, six publications and 293 Offers. The validated
+Snapshot remains under session state; the checked-in public Snapshot still
+contains demo fixture data and must not be published. ICA/Hemköp fallback
+compatibility and complete multi-Chain deployment data are not yet verified.
+Deployment is not part of this repair.

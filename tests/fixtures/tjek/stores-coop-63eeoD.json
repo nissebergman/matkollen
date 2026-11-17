@@ -1,0 +1,18 @@
+{
+  "key": "[redacted]",
+  "status": "[redacted]",
+  "value": {
+    "data": [
+      {
+        "id": "lSegmZB4MZVpS_3lKyiRv",
+        "name": "Coop Drottninggatan Linköping",
+        "city": "Linköping",
+        "streetAddress": "Drottninggatan 23",
+        "coordinates": {
+          "latitude": 58.4043977,
+          "longitude": 15.6242393
+        }
+      }
+    ]
+  }
+}
