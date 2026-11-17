@@ -31,6 +31,7 @@ type FixtureOptions = {
   credentialUrlFor?: string;
   malformedFlyerFor?: string;
   missingFlyerFor?: string;
+  observedLayoutFor?: string;
 };
 
 function readJson<T>(path: string): T {
@@ -98,6 +99,14 @@ function recordedFetcher(options: FixtureOptions = {}) {
           headers: { "Content-Type": "application/pdf" },
         });
       }
+      if (options.observedLayoutFor === ledgerAccountNumber) {
+        return new Response(
+          readFileSync(
+            resolve(fixtureRoot, "flyers/observed-coop-layout-synthetic.pdf"),
+          ),
+          { headers: { "Content-Type": "application/pdf" } },
+        );
+      }
       return new Response(
         readFileSync(
           resolve(fixtureRoot, `flyers/${ledgerAccountNumber}.pdf`),
@@ -131,6 +140,43 @@ async function buildConfiguredCoopSnapshot(
 }
 
 describe("Coop flyer-PDF Snapshot job", () => {
+  it("extracts a price-first Offer and does not treat Jfr-pris as a sale price", async () => {
+    const observedLayoutLocation = {
+      ...coopOnlyLinkoping,
+      chains: {
+        Coop: {
+          ...linkopingCoop,
+          storeDiscovery: {
+            ...linkopingCoop.storeDiscovery,
+            excludeStoreIds: ["Coop:239", "Coop:8888"],
+          },
+        },
+      },
+    };
+    const { snapshot } = await buildConfiguredCoopSnapshot(
+      { observedLayoutFor: "056010" },
+      observedLayoutLocation,
+    );
+
+    expect(snapshot.chains[0]).toMatchObject({
+      status: "ok",
+      source: "coop-flyer-pdf",
+    });
+    expect(snapshot.offers).toHaveLength(1);
+    expect(snapshot.offers[0]).toMatchObject({
+      name: "babyvård och tillbehör",
+      brand: "Libero",
+      mechanicText: "2 för 169:- Gäller ej blöjor.",
+      quantity: 2,
+      price: 169,
+      unitPrice: 84.5,
+      limitText: "MAX 1 KÖP/HUSHÅLL.",
+      validFrom: "2026-11-16",
+      validTo: "2026-11-22",
+      sourceUrl: "https://dr.coop.se/butik/056010",
+    });
+  });
+
   it("uses each configured Store's flyer and preserves its validity and Offers", async () => {
     expect(linkopingCoop.source).toBe("coop-flyer-pdf");
 

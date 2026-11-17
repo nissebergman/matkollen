@@ -112,6 +112,7 @@ interface TextLine {
 interface ParsedMechanic {
   text: string;
   productPrefix: string;
+  productSuffix?: string;
   quantity: number;
   amount?: number;
   priceUnit?: Offer["priceUnit"];
@@ -132,7 +133,7 @@ const OFFER_LABEL_PATTERN =
 const ORDINARY_PRICE_PATTERN =
   /\b(?:ordinarie(?:\s+pris)?|normalpris|ord\.?\s*pris)\b/iu;
 const COMPARISON_PRICE_PATTERN =
-  /\b(?:jämförpris|jmf\.?\s*pris)\s*:?\s*(.+)$/iu;
+  /\b(?:jämförpris|jmf\.?\s*pris|jfr\.?\s*[-–]?\s*pris)\s*:?\s*(.+)$/iu;
 const LIMIT_PATTERN = /^(?:max(?:imum)?\.?\b|högst\b)/iu;
 
 function describeValidationError(error: z.ZodError): string {
@@ -511,7 +512,7 @@ function priceUnitFrom(value: string | undefined): Offer["priceUnit"] {
 
 function cleanText(value: string): string {
   return value
-    .replace(/^[\s|•·–—-]+|[\s|•·–—-]+$/gu, "")
+    .replace(/^[\s|•·–—-]+|(?<!:)[\s|•·–—-]+$/gu, "")
     .replace(/\s+/gu, " ")
     .trim();
 }
@@ -541,8 +542,10 @@ function parseMechanic(line: string): ParsedMechanic | undefined {
 
   if (match && match.index !== undefined) {
     const start = mechanicLabelStart(line, match.index);
-    const text = cleanText(line.slice(start));
+    const end = match.index + match[0].length;
+    const text = cleanText(line.slice(start, end));
     const productPrefix = cleanText(line.slice(0, start));
+    const productSuffix = cleanText(line.slice(end));
     const quantity = Number(
       (multiBuyPrice ?? textOnlyMulti)?.[1] ?? 1,
     );
@@ -552,6 +555,7 @@ function parseMechanic(line: string): ParsedMechanic | undefined {
       return {
         text,
         productPrefix,
+        ...(productSuffix ? { productSuffix } : {}),
         quantity: Number(multiBuyPrice[1]),
         ...(amount !== undefined ? { amount } : {}),
         ...(priceUnit ? { priceUnit } : {}),
@@ -563,6 +567,7 @@ function parseMechanic(line: string): ParsedMechanic | undefined {
     return {
       text,
       productPrefix,
+      ...(productSuffix ? { productSuffix } : {}),
       quantity: textOnlyMulti ? Number(textOnlyMulti[1]) : quantity,
       ...(amount !== undefined ? { amount } : {}),
       ...(priceUnit ? { priceUnit } : {}),
@@ -571,9 +576,12 @@ function parseMechanic(line: string): ParsedMechanic | undefined {
 
   if (textOnlyMulti && textOnlyMulti.index !== undefined) {
     const start = mechanicLabelStart(line, textOnlyMulti.index);
+    const end = textOnlyMulti.index + textOnlyMulti[0].length;
+    const productSuffix = cleanText(line.slice(end));
     return {
-      text: cleanText(line.slice(start)),
+      text: cleanText(line.slice(start, end)),
       productPrefix: cleanText(line.slice(0, start)),
+      ...(productSuffix ? { productSuffix } : {}),
       quantity: Number(textOnlyMulti[1]),
     };
   }
@@ -608,6 +616,44 @@ function brandFrom(name: string): { name: string; brand?: string } {
     : { name };
 }
 
+function productFromSuffix(value: string): {
+  name: string;
+  brand?: string;
+  qualifierText?: string;
+} {
+  const suffix = cleanText(value);
+  const qualifier = suffix.match(/\s+(gäller ej\b.*)$/iu);
+  const productText = cleanText(
+    qualifier ? suffix.slice(0, qualifier.index) : suffix,
+  );
+  const qualifierText = qualifier ? cleanText(qualifier[1]) : undefined;
+  const sentences = productText
+    .split(/(?<=[.!?])\s+/u)
+    .map((sentence) => cleanText(sentence).replace(/[.!?]+$/u, ""))
+    .filter(Boolean);
+
+  if (sentences.length > 1) {
+    const brand = sentences[0];
+    const nextSentence = sentences[1];
+    if (
+      nextSentence
+        .toLocaleLowerCase()
+        .startsWith(`${brand.toLocaleLowerCase()} `)
+    ) {
+      return {
+        name: cleanText(nextSentence.slice(brand.length)),
+        brand,
+        ...(qualifierText ? { qualifierText } : {}),
+      };
+    }
+  }
+
+  return {
+    name: productText,
+    ...(qualifierText ? { qualifierText } : {}),
+  };
+}
+
 function isNoiseLine(line: string): boolean {
   return /^(?:veckans erbjudanden?|aktuella erbjudanden?|erbjudanden?|coop|gäller denna vecka)$/iu.test(
     line.trim(),
@@ -625,6 +671,7 @@ function parseFlyerOffers(
   const pendingNameLines: string[] = [];
   let category: Offer["category"] = "Övrigt";
   let sourceCategory: string | undefined;
+  let pendingLimitText: string | undefined;
   let lastOffer: Offer | undefined;
 
   for (const rawLine of lines) {
@@ -638,6 +685,7 @@ function parseFlyerOffers(
       category = mappedCategory;
       sourceCategory = line;
       pendingNameLines.length = 0;
+      pendingLimitText = undefined;
       lastOffer = undefined;
       continue;
     }
@@ -657,19 +705,31 @@ function parseFlyerOffers(
       continue;
     }
 
+    let comparisonPriceText: string | undefined;
+    let mechanicLine = line;
     const comparison = line.match(COMPARISON_PRICE_PATTERN);
-    if (lastOffer && comparison) {
-      lastOffer.comparisonPriceText = cleanText(comparison[1]);
-      pendingNameLines.length = 0;
-      continue;
+    if (comparison && comparison.index !== undefined) {
+      comparisonPriceText = cleanText(comparison[1]);
+      mechanicLine = cleanText(line.slice(0, comparison.index));
+      if (!mechanicLine || !parseMechanic(mechanicLine)) {
+        if (lastOffer) {
+          lastOffer.comparisonPriceText = comparisonPriceText;
+        }
+        pendingNameLines.length = 0;
+        continue;
+      }
     }
-    if (lastOffer && LIMIT_PATTERN.test(line)) {
-      lastOffer.limitText = line;
+    if (LIMIT_PATTERN.test(line)) {
+      if (lastOffer) {
+        lastOffer.limitText = line;
+      } else {
+        pendingLimitText = [pendingLimitText, line].filter(Boolean).join(" ");
+      }
       pendingNameLines.length = 0;
       continue;
     }
 
-    const mechanic = parseMechanic(line);
+    const mechanic = parseMechanic(mechanicLine);
     if (!mechanic) {
       pendingNameLines.push(line);
       if (pendingNameLines.length > 3) {
@@ -679,7 +739,10 @@ function parseFlyerOffers(
     }
 
     const rawName = mechanic.productPrefix || pendingNameLines.join(" ");
-    const product = brandFrom(cleanText(rawName));
+    const suffixProduct = productFromSuffix(mechanic.productSuffix ?? "");
+    const product = rawName
+      ? brandFrom(cleanText(rawName))
+      : suffixProduct;
     if (!product.name) {
       throw new Error(
         `Coop-flyern för ${store.name} innehåller ett pris utan produktnamn.`,
@@ -717,7 +780,9 @@ function parseFlyerOffers(
       chain: "Coop",
       storeId: store.id,
       name: product.name,
-      mechanicText: mechanic.text,
+      mechanicText: cleanText(
+        [mechanic.text, suffixProduct.qualifierText].filter(Boolean).join(" "),
+      ),
       category,
       validFrom: flyer.validFrom,
       validTo: flyer.validTo,
@@ -730,10 +795,13 @@ function parseFlyerOffers(
       ...(price !== undefined ? { price } : {}),
       ...(unitPrice !== undefined ? { unitPrice } : {}),
       ...(priceUnit ? { priceUnit } : {}),
+      ...(pendingLimitText ? { limitText: pendingLimitText } : {}),
+      ...(comparisonPriceText ? { comparisonPriceText } : {}),
       ...(sourceCategory ? { sourceCategory } : {}),
     };
     offers.push(offer);
     lastOffer = offer;
+    pendingLimitText = undefined;
     pendingNameLines.length = 0;
   }
 

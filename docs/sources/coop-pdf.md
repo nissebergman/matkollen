@@ -34,8 +34,12 @@ than silently publishing a partial refresh. Unknown or absent section headings
 map to `Övrigt`. A flyer preview is not used as a product image.
 
 The checked-in PDFs are small, generated text-only fixtures, not copies of
-Coop flyers. They cover basic line-oriented layouts and do not establish
-fidelity for real flyers. Image-only PDFs, unusual text ordering, or changed
-flyer layouts can fail parsing; no real Coop flyer has been validated against
-this parser. The adapter reports such failures and does not publish an
-apparently complete result.
+Coop flyers. A read-only retrieval of the Stora Coop Garnisonen flyer on
+2026-11-17 returned a 12-page PDF. Running the adapter exposed a failure on
+price-before-name text and the `Jfr-pris` comparison-price label. The parser
+was updated for those observed structures, and a synthetic two-page fixture
+captures short extracted text fragments for offline regression coverage. The
+real PDF was not saved, and the updated parser has not been re-run against it;
+this fixture does not establish full real-flyer fidelity. Image-only PDFs,
+unusual text ordering, or changed layouts can still fail parsing. The adapter
+reports such failures and does not publish an apparently complete result.
