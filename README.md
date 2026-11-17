@@ -4,6 +4,11 @@ A Swedish, mobile-first view of supermarket Offers for Linköping. The app reads
 the versioned Snapshot at `public/snapshots/linkoping.json`; it never calls
 Hemköp directly.
 
+Offers are ordered by lowest effective price by default. Choose “Största rabatt”
+to sort by the difference between regular and effective price when both use a
+known, shared unit; Offers without a usable price or computable discount appear
+last.
+
 ## Development
 
 ```sh
