@@ -18,7 +18,7 @@ precedence over pins.
 Add a Location by adding a configuration entry and publishing a Snapshot named
 `public/snapshots/<id>.json`. The app shows a Location picker only when more
 than one Location is configured. A configured source without a registered
-adapter is reported as a failed Chain; currently only the Hemköp adapter is
+adapter is reported as a failed Chain; the ICA and Hemköp adapters are
 implemented.
 
 Offers are ordered by lowest effective price by default. Choose “Största rabatt”
@@ -45,12 +45,14 @@ network.
 
 ## Snapshot refresh
 
-`npm run snapshot:hemkop -- [output-directory]` runs the job for every
-configured Location, one at a time, and writes one Snapshot per Location.
-When only one Location is configured, a `.json` argument can still be used as
-the exact output path. Before refreshing, read
-[the source terms and robots notes](docs/sources/hemkop.md): the campaign
-route is disallowed by Hemköp's robots.txt. The adapter makes direct,
-anonymous requests only during the stated UTC visiting window, waits at least
-ten seconds between requests, does not retry access denials, and reports a
-failed or stale Chain with a nonzero process exit.
+`npm run snapshot -- [output-directory]` runs the job for every configured
+Location, one at a time, and writes one Snapshot per Location. When only one
+Location is configured, a `.json` argument can still be used as the exact
+output path. Before refreshing, read the
+[ICA](docs/sources/ica.md) and
+[Hemköp](docs/sources/hemkop.md) source-access notes. ICA fetches an anonymous
+token at runtime for Store discovery, then requests public per-Store Offers
+pages sequentially. Hemköp requests only run during its stated UTC visiting
+window and wait at least ten seconds between requests. Both adapters stop on
+access denials without retries or workarounds, and report a failed or stale
+Chain with a nonzero process exit.
