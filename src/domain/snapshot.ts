@@ -5,6 +5,8 @@ export const SCHEMA_VERSION = 1;
 export const CHAINS = ["ICA", "Coop", "Hemköp"] as const;
 export const PRICE_UNITS = ["st", "kg", "l"] as const;
 
+export type Chain = (typeof CHAINS)[number];
+
 const isoDate = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/)

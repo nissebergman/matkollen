@@ -1,12 +1,14 @@
 import { z } from "zod";
 import { mapHemkopCategory } from "../domain/categories";
+import type { Offer, Snapshot, Store } from "../domain/snapshot";
 import {
-  SCHEMA_VERSION,
-  SnapshotSchema,
-  type Offer,
-  type Snapshot,
-  type Store,
-} from "../domain/snapshot";
+  ChainRefreshError,
+  buildSnapshot,
+  type ChainRefreshContext,
+  type ChainRefreshResult,
+  type ChainSourceAdapter,
+  type SnapshotJobDependencies,
+} from "./runner";
 
 export const HEMKOP_REQUEST_DELAY_MS = 10_000;
 const HEMKOP_SOURCE = "hemkop-first-party";
@@ -19,12 +21,7 @@ export interface HemkopLocation {
   city: string;
 }
 
-export interface HemkopJobDependencies {
-  fetcher?: typeof fetch;
-  now?: () => Date;
-  sleep?: (milliseconds: number) => Promise<void>;
-  previousSnapshot?: unknown;
-}
+export type HemkopJobDependencies = SnapshotJobDependencies;
 
 const optionalText = z.string().nullable().optional();
 const optionalNumber = z
@@ -177,10 +174,6 @@ type HemkopStore = z.infer<typeof HemkopStoreSchema>;
 type HemkopProduct = z.infer<typeof HemkopProductSchema>;
 type HemkopPromotion = z.infer<typeof HemkopPromotionSchema>;
 
-function defaultSleep(milliseconds: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
 function assertWithinHemkopVisitTime(date: Date): void {
   const utcMinutes = date.getUTCHours() * 60 + date.getUTCMinutes();
   if (utcMinutes < 4 * 60 || utcMinutes >= 8 * 60 + 45) {
@@ -252,14 +245,6 @@ function dateFromSource(value: string | number | null | undefined): string | und
 
   const time = Date.parse(normalized);
   return Number.isFinite(time) ? stockholmDate(new Date(time)) : undefined;
-}
-
-function currentOfferWeekEnd(today: string): string {
-  const day = new Date(`${today}T00:00:00.000Z`).getUTCDay();
-  const daysUntilSunday = (7 - day) % 7;
-  const end = new Date(`${today}T00:00:00.000Z`);
-  end.setUTCDate(end.getUTCDate() + daysUntilSunday);
-  return end.toISOString().slice(0, 10);
 }
 
 function parseAmount(value: unknown): number | undefined {
@@ -533,16 +518,11 @@ function formatRequestError(status: number): string {
   return `Hemköp svarade med HTTP ${status}.`;
 }
 
-export async function buildHemkopSnapshot(
+async function refreshHemkop(
   location: HemkopLocation,
-  dependencies: HemkopJobDependencies = {},
-): Promise<Snapshot> {
-  const fetcher = dependencies.fetcher ?? globalThis.fetch;
-  const now = dependencies.now ?? (() => new Date());
-  const sleep = dependencies.sleep ?? defaultSleep;
-  const attemptAt = now().toISOString();
-  const runDate = stockholmDate(new Date(attemptAt));
-  const weekEnd = currentOfferWeekEnd(runDate);
+  context: ChainRefreshContext,
+): Promise<ChainRefreshResult> {
+  const { fetcher, now, sleep, runDate, offerWeekEnd: weekEnd } = context;
   let requestStarted = false;
   let discoveredStores: Store[] = [];
 
@@ -653,67 +633,26 @@ export async function buildHemkopSnapshot(
       offers.length > 0 && emptyStores.length > 0
         ? `Inga aktuella erbjudanden hämtades från: ${emptyStores.join(", ")}.`
         : undefined;
-    const completedAt = now().toISOString();
-
-    return SnapshotSchema.parse({
-      schemaVersion: SCHEMA_VERSION,
-      location: { id: location.id, name: location.name },
-      generatedAt: completedAt,
-      chains: [
-        {
-          chain: "Hemköp",
-          source: HEMKOP_SOURCE,
-          status: "ok",
-          lastAttemptAt: attemptAt,
-          lastSuccessAt: completedAt,
-          ...(warning ? { error: warning } : {}),
-        },
-      ],
+    return {
       stores: discoveredStores,
       offers,
-    });
+      ...(warning ? { warning } : {}),
+    };
   } catch (error) {
-    const previousResult = dependencies.previousSnapshot
-      ? SnapshotSchema.safeParse(dependencies.previousSnapshot)
-      : undefined;
-    const previous =
-      previousResult?.success && previousResult.data.location.id === location.id
-        ? previousResult.data
-        : undefined;
-    const previousHemkop = previous?.chains.find((chain) => chain.chain === "Hemköp");
-    const canReusePrevious =
-      previousHemkop?.source === HEMKOP_SOURCE &&
-      previousHemkop.status !== "failed";
-    const previousOffers =
-      (canReusePrevious ? previous?.offers : undefined)?.filter(
-        (offer) =>
-          offer.chain === "Hemköp" &&
-          offer.validTo >= runDate &&
-          (!offer.validFrom || offer.validFrom <= weekEnd),
-      ) ?? [];
-    const stale = previousOffers.length > 0;
     const message = error instanceof Error ? error.message : "Okänt fel.";
-    const surfacedMessage = message.slice(0, 240);
-    const failedAt = now().toISOString();
-
-    return SnapshotSchema.parse({
-      schemaVersion: SCHEMA_VERSION,
-      location: { id: location.id, name: location.name },
-      generatedAt: failedAt,
-      chains: [
-        {
-          chain: "Hemköp",
-          source: HEMKOP_SOURCE,
-          status: stale ? "stale" : "failed",
-          lastAttemptAt: attemptAt,
-          lastSuccessAt: canReusePrevious ? previousHemkop?.lastSuccessAt ?? null : null,
-          error: surfacedMessage,
-        },
-      ],
-      stores: stale
-        ? previous?.stores.filter((store) => store.chain === "Hemköp") ?? []
-        : discoveredStores,
-      offers: stale ? previousOffers : [],
-    });
+    throw new ChainRefreshError(message.slice(0, 240), discoveredStores);
   }
+}
+
+export const HEMKOP_SOURCE_ADAPTER: ChainSourceAdapter<HemkopLocation> = {
+  chain: "Hemköp",
+  source: HEMKOP_SOURCE,
+  refresh: refreshHemkop,
+};
+
+export function buildHemkopSnapshot(
+  location: HemkopLocation,
+  dependencies: HemkopJobDependencies = {},
+): Promise<Snapshot> {
+  return buildSnapshot(location, [HEMKOP_SOURCE_ADAPTER], dependencies);
 }

@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "location": {
+    "id": "linkoping",
+    "name": "Linköping"
+  },
+  "generatedAt": "2026-11-16T05:00:00.000Z",
+  "chains": [
+    {
+      "chain": "ICA",
+      "source": "ica-first-party",
+      "status": "ok",
+      "lastAttemptAt": "2026-11-16T05:00:00.000Z",
+      "lastSuccessAt": "2026-11-16T05:00:00.000Z"
+    },
+    {
+      "chain": "Coop",
+      "source": "coop-tjek",
+      "status": "ok",
+      "lastAttemptAt": "2026-11-16T05:00:00.000Z",
+      "lastSuccessAt": "2026-11-16T05:00:00.000Z"
+    }
+  ],
+  "stores": [
+    {
+      "id": "ICA:fixture-1",
+      "chain": "ICA",
+      "name": "ICA Supermarket Linköping",
+      "address": "Storgatan 1, Linköping"
+    },
+    {
+      "id": "Coop:fixture-1",
+      "chain": "Coop",
+      "name": "Stora Coop Linköping",
+      "address": "Västra Svedengatan 12, Linköping"
+    }
+  ],
+  "offers": [
+    {
+      "id": "ica-previous",
+      "chain": "ICA",
+      "storeId": "ICA:fixture-1",
+      "name": "Havregryn",
+      "mechanicText": "15 kr/st",
+      "category": "Skafferi",
+      "validFrom": "2026-11-16",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://www.ica.se/erbjudanden/fixture",
+      "price": 15,
+      "unitPrice": 15
+    },
+    {
+      "id": "ica-expired",
+      "chain": "ICA",
+      "storeId": "ICA:fixture-1",
+      "name": "Utgånget havregryn",
+      "mechanicText": "12 kr/st",
+      "category": "Skafferi",
+      "validFrom": "2026-11-09",
+      "validTo": "2026-11-15",
+      "sourceUrl": "https://www.ica.se/erbjudanden/fixture",
+      "price": 12,
+      "unitPrice": 12
+    },
+    {
+      "id": "ica-next-week",
+      "chain": "ICA",
+      "storeId": "ICA:fixture-1",
+      "name": "Nästa veckas havregryn",
+      "mechanicText": "14 kr/st",
+      "category": "Skafferi",
+      "validFrom": "2026-11-23",
+      "validTo": "2026-11-29",
+      "sourceUrl": "https://www.ica.se/erbjudanden/fixture",
+      "price": 14,
+      "unitPrice": 14
+    },
+    {
+      "id": "coop-previous",
+      "chain": "Coop",
+      "storeId": "Coop:fixture-1",
+      "name": "Gammalt ägg",
+      "mechanicText": "25 kr/förpackning",
+      "category": "Mejeri & ost",
+      "validFrom": "2026-11-16",
+      "validTo": "2026-11-22",
+      "sourceUrl": "https://www.coop.se/erbjudanden/fixture",
+      "price": 25,
+      "unitPrice": 25
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { act, cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { App } from "../src/App";
 import snapshotFixture from "./fixtures/snapshots/linkoping.json";
+import multiChainFixture from "./fixtures/snapshots/multi-chain-previous.json";
 
 afterEach(() => {
   cleanup();
@@ -165,6 +166,43 @@ describe("Offers app", () => {
     );
     expect(screen.getByText("Krossade tomater")).toBeVisible();
     expect(screen.getByText("Kan vara inaktuellt")).toBeVisible();
+  });
+
+  it("shows separate stale and failed Chain banners in a multi-Chain Snapshot", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
+    const snapshot = JSON.parse(JSON.stringify(multiChainFixture));
+    snapshot.generatedAt = "2026-11-17T09:00:00.000Z";
+    snapshot.chains[0].status = "stale";
+    snapshot.chains[0].error = "ICA svarade med HTTP 503.";
+    snapshot.chains[1].status = "failed";
+    snapshot.chains[1].lastSuccessAt = null;
+    snapshot.chains[1].error = "Coop svarade med HTTP 503.";
+    snapshot.offers = snapshot.offers.filter(
+      (offer: { chain: string }) => offer.chain === "ICA",
+    );
+    vi.stubGlobal("fetch", async () => Response.json(snapshot));
+
+    render(<App />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const banners = screen.getAllByRole("alert");
+    expect(banners).toHaveLength(2);
+    expect(banners[0]).toHaveTextContent("ICA kunde inte uppdateras");
+    expect(banners[0]).toHaveTextContent("16 nov. 2026");
+    expect(banners[0]).toHaveTextContent("ICA svarade med HTTP 503.");
+    expect(banners[1]).toHaveTextContent("Coop kunde inte uppdateras");
+    expect(banners[1]).toHaveTextContent("Ingen tidigare lyckad uppdatering finns");
+    expect(banners[1]).toHaveTextContent("Coop svarade med HTTP 503.");
+    expect(screen.getByRole("heading", { name: "Havregryn" })).toBeVisible();
+    expect(screen.getByText("Kan vara inaktuellt")).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Gammalt ägg" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Nästa veckas havregryn" })).not.toBeInTheDocument();
+    expect(screen.getByText(/senast uppdaterad/i)).toBeVisible();
   });
 
   it("reports a failed Snapshot request instead of showing an empty Offer list", async () => {
