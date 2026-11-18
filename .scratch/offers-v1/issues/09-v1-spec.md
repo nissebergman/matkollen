@@ -1,7 +1,7 @@
 # Spec: Weekly grocery Offers in one view (v1)
 
 Type: spec
-Status: implemented (source validation tracked separately)
+Status: resolved
 Labels: v1
 Blocked by:
 Parent: ../map.md
@@ -77,7 +77,8 @@ The app never calls the Chains live. A scheduled job fetches each Chain's Offers
 illustrations. Images are generated as 192×192 JPEGs by `sharp` and published
 with the app; the browser never loads remote Offer `imageUrl`s. Unmatched or
 failed images use a placeholder. Catalogue and source details are in
-[`README.md`](../../../README.md#local-product-image-database).
+[`README.md`](../../../README.md#local-product-image-database); the work is
+tracked in [ticket 12](../../offers-v1-implementation/issues/12-show-local-product-illustrations.md).
 
 ## Implementation Decisions
 
@@ -100,7 +101,7 @@ failed images use a placeholder. Catalogue and source details are in
 
 | Chain | Primary source | Fallback |
 |---|---|---|
-| ICA | Tjek/eReklamblad, configured after first-party access returned HTTP 403; the 2026-11-18 refresh published Offers for all 12 discovered Stores | First-party path is not automatically retried; a bounded sample found member-price fields in 2 of 21 Offers, while broader prevalence and live-record normalization remain unverified |
+| ICA | Tjek/eReklamblad, configured after first-party access returned HTTP 403; the 2026-11-18 refresh published Offers for all 12 discovered Stores | First-party path is not automatically retried; a bounded 36-Offer live sample confirmed member-price normalization (11 records) but found no regular prices or text mechanics; multi-buy mechanics remain unverified |
 | Coop | Tjek/eReklamblad; the 2026-11-17 refresh published Offers for all six configured Stores | Experimental flyer-PDF adapter fails closed on an ambiguous live row; see [ticket 11](../../offers-v1-implementation/issues/11-switch-coop-to-flyer-pdfs.md) |
 | Hemköp | Axfood first-party campaign API; the 2026-11-18 refresh published Offers for all seven configured Stores | Tjek's Incito Offer lookup returned one member-price sample, but live Store discovery and broad coverage remain unverified; see [ticket 10](../../offers-v1-implementation/issues/10-switch-ica-and-hemkop-to-tjek.md) |
 

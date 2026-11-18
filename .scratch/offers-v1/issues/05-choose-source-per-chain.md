@@ -9,7 +9,9 @@ Parent: ../map.md
 
 Given the research findings, which source does the snapshot job use for ICA, Coop and Hemköp? Choose between each Chain's own source, one aggregator for all Chains, or a mix. Weigh coverage, field richness, stability and ToS risk, and record a fallback for each Chain.
 
-## Decision (2026-11-18)
+## Answer
+
+_Resolved 2026-11-18._
 
 The configured source is selected independently per Chain in
 `src/snapshot/locations.json`:

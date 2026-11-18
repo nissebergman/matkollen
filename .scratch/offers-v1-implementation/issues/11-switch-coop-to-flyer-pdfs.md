@@ -39,6 +39,18 @@ Offers. This confirms one-Store Store-detail/flyer discovery and fail-closed
 behavior, but the real flyer still does not parse accurately. Keep Tjek
 configured and this ticket blocked.
 
+**Status note (2026-11-18, bounded full-Location check):** The production
+flyer-PDF adapter ran for the configured Linköping Location with a 30-request
+budget; it used five. The public Store page, its script, the Store map and
+one Store-detail request all returned HTTP 200, and live discovery found all
+six configured Stores (`Coop:2303`, `239`, `240`, `238`, `3868`, `3867`)
+without persisting the key. The first Store's current flyer (Stora Coop
+Garnisonen) was fetched, and the parser failed the Chain on the ambiguous row
+`103:15`, publishing zero Offers. Store discovery is now verified live for the
+whole Location; flyer discovery for the other five Stores and accurate
+real-flyer extraction remain unverified. Keep Tjek configured and this ticket
+blocked.
+
 - [ ] Discover the configured Location's Coop Stores and their current Store-specific flyers, obtaining any public-page configuration needed at runtime without storing credentials.
 - [x] Extract representative Offers from flyer PDF fixtures with the correct Store, validity, name and mechanic; preserve available product and price details and never invent a numeric price.
 - [x] The fallback produces the shared Snapshot contract and displays Offers without app changes; configuration can switch back to Tjek.

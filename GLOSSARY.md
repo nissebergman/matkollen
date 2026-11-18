@@ -4,6 +4,8 @@ A household tool that gathers the current week's supermarket Offers in one filte
 
 ## Language
 
+The _Avoid_ lists govern English text: code, docs, tickets and commit messages. The Swedish UI copy uses ordinary Swedish words, so "erbjudande" and "butik" are correct there.
+
 **Offer**:
 A promotional price set by a Store on a product for a limited period. Member-only prices count as ordinary Offers. The household is assumed to be a member of every Chain.
 _Avoid_: Deal, discount, campaign, erbjudande

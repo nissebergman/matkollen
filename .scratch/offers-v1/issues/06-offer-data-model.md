@@ -9,7 +9,9 @@ Parent: ../map.md
 
 What is the shape of one normalised Offer in the snapshot the SPA reads? Cover the required and optional fields, how offer mechanics are represented ("2 för 30 kr", "3 för 2", per-kg prices, max-purchase limits), the comparison price, validity, Store/Chain references, images, and what "discount" means for sorting when the original price is missing. Also decide the shape of the snapshot file as a whole, such as one file per Location versus per Store.
 
-## Decision (2026-11-18)
+## Answer
+
+_Resolved 2026-11-18._
 
 Resolved by the implemented, versioned Snapshot contract documented in
 [the v1 spec](09-v1-spec.md#snapshot-contract-resolves-ticket-06) and

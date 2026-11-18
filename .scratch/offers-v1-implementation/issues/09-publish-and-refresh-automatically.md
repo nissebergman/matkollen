@@ -12,6 +12,20 @@
 - [x] No source credentials are committed or stored as CI secrets; the workflow and publication behaviour are verified without requiring live endpoints in the automated tests.
 - [x] Document that GitHub Pages may be publicly accessible and verify that the chosen repository and Pages visibility are acceptable before publishing household data.
 
+## Answer
+
+The public Pages site is live at
+<https://nissebergman.github.io/matkollen/>. Run
+[44256936947](https://github.com/nissebergman/matkollen/actions/runs/44256936947)
+deployed Snapshot commit
+[60ce187](https://github.com/nissebergman/matkollen/commit/60ce187) with every
+Chain fresh: ICA 787 Offers across 12 Stores (Tjek), Coop 293 across six (Tjek)
+and Hemköp 452 across seven (Axfood). The app and Snapshot URLs return HTTP
+200, and the deployed bundle requests the Location Snapshot under
+`/matkollen/snapshots/`. An earlier partial run, recorded under Comments,
+confirmed that a failing Chain still publishes and then fails the workflow as
+designed. No source credentials or CI source secrets were used.
+
 ## Comments
 
 The workflow is integrated and the user approved publishing to the public
@@ -54,6 +68,19 @@ but GitHub's workflow API still reports no registered workflows. Pages remains
 disabled and no deployment has run; retry workflow registration after the
 default-branch push is indexed.
 
+**Status note (2026-11-18, first deployment, partial refresh):** Manual run
+[44246089770](https://github.com/nissebergman/matkollen/actions/runs/44246089770)
+generated and deployed Snapshot commit
+[3b56b4c](https://github.com/nissebergman/matkollen/commit/3b56b4c) at
+2026-11-18T05:49:13Z. It contains 293 fresh Coop Tjek Offers and no fixture
+Chains or Offers. ICA's anonymous token request returned HTTP 403, and
+Hemköp's first-party campaign response had an unsupported `comparePrice`
+shape; both failed closed with no Offers. The Pages deployment succeeded, and
+the workflow then reported the partial refresh as failed as designed. The app
+and Snapshot URLs return HTTP 200, and the deployed bundle requests the
+Location Snapshot under `/matkollen/snapshots/`. No source credentials or CI
+source secrets were used.
+
 **Status note (2026-11-18, after publication):** The Hemköp `comparePrice`
 failure was traced to an observed price range and fixed locally with offline
 regression coverage; see ticket 01 and the Hemköp source notes. The deployed
@@ -69,19 +96,3 @@ successfully deployed Snapshot commit
 Snapshot reports all Chains fresh: ICA 787 Offers across 12 Stores, Coop 293
 across six, and Hemköp 452 across seven; each discovered Store has Offers.
 ICA member-price compatibility and Tjek's terms risks remain documented.
-
-## Answer
-
-The public Pages site is live at
-<https://nissebergman.github.io/matkollen/>. Manual run
-[44246089770](https://github.com/nissebergman/matkollen/actions/runs/44246089770)
-generated and deployed Snapshot commit
-[3b56b4c](https://github.com/nissebergman/matkollen/commit/3b56b4c) at
-2026-11-18T05:49:13Z. It contains 293 fresh Coop Tjek Offers and no fixture
-Chains or Offers. ICA's anonymous token request returned HTTP 403, and
-Hemköp's first-party campaign response had an unsupported `comparePrice`
-shape; both failed closed with no Offers. The Pages deployment succeeded, and
-the workflow then reported the partial refresh as failed as designed. The app
-and Snapshot URLs return HTTP 200, and the deployed bundle requests the
-Location Snapshot under `/matkollen/snapshots/`. No source credentials or CI
-source secrets were used.

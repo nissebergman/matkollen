@@ -61,6 +61,32 @@ of those specific live records. No Hemköp Tjek requests were made because its
 documented visit window was closed. Keep the remaining live-validation
 criterion open.
 
+**Status note (2026-11-18, bounded ICA normalization check):** The production
+Tjek adapter ran end to end against live data, limited by a request-budget
+wrapper to three Linköping Stores and 12 Offer IDs per publication (47
+requests, no retries, adapter delays unchanged). ICA finished `ok` with 36
+Offers. Unlike earlier samples, the raw Offer records were retained (outside
+the repository) and compared with the normalized output:
+- 11 of 36 records had `membershipPrice` and no `price`; each normalized to the
+  member price as the Offer price, with `unitPrice` and `priceUnit` taken from
+  the source. Member pricing for ICA via Tjek now works on live records.
+- No record carried text mechanics (`offerText`, `priceText`, member-price
+  text) or a multi-buy, so `mechanicText` is always generated from the numeric
+  price (for example "33 kr", "20 kr/kg"). Multi-buy mechanics remain
+  unverified live.
+- No record carried `regularPrice`, `ordinaryPrice` or `originalPrice`, so ICA
+  Offers via Tjek never show a discount.
+- One record (`LJUSSLINGOR`) had only `unitPrice: 0`. The adapter normalized
+  it to price 0 and "0 kr/st"; the app hides zero-price Offers, so no false
+  price is shown, but the Offer is silently dropped. This conflicted with
+  "Parsing must never invent a price". Fixed: the adapter now treats a zero
+  Tjek amount as a placeholder, leaves the numeric price fields empty and
+  shows "Se reklambladet" when nothing else is displayable; a Snapshot-job
+  regression covers it.
+Hemköp was not probed: its documented visit window (04:00–08:45 UTC) was
+closed. Keep the live-validation criterion open for Hemköp Store discovery and
+multi-buy mechanics.
+
 - [x] Each Chain can independently select Tjek through Location configuration.
 - [x] Each fallback Chain discovers its Stores and produces Offers in the existing Snapshot contract through offline Snapshot-job fixtures.
 - [x] A bounded ICA sample verifies current Store-labeled publications and 21 Offer associations/validity; two samples included a member-price field.

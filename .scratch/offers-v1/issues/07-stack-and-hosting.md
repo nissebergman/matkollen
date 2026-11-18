@@ -9,7 +9,9 @@ Parent: ../map.md
 
 What framework, language and build tool does the SPA use? Where and how does the scheduled snapshot job run (for example GitHub Actions cron or a serverless function), where is the snapshot stored, and where is the SPA hosted? Constraints that follow from the chosen sources (needed secrets, IP blocking, runtime) must be satisfied.
 
-## Decision (2026-11-18)
+## Answer
+
+_Resolved 2026-11-18._
 
 Resolved: TypeScript, React and Vite for the SPA; a TypeScript Snapshot job
 scheduled and manually dispatched by GitHub Actions; static Snapshot and app
