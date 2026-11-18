@@ -76,6 +76,7 @@ validation passed: `npm test` (8 files, 61 tests), `npm run build`, and
 comments in Zod dependencies. The Hemköp adapter now supports the observed
 Incito Offer-ID route after a 404 from `paged-publications`; an offline
 Snapshot-job test replays the sanitized live member-price Offer with synthetic
-Store discovery. The bounded ICA sample still has no member-price field, and
-Hemköp Store discovery is not live-verified, so the final live-validation
-criterion remains open.
+Store discovery. The earlier bounded ICA sample had no member-price field; a
+later 50-request sample found fields in 2 of 21 Offer lookups but did not retain
+the raw Offer records or verify their normalization. Hemköp Store discovery is
+not live-verified, so the final live-validation criterion remains open.
