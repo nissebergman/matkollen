@@ -4,28 +4,29 @@
     "id": "linkoping",
     "name": "Linköping"
   },
-  "generatedAt": "2026-11-18T07:36:51.778Z",
+  "generatedAt": "2026-11-18T14:23:36.536Z",
   "chains": [
     {
       "chain": "ICA",
       "source": "tjek-ereklamblad",
       "status": "ok",
-      "lastAttemptAt": "2026-11-18T07:11:57.205Z",
-      "lastSuccessAt": "2026-11-18T07:27:13.198Z"
+      "lastAttemptAt": "2026-11-18T14:01:51.350Z",
+      "lastSuccessAt": "2026-11-18T14:17:33.912Z"
     },
     {
       "chain": "Coop",
       "source": "coop-tjek",
       "status": "ok",
-      "lastAttemptAt": "2026-11-18T07:27:13.209Z",
-      "lastSuccessAt": "2026-11-18T07:33:05.589Z"
+      "lastAttemptAt": "2026-11-18T14:17:33.928Z",
+      "lastSuccessAt": "2026-11-18T14:23:36.526Z"
     },
     {
       "chain": "Hemköp",
       "source": "hemkop-first-party",
-      "status": "ok",
-      "lastAttemptAt": "2026-11-18T07:33:05.594Z",
-      "lastSuccessAt": "2026-11-18T07:36:51.772Z"
+      "status": "stale",
+      "lastAttemptAt": "2026-11-18T14:23:36.531Z",
+      "lastSuccessAt": "2026-11-18T07:36:51.772Z",
+      "error": "Hemköps besöksfönster är 04:00–08:45 UTC; ingen begäran skickades."
     }
   ],
   "stores": [
@@ -1882,15 +1883,12 @@
       "chain": "ICA",
       "storeId": "ICA:gL3lB3JLe_uCGDn0RvmRB",
       "name": "LJUSSLINGOR",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "ICA. Gäller alla utomhusljusslingor från ICA. Ord pris 89-399:-/st. 30dgr.pris 89-399:-/st.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FtsqeGyOT%2Fp-1.webp&w=300&x1r=0.04&x2r=0.37&y1r=0.72&y2r=0.96&s=2eab1b26123b165d02b1d15f50e32a50",
       "sourceCategory": "home"
@@ -2812,15 +2810,12 @@
       "chain": "ICA",
       "storeId": "ICA:gL3lB3JLe_uCGDn0RvmRB",
       "name": "NUK BABY",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "NUK. Gäller alla nappar, nappflaskor och muggar från NUK.\nOrd pris 99:90-129:00/st. 30dgr.pris 99:90-129:00/st.",
       "category": "Barn",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FtsqeGyOT%2Fp-12.webp&w=300&x1r=0.322&x2r=0.65&y1r=0.37&y2r=0.638&s=a0d4f2132f199df62a9abca643016e03",
       "sourceCategory": "baby"
@@ -3117,15 +3112,12 @@
       "chain": "ICA",
       "storeId": "ICA:gL3lB3JLe_uCGDn0RvmRB",
       "name": "KÖKSREDSKAP",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "Gastromax. Passar till alla typer av stek- och kokkärl. Ord pris 29:90/st.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FtsqeGyOT%2Fp-14.webp&w=300&x1r=0.043&x2r=0.495&y1r=0.295&y2r=0.493&s=6d7249642be50a9d852b321f66d410ee",
       "sourceCategory": "home"
@@ -3189,15 +3181,12 @@
       "chain": "ICA",
       "storeId": "ICA:gL3lB3JLe_uCGDn0RvmRB",
       "name": "KALENDERLJUS",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "ICA. Välj mellan flera olika storlekar och modeller. Ord pris 99:90/st. 30dgr.pris 99:90/st.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FtsqeGyOT%2Fp-15.webp&w=300&x1r=0.045&x2r=0.495&y1r=0.03&y2r=0.49&s=9f434032dadaa13569bff23f310a54fc",
       "sourceCategory": "home"
@@ -3279,15 +3268,12 @@
       "chain": "ICA",
       "storeId": "ICA:gL3lB3JLe_uCGDn0RvmRB",
       "name": "MUGGAR",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "ICA. Porslin. Välj mellan flera olika storlekar och modeller. Vi bjuder på den billigaste!",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FtsqeGyOT%2Fp-15.webp&w=300&x1r=0.505&x2r=0.955&y1r=0.505&y2r=0.96&s=f1a20001caa40ff3463d676b14587386",
       "sourceCategory": "home"
@@ -3369,15 +3355,12 @@
       "chain": "ICA",
       "storeId": "ICA:gL3lB3JLe_uCGDn0RvmRB",
       "name": "AVFALLSPÅSE",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "Praktisk avfallspåse med dragsnöre för enkel förslutning! Ninjaplast. 15-pack. Välj mellan 20-35 liter. 100% återvunnen polyeten. Slitstarka med treskiktslager. Vi bjuder på den billigaste! Ord pris 20:90 - 24:90/frp.",
       "category": "Hushåll & hygien",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
-      "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
+      "priceUnit": "l",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FtsqeGyOT%2Fp-16.webp&w=300&x1r=0.05&x2r=0.48&y1r=0.22&y2r=0.37&s=00a9da3d8bb0afd09b43c9f25adb9431",
       "sourceCategory": "household"
@@ -3673,15 +3656,12 @@
       "chain": "ICA",
       "storeId": "ICA:gL3lB3JLe_uCGDn0RvmRB",
       "name": "DAM- & BARN-STRUMPBYXOR",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "mywear. Stl Dam 36/38-48/50. Barn 86/92-146/152. Ord pris 59:90-129:-/frp.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FtsqeGyOT%2Fp-17.webp&w=300&x1r=0.201&x2r=0.407&y1r=0.342&y2r=0.493&s=e2c60a2cc209adc4cd81cf1bc406fad1",
       "sourceCategory": "apparel"
@@ -3763,15 +3743,12 @@
       "chain": "ICA",
       "storeId": "ICA:gL3lB3JLe_uCGDn0RvmRB",
       "name": "SHAPING",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "mywear. Stl 36/38-48/50. Ord pris 99-129:-/st. 30dgr.pris 99-129:-/st.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FtsqeGyOT%2Fp-17.webp&w=300&x1r=0.59&x2r=0.957&y1r=0.808&y2r=0.962&s=b1fad0a0cca1132aee10e8407de215d9",
       "sourceCategory": "apparel"
@@ -3992,15 +3969,12 @@
       "chain": "ICA",
       "storeId": "ICA:gL3lB3JLe_uCGDn0RvmRB",
       "name": "RESVÄSKOR",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "Cavalet. Välj mellan tre olika storlekar. Ord pris 1299-1699:-/st. 30dgr.pris 1299-1699:-/st.",
       "category": "Övrigt",
       "validTo": "2026-11-29",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FtsqeGyOT%2Fp-19.webp&w=300&x1r=0.06&x2r=0.57&y1r=0.58&y2r=0.94&s=d28571ad3a0287be37a8f54d6025f4fe",
       "sourceCategory": "outdoor"
@@ -8694,7 +8668,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:372dCuz:Rz3xyLYV5M1Iw-9YSDMZ7",
+      "id": "ica:372dCuz:DkDlFIrdf5Rw_GzEhLi7B",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Smördeg, Pajdeg",
@@ -8712,7 +8686,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:372dCuz:ozO0XulZMT-nlDIQAaCWk",
+      "id": "ica:372dCuz:BskgTiwTrq_GEM_pcK7Bn",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Frysta grönsaker",
@@ -8729,7 +8703,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:372dCuz:UqtlJMaDxDiFO_Zxj1nGi",
+      "id": "ica:372dCuz:x_1BTdbNdsgGIC0jI_OFZ",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Jubileumskakor",
@@ -8747,7 +8721,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:372dCuz:GvolPk4tMvweWu_kDmO_U",
+      "id": "ica:372dCuz:UlJbeKbMqmxqy7a_CzVGY",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Paneer",
@@ -8765,7 +8739,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:372dCuz:ROd4dS7q8fqdwEpk4m7V8",
+      "id": "ica:372dCuz:YuONjAvzSWrKkrN5Pgk-Q",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Marina sallader, röror",
@@ -8783,7 +8757,7 @@
       "sourceCategory": "cold-cuts"
     },
     {
-      "id": "ica:372dCuz:2a_Pagcz2ipvEOaCHPB-A",
+      "id": "ica:372dCuz:3ZM7oRHwTeVCu_DFBTpVi",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Surimisticks",
@@ -8801,7 +8775,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:372dCuz:RZsbDjcW7ZOR1JShzZlsU",
+      "id": "ica:372dCuz:YoIjCpX6sb9jINtl523Xm",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Gräddfil",
@@ -8819,7 +8793,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:372dCuz:QA4ZxpaD8Vbfom1_sqltD",
+      "id": "ica:372dCuz:SCBGEpXMLreMDYpwL70ES",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Sköljmedel",
@@ -8837,7 +8811,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:372dCuz:8412rOgLrtgiBY5MPaGzn",
+      "id": "ica:372dCuz:gDyrflSuSi-aUf7ol82vS",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Avfallspåse 30L",
@@ -8855,7 +8829,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:372dCuz:KpwTXYBbtm0pp2Th7QC3a",
+      "id": "ica:372dCuz:KVIagc9SEDD_kTtUBAinp",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Toalettpapper, hushållspapper",
@@ -8873,7 +8847,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:372dCuz:9HReLWwwxQL1UvOiYgIrS",
+      "id": "ica:372dCuz:nVcGjBLq6ntxSTgrbtxxm",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Deo roll on",
@@ -8891,7 +8865,7 @@
       "sourceCategory": "beauty"
     },
     {
-      "id": "ica:372dCuz:89nj4vpRnPH79ClLf5sTn",
+      "id": "ica:372dCuz:Tb5n1DBHN5KgM57VYRMxf",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Fryspåsar, Plastpåsar",
@@ -8909,7 +8883,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:372dCuz:URsG2bamdC_2sXFQMMOFQ",
+      "id": "ica:372dCuz:6EQH7jRT89cAKHpBJbpzO",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Fruktsmoothie, Puré",
@@ -8927,7 +8901,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:372dCuz:XPxkQOTdY7GwLVIA55mV6",
+      "id": "ica:372dCuz:5Wxvp6zQ-21J-iB_a05fl",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Fruktsmoothie, Puré",
@@ -8945,7 +8919,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:372dCuz:wk42GnonbQqnmgTcHc7Xq",
+      "id": "ica:372dCuz:nEgELbsChgqp-QAyX54WW",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Blöjor",
@@ -8963,7 +8937,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:372dCuz:OQsV7h4-IdDiX-RghYJZ6",
+      "id": "ica:372dCuz:o1Ua-W_nPAiEw0YJMQNi_",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Ryggbiff i bit",
@@ -8980,7 +8954,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:372dCuz:JheR-tICe4Irez24bd4do",
+      "id": "ica:372dCuz:xYi5hcFcDlrIDHrdhKTOr",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Umamifärs",
@@ -8998,7 +8972,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:372dCuz:vNtNBh-uNh7nqnxmyJTe9",
+      "id": "ica:372dCuz:_QVDJ7oTSC1FhfKcMQKbS",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Färsk panerad schnitzel",
@@ -9016,7 +8990,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:372dCuz:8YsC7-vv7usDXL0Dpn6n1",
+      "id": "ica:372dCuz:pKU5-hYDQhMTgG66j6k3N",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Benfri fläsklägg",
@@ -9033,7 +9007,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:372dCuz:M7G-0VsmBP4clTHVajsv9",
+      "id": "ica:372dCuz:irmyuhYshs3_U_NPm8gTe",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Kryddad kyckling",
@@ -9050,7 +9024,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:372dCuz:CcDLB7r_9shdUkUmtfGHm",
+      "id": "ica:372dCuz:-zbgSS2I9rRd3pMKTZhfN",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Grillkorv",
@@ -9208,7 +9182,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:372dCuz:o67V8hXOdaTfEjdihhYl9",
+      "id": "ica:372dCuz:HoHXDBLG0CD2QjRkmySWI",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Cheddar",
@@ -9225,7 +9199,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:372dCuz:MTNJxnD9bBVtuEwOT-eor",
+      "id": "ica:372dCuz:7M5exkIKxS2xBSAfwhmtJ",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Fast potatis i påse",
@@ -9242,7 +9216,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:372dCuz:SlqnfSLQVOdLdsalV_8DA",
+      "id": "ica:372dCuz:6xFTFI0Uwp6ZDruPRlmMh",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Stor grön kiwi",
@@ -9382,7 +9356,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:372dCuz:nOxI0GLEbG1zWLN9L9eH3",
+      "id": "ica:372dCuz:Bke7nVDTczANBZeAShGvo",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Juice",
@@ -9399,7 +9373,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:372dCuz:nvqO9NAes_s9PbZYm8ziP",
+      "id": "ica:372dCuz:uCwy4p6Uogos7w21uKDnh",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Herrgård®, Präst®, Grevé®",
@@ -9416,7 +9390,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:372dCuz:PFF6pxhOtjZ_4Y9rse870",
+      "id": "ica:372dCuz:j1FyA88xSGta4xDizKAKJ",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Kaffe",
@@ -9434,7 +9408,7 @@
       "sourceCategory": "colonial"
     },
     {
-      "id": "ica:372dCuz:89uFq1Ud99oLUeWDSrVps",
+      "id": "ica:372dCuz:BsKi2dhwVgLHsCxx7vF8C",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Barista havredryck",
@@ -9451,7 +9425,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:372dCuz:cpgm_N0vmMcb5ALdR044p",
+      "id": "ica:372dCuz:YT2qNdhlzNL-nDQFYwSDV",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Bordsmargarin",
@@ -9468,7 +9442,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:372dCuz:EVbs2-E7iKrBM7N4dm4uu",
+      "id": "ica:372dCuz:6uw1sL9CF4_lQkgumCmSp",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Vetemjöl",
@@ -9485,7 +9459,7 @@
       "sourceCategory": "colonial"
     },
     {
-      "id": "ica:372dCuz:cvIdVaSc1Js68f-vGjH67",
+      "id": "ica:372dCuz:3fZbWjBsFN_GLZC3DVM05",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Cheddar",
@@ -9502,7 +9476,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:372dCuz:nzStOCU3DOM9gicY7GXhI",
+      "id": "ica:372dCuz:mZGdDNdVblFJ-haFYSLQz",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Kolsyrat vatten",
@@ -9520,7 +9494,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:372dCuz:LNL5DQpDSzt3l64QDFD6J",
+      "id": "ica:372dCuz:6oU7ae8Z6XsaIipE_gxhJ",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Normalgräddat-, Brungräddat trekantsknäcke",
@@ -9538,7 +9512,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:372dCuz:3ggY89W6-DQFeHVlChHl8",
+      "id": "ica:372dCuz:p_K9z6HAHnMpfXk5Luhod",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Fast potatis i påse",
@@ -9555,7 +9529,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:372dCuz:yC6mlHNep-qnJIAvFQp7h",
+      "id": "ica:372dCuz:65y2mXHEqtHdirIb9zfNg",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Jubileumskakor",
@@ -9573,7 +9547,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:372dCuz:dy7AelYnhWTHX88MKZu58",
+      "id": "ica:372dCuz:r-HpkazLYMvN1vhUDYnp8",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Toalettpapper, hushållspapper",
@@ -9591,7 +9565,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:372dCuz:WSGtIFgRzk5avr_JRYqze",
+      "id": "ica:372dCuz:1Mwes07OdPTsqBGc-cftV",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Marina sallader, röror",
@@ -9609,7 +9583,7 @@
       "sourceCategory": "cold-cuts"
     },
     {
-      "id": "ica:372dCuz:qjXvyKLGCtWPePKXPzxvt",
+      "id": "ica:372dCuz:FKdjuPuDcK4tJoS_GRoH2",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Chips, Ringar och Bågar",
@@ -9626,7 +9600,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:372dCuz:x1Q0v2lGjwzLqkvRer8bA",
+      "id": "ica:372dCuz:O0BnvV2uKK28Jblur_BT4",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Chips, Ringar och Bågar",
@@ -9643,7 +9617,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:372dCuz:3M9_CtX2GnadEvFhNpqJL",
+      "id": "ica:372dCuz:17iLkBNxtuGIvYjj2gWEZ",
       "chain": "ICA",
       "storeId": "ICA:372dCuz",
       "name": "Gräddfil",
@@ -9782,7 +9756,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:80a71ez:vJ7xPmdsklWHE4yZAj_B8",
+      "id": "ica:80a71ez:MySUdnVIvrpmVQAbCLa7F",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Smördeg, Pajdeg",
@@ -9800,7 +9774,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:80a71ez:cPrBUdpVgF1SIAYKEC5oT",
+      "id": "ica:80a71ez:nRB6aThAX_mBa1zwS4K3-",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Frysta grönsaker",
@@ -9817,7 +9791,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:80a71ez:1gR9Fy6oy9T_6i4Jc6VIV",
+      "id": "ica:80a71ez:jw4B1Fq1pSvKpD6laqp7L",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Jubileumskakor",
@@ -9835,7 +9809,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:80a71ez:KjwVei--opq-vL0MOTleP",
+      "id": "ica:80a71ez:yvmGrzAUVqz8aFpTuz78m",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Paneer",
@@ -9853,7 +9827,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:80a71ez:LU4E8A7GdmTsZ1nq0b68Q",
+      "id": "ica:80a71ez:7Z1IleSjWWVnZ9F8YuDSQ",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Marina sallader, röror",
@@ -9871,7 +9845,7 @@
       "sourceCategory": "cold-cuts"
     },
     {
-      "id": "ica:80a71ez:Rc7WjpZg847BPW2acu1o1",
+      "id": "ica:80a71ez:SV0SNc07HECpPhkgbvZr0",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Surimisticks",
@@ -9889,7 +9863,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:80a71ez:WUYYhsgSEpV_MeFWBYXWL",
+      "id": "ica:80a71ez:xB3cFeCNQ72aa2EJBKuPB",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Gräddfil",
@@ -9907,7 +9881,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:80a71ez:xfKulO3YIaTDMWWSiNPpk",
+      "id": "ica:80a71ez:l7h_LrLCTBEOuzUnv5vC-",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Sköljmedel",
@@ -9925,7 +9899,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:80a71ez:Sq7Tlkw-kST1oHB96eGtG",
+      "id": "ica:80a71ez:-EEkeYIsgV2JhImUPid97",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Avfallspåse 30L",
@@ -9943,7 +9917,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:80a71ez:NTAfhm_f80XGNOwkua1xG",
+      "id": "ica:80a71ez:0sUKkhHRBx3dv2kSmaW16",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Toalettpapper, hushållspapper",
@@ -9961,7 +9935,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:80a71ez:qDkTH5desbfnIA3Pygp_H",
+      "id": "ica:80a71ez:3fZksFQ7-LXpYGbjqupZF",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Deo roll on",
@@ -9979,7 +9953,7 @@
       "sourceCategory": "beauty"
     },
     {
-      "id": "ica:80a71ez:wJQ0a7YsGWWU6GbFTmsCu",
+      "id": "ica:80a71ez:GReYrlMCWAt0xfXUqVLgP",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Fryspåsar, Plastpåsar",
@@ -9997,7 +9971,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:80a71ez:SB8z8Xnm8MK8Q41SwjkqQ",
+      "id": "ica:80a71ez:GE0GUjHq2HJBJSYt8llBA",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Fruktsmoothie, Puré",
@@ -10015,7 +9989,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:80a71ez:G0-cw9PceU0xg6Xe0i1Ts",
+      "id": "ica:80a71ez:gaZUaa3NXnEGmkMx3NS8s",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Fruktsmoothie, Puré",
@@ -10033,7 +10007,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:80a71ez:Xm0EMml-RjYW_jtGujh_P",
+      "id": "ica:80a71ez:465eajPavDurxur2Ddvgi",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Blöjor",
@@ -10051,7 +10025,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:80a71ez:VwrDmlaDSMy0LVIa-9XzK",
+      "id": "ica:80a71ez:P4U90YEScdGmWPiyaFgkK",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Ryggbiff i bit",
@@ -10068,7 +10042,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:80a71ez:JTscwsQCEskKD_t2JjK9B",
+      "id": "ica:80a71ez:TlbM3v66qeMOCGinSK5vP",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Umamifärs",
@@ -10086,7 +10060,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:80a71ez:wmB0jHoZ8Oass1fHPohhh",
+      "id": "ica:80a71ez:ABN8nleHFW4yCgkEosqHH",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Färsk panerad schnitzel",
@@ -10104,7 +10078,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:80a71ez:GF84s5e8abMy-NeQGLyPw",
+      "id": "ica:80a71ez:92KdMRKTDFt6ANIEAYHSc",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Benfri fläsklägg",
@@ -10121,7 +10095,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:80a71ez:gA-9b7-BzM-3GmePrzTne",
+      "id": "ica:80a71ez:xssQwvIDL2FuSy7fexpQs",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Kryddad kyckling",
@@ -10138,7 +10112,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:80a71ez:ku1o9uUKH7Ef35smF3gCa",
+      "id": "ica:80a71ez:dLUt-Q6Zr_7nZ7NsZseWA",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Grillkorv",
@@ -10155,7 +10129,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:80a71ez:Tt9vhN9VjFCkbf76LWfpC",
+      "id": "ica:80a71ez:pKYj0pxpeWV4TgurNrWlM",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Amaryllis",
@@ -10173,7 +10147,7 @@
       "sourceCategory": "garden"
     },
     {
-      "id": "ica:80a71ez:8scYfGQ4t2iSbNMQK8l61",
+      "id": "ica:80a71ez:jK_oT9-cVdAZu4BZ2PvUE",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Aubergine",
@@ -10191,7 +10165,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:80a71ez:e3RmfHxH9lQB0Z1dWmcAt",
+      "id": "ica:80a71ez:uQECecks0H1xXVp7i_JHi",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Fast potatis i påse",
@@ -10208,7 +10182,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:80a71ez:poadEmy6RVqnPSUYgEDjX",
+      "id": "ica:80a71ez:XoQNmOoOKBikZTyXvmTSK",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Plommontomater i ask",
@@ -10226,7 +10200,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:80a71ez:2QxihSnyjyO9Qk0FQTZZG",
+      "id": "ica:80a71ez:QY9F6GPWnEiV8h53NJuvQ",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Mogen avokado 3-pack",
@@ -10244,7 +10218,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:80a71ez:_BYUWzVqWgYsU5Ehetj-1",
+      "id": "ica:80a71ez:pphCwmfkHddRDLfVJLQ9R",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Nyskördade morötter i påse",
@@ -10261,7 +10235,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:80a71ez:kMutqRQuzhj6jMTK5cF2c",
+      "id": "ica:80a71ez:X4BcEG235GChYfB8cYKsF",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Äpplen Pink Lady",
@@ -10278,7 +10252,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:80a71ez:0kaZ3isIWp7MEK-emxPKv",
+      "id": "ica:80a71ez:6S7vJzXmPp9N6kS64m2Eq",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Stor grön kiwi",
@@ -10296,7 +10270,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:80a71ez:xp5KytKNAU-QPFkkjBla9",
+      "id": "ica:80a71ez:SKZWg0glVnyqUVDeRWw_u",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Cheddar",
@@ -10313,7 +10287,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:80a71ez:QK36pBxXoYfX7pC0HWp9z",
+      "id": "ica:80a71ez:2sS5dwvDHe5Ie3HalYMjX",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Fast potatis i påse",
@@ -10330,7 +10304,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:80a71ez:rHrn0ZrFzfoBOV_tp-sa9",
+      "id": "ica:80a71ez:PVhvRaJlK8vEcL_X662-e",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Stor grön kiwi",
@@ -10348,7 +10322,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:80a71ez:6hmDreKjsundtqPknhK6D",
+      "id": "ica:80a71ez:ENuH5KVMiyjBZRT6wKeHn",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Twist",
@@ -10366,7 +10340,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:80a71ez:gQQYBb59IKnUBX0hGVibl",
+      "id": "ica:80a71ez:cJCZ9Oki-mgBdXwMdX7hW",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Chips, Ringar och Bågar",
@@ -10383,7 +10357,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:80a71ez:eaMYf9FE3CKLXUBblXZR9",
+      "id": "ica:80a71ez:SybFR36--0C90Zay9dRTn",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Chips, Ringar och Bågar",
@@ -10400,7 +10374,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:80a71ez:R3S6cIa-czNWrp-H9RS37",
+      "id": "ica:80a71ez:Tky4E4uC7Gj4dWHlFLtlE",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Chokladstycksaker",
@@ -10417,7 +10391,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:80a71ez:2Nr6fEnLiFfgpoxnJpXCJ",
+      "id": "ica:80a71ez:46mKCGMLNCTxKucP_4uva",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Energidryck",
@@ -10435,7 +10409,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:80a71ez:3am5SFSYvng3W_XX0WiRa",
+      "id": "ica:80a71ez:iFaSJc8Y2XmKDZR3r6pmo",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Wienerbröd",
@@ -10453,7 +10427,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:80a71ez:RfqcRcOOHdzKtVsbrPSul",
+      "id": "ica:80a71ez:N0cetzcodNdfFLja-WjW5",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Gräddglass, Sorbet",
@@ -10470,7 +10444,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:80a71ez:2DLAbF7YHqw7lsUCwd67Q",
+      "id": "ica:80a71ez:FsE9jenwxIZ3MkOcSvsa8",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Juice",
@@ -10487,7 +10461,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:80a71ez:j7DSbuNWarayF6PPi5pxI",
+      "id": "ica:80a71ez:QWXeeS8n6ET0OoqZiGBiW",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Herrgård®, Präst®, Grevé®",
@@ -10504,7 +10478,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:80a71ez:oI95XLAJzB2bNS2X0dGph",
+      "id": "ica:80a71ez:VIcaGrrADmsbRGirNOJjh",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Kaffe",
@@ -10522,7 +10496,7 @@
       "sourceCategory": "colonial"
     },
     {
-      "id": "ica:80a71ez:gBaLDDwztrql83A03o5BM",
+      "id": "ica:80a71ez:EB-oiEfeBjOjKRs2_wN3E",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Barista havredryck",
@@ -10539,7 +10513,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:80a71ez:yn6J-_TP0Lxz6R9CkIkKq",
+      "id": "ica:80a71ez:2KBfkZGS28rpCEbTPZIIy",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Bordsmargarin",
@@ -10556,7 +10530,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:80a71ez:66WnLkqyHKeHdgm0Qnnfy",
+      "id": "ica:80a71ez:KyzcoyHBXy1SQKnKqI9lo",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Vetemjöl",
@@ -10573,7 +10547,7 @@
       "sourceCategory": "colonial"
     },
     {
-      "id": "ica:80a71ez:JCO1e-Ffe0ofB_qsHHEC4",
+      "id": "ica:80a71ez:qEo96Rv7IyjhQYIdkT2FQ",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Cheddar",
@@ -10590,7 +10564,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:80a71ez:q4xGF2_pRGUAiGIz-ma3f",
+      "id": "ica:80a71ez:jH4RJb0fABDSlpW_Bl3Xb",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Kolsyrat vatten",
@@ -10608,7 +10582,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:80a71ez:tvb91KyS4rdHldtkoD1Vt",
+      "id": "ica:80a71ez:SoBlI7VwiGhL15WbfS8P-",
       "chain": "ICA",
       "storeId": "ICA:80a71ez",
       "name": "Normalgräddat-, Brungräddat trekantsknäcke",
@@ -10870,7 +10844,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:dlj8LYAe2ws1VyozcI4lo",
+      "id": "ica:750cypl:kTHJXlN9PwT4HBloHjpvK",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Smördeg, Pajdeg",
@@ -10888,7 +10862,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:750cypl:XJc4rv_sHR5qprqNMAsMm",
+      "id": "ica:750cypl:KAd_0YyV2tZi6oTdhSrJR",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Frysta grönsaker",
@@ -10905,7 +10879,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:750cypl:5L34QvdKGkhTRUfIZf6EN",
+      "id": "ica:750cypl:B6cugOnDMuDCYD7aCu0UH",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Jubileumskakor",
@@ -10923,7 +10897,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:750cypl:KW9r1x4KjI7EPOXJIzEFp",
+      "id": "ica:750cypl:WND9IAq6uucKi_U2w98r8",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Paneer",
@@ -10941,7 +10915,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:750cypl:U2hB9yocuVgXUhIR1oBS2",
+      "id": "ica:750cypl:NE_zcN1F7gj9oUHPqDFCv",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Marina sallader, röror",
@@ -10959,7 +10933,7 @@
       "sourceCategory": "cold-cuts"
     },
     {
-      "id": "ica:750cypl:oeIbFVBPG1vXRgaFg69np",
+      "id": "ica:750cypl:ooQMcwwjWVGmqlIuCV2I3",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Surimisticks",
@@ -10977,7 +10951,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:750cypl:mdxfHUkCtAy44aFNKqRDm",
+      "id": "ica:750cypl:mjxH8sRnbWHF-xQvaBlsL",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Gräddfil",
@@ -10995,7 +10969,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:750cypl:Q-i5V20QBuZPzUlG_FZfP",
+      "id": "ica:750cypl:SIUMsxT1tyb7-PegqjKT-",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Sköljmedel",
@@ -11013,7 +10987,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:750cypl:hmOhwu78wXFjWSavzIKv7",
+      "id": "ica:750cypl:_HLI2-rnC3Z8icXZO0zJw",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Avfallspåse 30L",
@@ -11031,7 +11005,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:750cypl:LFmKKRDjDWI_DNXxMsWwy",
+      "id": "ica:750cypl:rQMWHDVzUv3oL6erJZ63m",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Toalettpapper, hushållspapper",
@@ -11049,7 +11023,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:750cypl:cNwtKgTtVqk8A37U0Q5OD",
+      "id": "ica:750cypl:TMaM2T2wKIcC-VbGLSFDL",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Deo roll on",
@@ -11067,7 +11041,7 @@
       "sourceCategory": "beauty"
     },
     {
-      "id": "ica:750cypl:qW40JXZ9d1AQDBGXWwd08",
+      "id": "ica:750cypl:I7lJSlPp2wtG0NequmCup",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Fryspåsar, Plastpåsar",
@@ -11085,7 +11059,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:750cypl:xh_VihGucC7J1bj-O0GDJ",
+      "id": "ica:750cypl:C2IDSfbE-vPkIwDII60hi",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Fruktsmoothie, Puré",
@@ -11103,7 +11077,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:750cypl:_l3qK_jIDY6eWn-lun9JT",
+      "id": "ica:750cypl:9LsQ17ADINLMkXA3G7IrZ",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Fruktsmoothie, Puré",
@@ -11121,7 +11095,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:750cypl:4iAJmDcavnNb2pfa3K1qq",
+      "id": "ica:750cypl:HkiUzzoFC7NW7yQXMUP4x",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Blöjor",
@@ -11139,7 +11113,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:750cypl:y0ZlclG-cIsotxSfPkQzo",
+      "id": "ica:750cypl:erlkGieK_NqETsHJuy31r",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Ryggbiff i bit",
@@ -11156,7 +11130,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:750cypl:XMY9Sv9_ZoP_gslE_71ue",
+      "id": "ica:750cypl:EdlQXXxWfYM7PMsqXGYhT",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Umamifärs",
@@ -11174,7 +11148,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:750cypl:9VGdfIJQOARwz9zDHBmB2",
+      "id": "ica:750cypl:uZRDcvcmZjvzlYHDk2bo6",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Färsk panerad schnitzel",
@@ -11192,7 +11166,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:750cypl:WJZJxmHnePjWWlsEtB5mL",
+      "id": "ica:750cypl:RaXX6Osojvc89a1eyu3xs",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Benfri fläsklägg",
@@ -11209,7 +11183,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:750cypl:qoktekzcmLdpnRQWbyMw9",
+      "id": "ica:750cypl:f7jg0cdGXetIvxiAl9vIZ",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Kryddad kyckling",
@@ -11226,7 +11200,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:750cypl:8DI5xJX7ejI0RtFnofwjZ",
+      "id": "ica:750cypl:3mlkTDgtynKPNLXgGrv6Q",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Grillkorv",
@@ -11243,7 +11217,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:750cypl:8bxAPKYoKCNHDA2s4CgYo",
+      "id": "ica:750cypl:HVGXw-z3DyyeSEtsldLup",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Amaryllis",
@@ -11261,7 +11235,7 @@
       "sourceCategory": "garden"
     },
     {
-      "id": "ica:750cypl:SBrtSqjzr1NrxfHbdm5q-",
+      "id": "ica:750cypl:UFTYby9kEo9yLn-J359vz",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Aubergine",
@@ -11279,7 +11253,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:CBE-e16YKfYuLRKXIPyM9",
+      "id": "ica:750cypl:bCH2tbNzFYmAkt5vbnD7j",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Fast potatis i påse",
@@ -11296,7 +11270,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:mEXIR02jM0sgtIvf0qLTC",
+      "id": "ica:750cypl:_WxDxNuKLGW1-1wsKVpgB",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Plommontomater i ask",
@@ -11314,7 +11288,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:VA7OrYZcZNe85pf4x37ad",
+      "id": "ica:750cypl:EWnYNZuPHCBEBxlAmII42",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Mogen avokado 3-pack",
@@ -11332,7 +11306,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:Ci74R-A17yh55BhpS2tEh",
+      "id": "ica:750cypl:KYySBIZP_dDwLnkRTcgYe",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Nyskördade morötter i påse",
@@ -11349,7 +11323,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:6I9vSsR_l-KDaeouRk3iv",
+      "id": "ica:750cypl:B22l9nW3WToyYuOCexQOT",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Äpplen Pink Lady",
@@ -11366,7 +11340,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:rh_xJRhWaNezFO6LDirhW",
+      "id": "ica:750cypl:Y14s6ag0WVxvmpvx4Tzho",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Stor grön kiwi",
@@ -11384,7 +11358,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:XZ3R99hf6ciXkZGsgjjKf",
+      "id": "ica:750cypl:YVzl-lWytGyZfwWvz-5hp",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Cheddar",
@@ -11401,7 +11375,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:750cypl:1_JZVLLfRccIp9HTQ14dA",
+      "id": "ica:750cypl:TKmHd9CjjyNgaxfrcVG0X",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Fast potatis i påse",
@@ -11418,7 +11392,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:Qqs3zhBgqnoVpdvshTN-P",
+      "id": "ica:750cypl:5nF7cRxN67HbpOA8qldC4",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Stor grön kiwi",
@@ -11436,7 +11410,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:qNUqJmLTJbfsEgQu3wAWC",
+      "id": "ica:750cypl:nI9yexLsl7VXAuybR_T2l",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Twist",
@@ -11454,7 +11428,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:750cypl:gxTiN5Y5oTKHSlfPLzGTY",
+      "id": "ica:750cypl:8O7YwQYaU-k9ROyNl7z0b",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Chips, Ringar och Bågar",
@@ -11471,7 +11445,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:750cypl:gV4XD_C6GSSjnRzeWtBn4",
+      "id": "ica:750cypl:ld8XNVGn2txTMBsZeni0O",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Chips, Ringar och Bågar",
@@ -11488,7 +11462,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:750cypl:PYrATXgGCd8RLEik6hThy",
+      "id": "ica:750cypl:vuKtWsDNaw6Nf5NV77_tp",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Chokladstycksaker",
@@ -11505,7 +11479,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:750cypl:dxqxbCl_JSNqBNRg-9n-z",
+      "id": "ica:750cypl:c_jTE-HCF4C0XjCmKSNdG",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Energidryck",
@@ -11523,7 +11497,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:750cypl:rDx6j7UmtFMF1Ev7gyGuL",
+      "id": "ica:750cypl:N6X4_4J4ynzWRksw9BBns",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Wienerbröd",
@@ -11541,7 +11515,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:750cypl:uFO6pRFnUW9u1LQCN0xTE",
+      "id": "ica:750cypl:cAv22acuwoBOFKSJb3sxs",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Gräddglass, Sorbet",
@@ -11558,7 +11532,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:750cypl:J0Kj5VT_3V6qZnVu1ObHh",
+      "id": "ica:750cypl:A4M09qvnFqINYlGd7QKTV",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Juice",
@@ -11575,7 +11549,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:750cypl:ucn_rTfKQZlZCVfd7B5mu",
+      "id": "ica:750cypl:FqMTTNh7AjWo2aND-okrI",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Herrgård®, Präst®, Grevé®",
@@ -11592,7 +11566,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:750cypl:OPMoSFE93-Rk0ju8vRlhq",
+      "id": "ica:750cypl:LxBayuTQjM_Aob0eSoSfC",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Kaffe",
@@ -11610,7 +11584,7 @@
       "sourceCategory": "colonial"
     },
     {
-      "id": "ica:750cypl:ndqdegsNPGZIHHTWGEFUj",
+      "id": "ica:750cypl:Kepq6iuIhtr02Yg-kmasX",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Barista havredryck",
@@ -11627,7 +11601,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:750cypl:KH8tM3o9myomF9P9Ul7-c",
+      "id": "ica:750cypl:eIKD4YII1i54s6xmlFvJo",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Bordsmargarin",
@@ -11644,7 +11618,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:750cypl:QCWAYUelqqumxXBIYQHan",
+      "id": "ica:750cypl:4LTR0a8qf4kZpoQ1KcV-4",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Vetemjöl",
@@ -11661,7 +11635,7 @@
       "sourceCategory": "colonial"
     },
     {
-      "id": "ica:750cypl:AFUpi24YYGzYF0IrP_RAu",
+      "id": "ica:750cypl:UCEH2E1HszMvLsE8yyacT",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Cheddar",
@@ -11678,7 +11652,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:750cypl:PgPe5kNcdwhy0CBJ4Zcst",
+      "id": "ica:750cypl:FnhNgWHOfT8rh4i7OljSx",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Kolsyrat vatten",
@@ -11696,7 +11670,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:750cypl:2xj9mBsnhcU8ShXuZ5oBS",
+      "id": "ica:750cypl:rba2MlC8xNN4Dcf__J93K",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
       "name": "Normalgräddat-, Brungräddat trekantsknäcke",
@@ -11958,7 +11932,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:46951iz:mXHNkI8p9uqfyIsI1AE7m",
+      "id": "ica:46951iz:x32W8QGMJH0GVFHrO0UPN",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Smördeg, Pajdeg",
@@ -11976,7 +11950,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:46951iz:69IV3y7zl649GYPXSJTcl",
+      "id": "ica:46951iz:wmJthBUDC-8XBJOmZzRY8",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Frysta grönsaker",
@@ -11993,7 +11967,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:46951iz:xjBy0Mmz--0HZpN7iopk8",
+      "id": "ica:46951iz:YXzpHHK1beuiJxrysKaZl",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Jubileumskakor",
@@ -12011,7 +11985,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:46951iz:AnyqGu7cfSN_YWPSV0hAv",
+      "id": "ica:46951iz:U9HOqHPYFGIr_yA3E58vy",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Paneer",
@@ -12029,7 +12003,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:46951iz:KEt-cwbi3ZydY5z5PHl-6",
+      "id": "ica:46951iz:s6siuQczd5kujC_TS2Mxw",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Marina sallader, röror",
@@ -12047,7 +12021,7 @@
       "sourceCategory": "cold-cuts"
     },
     {
-      "id": "ica:46951iz:LnE6x5ikXKIXNfsaHHeF7",
+      "id": "ica:46951iz:88wMVxg2F0eFsq2uCqINI",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Surimisticks",
@@ -12065,7 +12039,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:46951iz:mo65VBDeRDBVQsKD6ZP-5",
+      "id": "ica:46951iz:Xj4xzj-UVE56L9t_GhSkA",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Gräddfil",
@@ -12083,7 +12057,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:46951iz:y7PNo9q4GKBVngedL-vZv",
+      "id": "ica:46951iz:7M6Ng_UKc7VjAfBS65x3D",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Sköljmedel",
@@ -12101,7 +12075,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:46951iz:JVU4IR4IWzezAyMwj4Vtu",
+      "id": "ica:46951iz:IRqMHWbAjhRchfH-2X_lp",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Avfallspåse 30L",
@@ -12119,7 +12093,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:46951iz:AH5uslP-oQIMuebqirPQJ",
+      "id": "ica:46951iz:jPh7SfnwX30zXS-0CI2I_",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Toalettpapper, hushållspapper",
@@ -12137,7 +12111,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:46951iz:sgBSNGs_ZXNKnnoXb_hpR",
+      "id": "ica:46951iz:AST3oUOq1Gzo_BPLVawwZ",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Deo roll on",
@@ -12155,7 +12129,7 @@
       "sourceCategory": "beauty"
     },
     {
-      "id": "ica:46951iz:_vAZqHCPrPylxDMqteVhw",
+      "id": "ica:46951iz:teFm7mwp-qGOL7Sa1bNH7",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Fryspåsar, Plastpåsar",
@@ -12173,7 +12147,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:46951iz:b1Wc1Q4KRCnH-R4VRHntc",
+      "id": "ica:46951iz:3sPtKgSUSWDwKGMfzVoCl",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Fruktsmoothie, Puré",
@@ -12191,7 +12165,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:46951iz:_w7B_Ek1bq9puhPnSZxuK",
+      "id": "ica:46951iz:FK94DHhWdyBrSiHzOkzmY",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Fruktsmoothie, Puré",
@@ -12209,7 +12183,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:46951iz:L2jQBGvdmRid96qFJFp_v",
+      "id": "ica:46951iz:GjD1fVFTPWDv7XKVvw-hL",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Blöjor",
@@ -12331,7 +12305,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:46951iz:Im1dQGBQEcZmRiCQtznnS",
+      "id": "ica:46951iz:aPD6G68I4K3wKF8GOFd0c",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Amaryllis",
@@ -12349,7 +12323,7 @@
       "sourceCategory": "garden"
     },
     {
-      "id": "ica:46951iz:VusZ1Nk8pbMYzIwybAiVj",
+      "id": "ica:46951iz:Nk6RQpPB2QY9ATv8p6Xut",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Aubergine",
@@ -12367,7 +12341,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:46951iz:va26IJDO3R-3CYn1Z8xmj",
+      "id": "ica:46951iz:uwMNRYXZMdqVIdsVXtuRs",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Fast potatis i påse",
@@ -12384,7 +12358,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:46951iz:R7B-OrsSmWA1PpAeb7c5g",
+      "id": "ica:46951iz:zc_CSbf-VkDa1xSU5AO3P",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Plommontomater i ask",
@@ -12402,7 +12376,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:46951iz:bDdlHwHcdTTpbcqreOQIm",
+      "id": "ica:46951iz:oI8fqthJaP1y5l2yzhi9W",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Mogen avokado 3-pack",
@@ -12420,7 +12394,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:46951iz:K4UBKv-vAC6vcZkrl8Slk",
+      "id": "ica:46951iz:GpkpKpBFeWKeI5870YpEo",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Nyskördade morötter i påse",
@@ -12437,7 +12411,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:46951iz:Bk_s1D5OgRUMp_ZwrnkwD",
+      "id": "ica:46951iz:okXBVF_AOUCki4O7InyWf",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Äpplen Pink Lady",
@@ -12454,7 +12428,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:46951iz:riP_uSNEoT9LY82plKm2H",
+      "id": "ica:46951iz:b1bLqbnMNtl7doNayTlNe",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Stor grön kiwi",
@@ -12472,7 +12446,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:46951iz:pXBP4ycsEoG4fZWqg_llP",
+      "id": "ica:46951iz:M896n6AaziPfcvit1G3q1",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Cheddar",
@@ -12489,7 +12463,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:46951iz:qSHbY25ld4MUM8w4XSkUl",
+      "id": "ica:46951iz:b7P-Cwtmfi5eyiH4-7vOX",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Fast potatis i påse",
@@ -12506,7 +12480,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:46951iz:yG1Nlyw74LEMwq5zaEr8F",
+      "id": "ica:46951iz:-JXKZfQg73rcU9Xxe_NTt",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Stor grön kiwi",
@@ -12646,7 +12620,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:46951iz:QpEv2BQMgPj3Fxj2hHAv2",
+      "id": "ica:46951iz:yMa34EJ0hLl8d9F1Kqsex",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Juice",
@@ -12663,7 +12637,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:46951iz:2w-epjJ16gD7At8WSjn8y",
+      "id": "ica:46951iz:2krgkB99DChghoEJCj7sW",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Herrgård®, Präst®, Grevé®",
@@ -12680,7 +12654,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:46951iz:Eun-ir2a6qLfTm9iP96WI",
+      "id": "ica:46951iz:404r7zdEBr4Ydp17KPuGS",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Kaffe",
@@ -12698,7 +12672,7 @@
       "sourceCategory": "colonial"
     },
     {
-      "id": "ica:46951iz:jEQ_1Uxyz__oJUCc6RqWx",
+      "id": "ica:46951iz:cQBiMPSykRIrgDPyP8_eg",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Barista havredryck",
@@ -12715,7 +12689,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:46951iz:DgVqU7RKWTQ2H15za8yWw",
+      "id": "ica:46951iz:8U1_tSTTTj3EursVhjllw",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Bordsmargarin",
@@ -12732,7 +12706,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:46951iz:UNehZTbIC_WfUGqP9kp7Z",
+      "id": "ica:46951iz:5b6iysOGZUQbxbw-r6GDW",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Vetemjöl",
@@ -12749,7 +12723,7 @@
       "sourceCategory": "colonial"
     },
     {
-      "id": "ica:46951iz:kJ3srEont1s-wy93zrui_",
+      "id": "ica:46951iz:z9KQ_9JsE8dAfl9UoUeS4",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Cheddar",
@@ -12766,7 +12740,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:46951iz:VnVfOaT1LC6xqq0x9GMSe",
+      "id": "ica:46951iz:xTzrXu-M0-bWAj9-Q9weg",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Kolsyrat vatten",
@@ -12784,7 +12758,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:46951iz:9bPc-Kd4-E5KLDdM_ZpwJ",
+      "id": "ica:46951iz:QEuxyQiiCoS6lbpgVdX_j",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Normalgräddat-, Brungräddat trekantsknäcke",
@@ -12802,7 +12776,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:46951iz:2z8AI09CCt6WRPtJm6LKR",
+      "id": "ica:46951iz:GLaGO-A7wlEghKY63Xjzn",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Fast potatis i påse",
@@ -12819,7 +12793,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:46951iz:K7LTl-fDhnqfWn2oynlnJ",
+      "id": "ica:46951iz:REIwR1CEPICq7SSj_WtkV",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Jubileumskakor",
@@ -12837,7 +12811,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:46951iz:8AF_AQv_JtmhcvouVSYq3",
+      "id": "ica:46951iz:nr3YfUpbpVenlxBlBba_y",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Toalettpapper, hushållspapper",
@@ -12855,7 +12829,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:46951iz:1vUI_YQCjCqP_3Jq8PFOq",
+      "id": "ica:46951iz:5gxG7BFb2Pbm4-3JhcykH",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Marina sallader, röror",
@@ -12873,7 +12847,7 @@
       "sourceCategory": "cold-cuts"
     },
     {
-      "id": "ica:46951iz:aOs4V7YuXY9i-rtpNuemP",
+      "id": "ica:46951iz:SgpvY8ijUN4kmt9xl_4nj",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Chips, Ringar och Bågar",
@@ -12890,7 +12864,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:46951iz:zalvftVR_VKxeLK0qgFKU",
+      "id": "ica:46951iz:IZdny5d0_p0XBFciFWw7K",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Chips, Ringar och Bågar",
@@ -12907,7 +12881,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:46951iz:xBDtG0U0IkqZjkgZMzQ4O",
+      "id": "ica:46951iz:7tb0Tmte5EuzSRpYEkmd4",
       "chain": "ICA",
       "storeId": "ICA:46951iz",
       "name": "Gräddfil",
@@ -13046,7 +13020,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:d2aaDTz:A98tuhErZq_1LXVNL-HQm",
+      "id": "ica:d2aaDTz:ocat4B3mchRfUTCGGDaCY",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Smördeg, Pajdeg",
@@ -13064,7 +13038,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:d2aaDTz:KuzBGp_tISqvVeCs8Gxw9",
+      "id": "ica:d2aaDTz:m8XXiMgajGc_HQtcNP3vk",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Frysta grönsaker",
@@ -13081,7 +13055,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:d2aaDTz:_L-5IxF6-b8X2-wh7ck6G",
+      "id": "ica:d2aaDTz:gNDir05mTIzX-V_FRhUDJ",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Jubileumskakor",
@@ -13099,7 +13073,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:d2aaDTz:DKwc7ZGyP1k0WbnBOBli2",
+      "id": "ica:d2aaDTz:_4qgY2rDzgP1WdffkhBIs",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Paneer",
@@ -13117,7 +13091,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:d2aaDTz:Tu4TxDzUYPpJLq80KmRfd",
+      "id": "ica:d2aaDTz:GPId8gqIk-79PkPNjph6j",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Marina sallader, röror",
@@ -13135,7 +13109,7 @@
       "sourceCategory": "cold-cuts"
     },
     {
-      "id": "ica:d2aaDTz:utP52WRSymzvQqHgFUQUV",
+      "id": "ica:d2aaDTz:DrV07POR92a8pdbeCVVH6",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Surimisticks",
@@ -13153,7 +13127,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:d2aaDTz:xKG43b7Jn_vZbVb4Q6sMl",
+      "id": "ica:d2aaDTz:gpn_rX-0-R_ES9B4tuf-7",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Gräddfil",
@@ -13171,7 +13145,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:d2aaDTz:QpsWUClr_zvhWoc2L6ta3",
+      "id": "ica:d2aaDTz:GAEkilFYcx8YwnzI780BM",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Sköljmedel",
@@ -13189,7 +13163,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:d2aaDTz:63YPj0VvTki69KgDAP5et",
+      "id": "ica:d2aaDTz:QQTT6oCFSUrLdXbF5nw2J",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Avfallspåse 30L",
@@ -13207,7 +13181,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:d2aaDTz:s7LhK6mDr69Y10OWtgW-s",
+      "id": "ica:d2aaDTz:lfg_6rWYTjwi6VR3GoEAA",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Toalettpapper, hushållspapper",
@@ -13225,7 +13199,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:d2aaDTz:hE0Ma-apx58XQjE7OTN3Q",
+      "id": "ica:d2aaDTz:ZKxMOaWZJP5akIXzCzN_T",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Deo roll on",
@@ -13243,7 +13217,7 @@
       "sourceCategory": "beauty"
     },
     {
-      "id": "ica:d2aaDTz:pmksRZ084GL08d2B0srK-",
+      "id": "ica:d2aaDTz:6TWwJeElAQlJkyof8f039",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Fryspåsar, Plastpåsar",
@@ -13261,7 +13235,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:d2aaDTz:CFrJjrnkeNrBSQ8-XeZ8F",
+      "id": "ica:d2aaDTz:OCSorK1MOcUQPvQueffgq",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Fruktsmoothie, Puré",
@@ -13279,7 +13253,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:d2aaDTz:D6BT6XjmrPg0MBHsTA-ai",
+      "id": "ica:d2aaDTz:_8ANlS_lD7HDmCCa4DEc4",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Fruktsmoothie, Puré",
@@ -13297,7 +13271,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:d2aaDTz:aAZ2rCDg8XcHe_p1kqKRG",
+      "id": "ica:d2aaDTz:XPRqMzWXOyUa1O65-5zF9",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Blöjor",
@@ -13315,7 +13289,7 @@
       "sourceCategory": "baby"
     },
     {
-      "id": "ica:d2aaDTz:-k37FO5cfCzoc3RRGF4WO",
+      "id": "ica:d2aaDTz:v4yVg3xVNOkA5_b-MImbC",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Ryggbiff i bit",
@@ -13332,7 +13306,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:d2aaDTz:icgNxokfYdPvk6EoNmO5h",
+      "id": "ica:d2aaDTz:yt3MTKwbZGiiYRe8t7Gyw",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Umamifärs",
@@ -13350,7 +13324,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:d2aaDTz:3gyfV_UA_ifCuKj0OZhxL",
+      "id": "ica:d2aaDTz:6i2wx44hz7qRm0D3Mq-fD",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Färsk panerad schnitzel",
@@ -13368,7 +13342,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:d2aaDTz:ySGX8FW3lgd3DbI5PvepW",
+      "id": "ica:d2aaDTz:0M6x_ksRyXuuuVvqcMeSe",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Benfri fläsklägg",
@@ -13385,7 +13359,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:d2aaDTz:p_HKruNpdwA1SwgymPXdF",
+      "id": "ica:d2aaDTz:RbIBzSRjnQKq0pd4Qe3JU",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Kryddad kyckling",
@@ -13402,7 +13376,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:d2aaDTz:QPT8YKSloNZu0chtTukkp",
+      "id": "ica:d2aaDTz:35RAjVLYwdYTS19hA-ERI",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Grillkorv",
@@ -13419,7 +13393,7 @@
       "sourceCategory": "meat-and-fish"
     },
     {
-      "id": "ica:d2aaDTz:AlaN3X5y1Wpe5q8Qp0vHN",
+      "id": "ica:d2aaDTz:fEi7w-fKT3W-W14p3HMKM",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Amaryllis",
@@ -13437,7 +13411,7 @@
       "sourceCategory": "garden"
     },
     {
-      "id": "ica:d2aaDTz:smLRKerwP66T0Y3SKyTC6",
+      "id": "ica:d2aaDTz:vYAnZLyCdcRszBQGAxXsM",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Aubergine",
@@ -13455,7 +13429,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:d2aaDTz:u9ER-ZZlNVXG3KE_BlZT1",
+      "id": "ica:d2aaDTz:uQqmGBt7MJ6XVXZTKhEb8",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Fast potatis i påse",
@@ -13472,7 +13446,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:d2aaDTz:yRxvUQ5OiqL2859kIY4JC",
+      "id": "ica:d2aaDTz:Av0P_uTlG9VGPloFfWOJk",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Plommontomater i ask",
@@ -13490,7 +13464,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:d2aaDTz:VjzsqLwUowvn-ROyLTVGc",
+      "id": "ica:d2aaDTz:lwNUSlfXzS44E0gngCCaI",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Mogen avokado 3-pack",
@@ -13508,7 +13482,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:d2aaDTz:12GiY-_y0WWMI2BeOYzkA",
+      "id": "ica:d2aaDTz:w_8dyrFTYtIZhJvQx4l-1",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Nyskördade morötter i påse",
@@ -13525,7 +13499,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:d2aaDTz:2PjaTZzmfyOVpz7krmjuc",
+      "id": "ica:d2aaDTz:4SYGU7GtYepWXp1fzfEMT",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Äpplen Pink Lady",
@@ -13542,7 +13516,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:d2aaDTz:xVLe1oMTS3qWgU7xlGqQt",
+      "id": "ica:d2aaDTz:Zkaw2pL3K7vkuaua5_qny",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Stor grön kiwi",
@@ -13560,7 +13534,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:d2aaDTz:R_4jxl4deMobyfgedK0GM",
+      "id": "ica:d2aaDTz:LyUDnO1RXN2E5hpSdvExK",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Cheddar",
@@ -13577,7 +13551,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:d2aaDTz:TMNRBKAh2Uxtttsx9tciH",
+      "id": "ica:d2aaDTz:OyVaIZgFZPQEKwKw1Iar9",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Fast potatis i påse",
@@ -13594,7 +13568,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:d2aaDTz:0np_3Bram4l_WEx581m1W",
+      "id": "ica:d2aaDTz:9yTD1Ho9TFxy_XGZLjsYe",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Stor grön kiwi",
@@ -13734,7 +13708,7 @@
       "sourceCategory": "frozen"
     },
     {
-      "id": "ica:d2aaDTz:8o2sdrX7s7oqNn8xcRdlq",
+      "id": "ica:d2aaDTz:2u2LyuV30Jzbv5H7-yqyG",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Juice",
@@ -13751,7 +13725,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:d2aaDTz:ReAdCIV_aRfsoYx7ORFT7",
+      "id": "ica:d2aaDTz:iKSu2_WV5H8dvT7RrzlgX",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Herrgård®, Präst®, Grevé®",
@@ -13768,7 +13742,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:d2aaDTz:6TVCO4Qp553G838MVad-I",
+      "id": "ica:d2aaDTz:s4b_LZjyOVkEo3WJHJors",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Kaffe",
@@ -13786,7 +13760,7 @@
       "sourceCategory": "colonial"
     },
     {
-      "id": "ica:d2aaDTz:Kdzf_3uIGRrZ3cQMlhxiE",
+      "id": "ica:d2aaDTz:C3O8ON9ZKBdDDudQow568",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Barista havredryck",
@@ -13803,7 +13777,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:d2aaDTz:1AGk9mDKMCEXZJRNaln3C",
+      "id": "ica:d2aaDTz:rKvnXdXl7UCyarlfadEV5",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Bordsmargarin",
@@ -13820,7 +13794,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:d2aaDTz:ntaKzGGg8LJwqxYtzm_85",
+      "id": "ica:d2aaDTz:HjDBR5LLkjQzANwIYveio",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Vetemjöl",
@@ -13837,7 +13811,7 @@
       "sourceCategory": "colonial"
     },
     {
-      "id": "ica:d2aaDTz:DsPKvurLkJSh6NafkRPTR",
+      "id": "ica:d2aaDTz:jGj5aePC_WtTJJLqIUvam",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Cheddar",
@@ -13854,7 +13828,7 @@
       "sourceCategory": "dairy-and-cold"
     },
     {
-      "id": "ica:d2aaDTz:M-_vI40YQKtYHkr3GBEYf",
+      "id": "ica:d2aaDTz:CzIoGDFI9938hZeRzUMZs",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Kolsyrat vatten",
@@ -13872,7 +13846,7 @@
       "sourceCategory": "beverages"
     },
     {
-      "id": "ica:d2aaDTz:sQOXpbVAc8hTp6mvGYvio",
+      "id": "ica:d2aaDTz:goax2G28pFkzTq1imvvzU",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Normalgräddat-, Brungräddat trekantsknäcke",
@@ -13890,7 +13864,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:d2aaDTz:u4hwDU1z_tNNDpU5qW-8w",
+      "id": "ica:d2aaDTz:hMFhHM_hkZDnd7zkHg-eF",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Fast potatis i påse",
@@ -13907,7 +13881,7 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:d2aaDTz:x74gTRCuep2VDzbhfy66f",
+      "id": "ica:d2aaDTz:c2GjsCM6JjHqxbpN2yROH",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Jubileumskakor",
@@ -13925,7 +13899,7 @@
       "sourceCategory": "bread-and-cakes"
     },
     {
-      "id": "ica:d2aaDTz:KGvc2DoL03UyBzbDSMoJE",
+      "id": "ica:d2aaDTz:aU1H_KzxoDZr8lt4I1x4M",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Toalettpapper, hushållspapper",
@@ -13943,7 +13917,7 @@
       "sourceCategory": "household"
     },
     {
-      "id": "ica:d2aaDTz:ZD9pRRr0cQizTEqp07MsE",
+      "id": "ica:d2aaDTz:7myq16t41DGLb1YyiETkU",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Marina sallader, röror",
@@ -13961,7 +13935,7 @@
       "sourceCategory": "cold-cuts"
     },
     {
-      "id": "ica:d2aaDTz:CBH1etoZnOMQYdEkJ3V3J",
+      "id": "ica:d2aaDTz:xTBg2pQ_ip2PlJ2YylRqI",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Chips, Ringar och Bågar",
@@ -13978,7 +13952,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:d2aaDTz:f-nu-uBgWpuj8sslAt-sa",
+      "id": "ica:d2aaDTz:ROBcYs5CMikaIDxzcl3Y_",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Chips, Ringar och Bågar",
@@ -13995,7 +13969,7 @@
       "sourceCategory": "snacks-and-candies"
     },
     {
-      "id": "ica:d2aaDTz:i2UTm8irTw6sNTmf9w54M",
+      "id": "ica:d2aaDTz:SIpctRONr8jEw-RpGy-KS",
       "chain": "ICA",
       "storeId": "ICA:d2aaDTz",
       "name": "Gräddfil",
@@ -14318,15 +14292,12 @@
       "chain": "Coop",
       "storeId": "Coop:R5G40rz499633RjY21m0n",
       "name": "Res smart med SJ till rabatterat pris",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "Just nu får du som Coop-medlem 20% rabatt* på både biljetter och förbeställd mat hos SJ. Dessutom får du 1 bonuspoäng/krona i Extrabonus att handla för hos Coop. Boka via coop.se/sj *Gäller bokningar som görs 16/11–29/11 2026, minst 10 dagar före avresa. Reseperiod 26/11 2026–4/4 2027. Går att kombinera med student- och seniorrabatter.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FieRiJyfz%2Fp-3.webp&w=300&x1r=0.015&x2r=0.988&y1r=0.732&y2r=0.932&s=64d5bd364ff8543a60a71434f0e16acf",
       "sourceCategory": "outdoor"
@@ -15221,15 +15192,12 @@
       "chain": "Coop",
       "storeId": "Coop:lSegmZB4MZVpS_3lKyiRv",
       "name": "Res smart med SJ till rabatterat pris",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "Just nu får du som Coop-medlem 20% rabatt* på både biljetter och förbeställd mat hos SJ. Dessutom får du 1 bonuspoäng/krona i Extrabonus att handla för hos Coop. Boka via coop.se/sj *Gäller bokningar som görs 16/11–29/11 2026, minst 10 dagar före avresa. Reseperiod 26/11 2026–4/4 2027. Går att kombinera med student- och seniorrabatter.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FNV_F04Kb%2Fp-3.webp&w=300&x1r=0.015&x2r=0.985&y1r=0.73&y2r=0.93&s=43401b620535fbe711292ccdd4c22f4b",
       "sourceCategory": "outdoor"
@@ -15610,15 +15578,12 @@
       "chain": "Coop",
       "storeId": "Coop:bg7jH8_cxjKU8dkhF82SS",
       "name": "Res smart med SJ till rabatterat pris",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "Just nu får du som Coop-medlem 20% rabatt* på både biljetter och förbeställd mat hos SJ. Dessutom får du 1 bonuspoäng/krona i Extrabonus att handla för hos Coop. Boka via coop.se/sj *Gäller bokningar som görs 16/11–29/11 2026, minst 10 dagar före avresa. Reseperiod 26/11 2026–4/4 2027. Går att kombinera med student- och seniorrabatter.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FJxPYHCab%2Fp-3.webp&w=300&x1r=0.015&x2r=0.988&y1r=0.732&y2r=0.932&s=ce61c1143511805140d819db2fb058ad",
       "sourceCategory": "outdoor"
@@ -16513,15 +16478,12 @@
       "chain": "Coop",
       "storeId": "Coop:ysuWxKzypOwSApUcvAZ4b",
       "name": "Res smart med SJ till rabatterat pris",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "Just nu får du som Coop-medlem 20% rabatt* på både biljetter och förbeställd mat hos SJ. Dessutom får du 1 bonuspoäng/krona i Extrabonus att handla för hos Coop. Boka via coop.se/sj *Gäller bokningar som görs 16/11–29/11 2026, minst 10 dagar före avresa. Reseperiod 26/11 2026–4/4 2027. Går att kombinera med student- och seniorrabatter.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FehTI16TN%2Fp-3.webp&w=300&x1r=0.015&x2r=0.985&y1r=0.73&y2r=0.93&s=4248397a4fe55b7ea241afa25b58c0af",
       "sourceCategory": "outdoor"
@@ -16902,15 +16864,12 @@
       "chain": "Coop",
       "storeId": "Coop:Ca-zEv5nLUp_AhPVz5VoL",
       "name": "Res smart med SJ till rabatterat pris",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "Just nu får du som Coop-medlem 20% rabatt* på både biljetter och förbeställd mat hos SJ. Dessutom får du 1 bonuspoäng/krona i Extrabonus att handla för hos Coop. Boka via coop.se/sj *Gäller bokningar som görs 16/11–29/11 2026, minst 10 dagar före avresa. Reseperiod 26/11 2026–4/4 2027. Går att kombinera med student- och seniorrabatter.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FJONUNdK_%2Fp-3.webp&w=300&x1r=0.015&x2r=0.988&y1r=0.732&y2r=0.932&s=4d4dc72cfac6982094aeeb83780c4c15",
       "sourceCategory": "outdoor"
@@ -18546,15 +18505,12 @@
       "chain": "Coop",
       "storeId": "Coop:IWyPU7A15Dwpu5ole0K8q",
       "name": "Babyvård",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "Libero. Libero babyvård och tillbehör. Gäller ej blöjor. Välj mellan olika sorter. 6-384 st, 150-200 ml",
       "category": "Barn",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvuRQkBzh%2Fp-8.webp&w=300&x1r=0.62&x2r=0.94&y1r=0.14&y2r=0.43&s=eb66b493494bad4dc2475b0b3e65087d",
       "sourceCategory": "baby"
@@ -18833,13 +18789,11 @@
       "chain": "Coop",
       "storeId": "Coop:IWyPU7A15Dwpu5ole0K8q",
       "name": "Kryddor i påse",
-      "mechanicText": "0 kr/kg",
+      "mechanicText": "Santa Maria. Välj mellan olika sorter. 4-75 g. KLIPP! TAG 5 BETALA FÖR 4 BILLIGASTE PÅ KÖPET",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
-      "unitPrice": 0,
       "priceUnit": "kg",
-      "comparisonPriceText": "0 kr/kg",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvuRQkBzh%2Fp-10.webp&w=300&x1r=0.05&x2r=0.94&y1r=0.035&y2r=0.405&s=58f200e471904c8154e8200d0388ee61",
       "sourceCategory": "colonial"
@@ -18937,15 +18891,12 @@
       "chain": "Coop",
       "storeId": "Coop:IWyPU7A15Dwpu5ole0K8q",
       "name": "Res smart med SJ till rabatterat pris",
-      "mechanicText": "0 kr/st",
+      "mechanicText": "För medlemmar Just nu! 20% rabatt* Just nu får du som Coop-medlem 20% rabatt* på både biljetter och förbeställd mat hos SJ. Dessutom får du 1 bonuspoäng/krona i Extrabonus att handla för hos Coop. Boka via coop.se/sj *Gäller bokningar som görs 16/11–29/11 2026, minst 10 dagar före avresa. Reseperiod 26/11 2026–4/4 2027. Går att kombinera med student- och seniorrabatter.",
       "category": "Övrigt",
       "validTo": "2026-11-22",
       "sourceUrl": "https://ereklamblad.se/",
       "packageSize": "1 pcs",
-      "price": 0,
-      "unitPrice": 0,
       "priceUnit": "st",
-      "comparisonPriceText": "0 kr/st",
       "validFrom": "2026-11-16",
       "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvuRQkBzh%2Fp-10.webp&w=300&x1r=0.055&x2r=0.945&y1r=0.745&y2r=0.945&s=a37256872497d581ad6cb1b1be5a137e",
       "sourceCategory": "outdoor"
