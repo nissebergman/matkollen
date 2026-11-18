@@ -69,6 +69,8 @@ jobs:
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: false
 
       - name: Build app and Snapshots
         run: npm run build
