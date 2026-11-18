@@ -131,7 +131,8 @@ Matching is keyword-based (see the README): Swedish compound suffixes outrank
 prefixes, keywords under four letters only match whole words, and per-image
 excluded words prevent known false positives (the apple image does not match
 pomegranates; the mince image does not match “färsk”). Against the
-2026-11-18 Linköping Snapshot, 623 of 1,515 priced Offers matched an image;
+2026-11-18 Linköping Snapshot, 623 of 1,515 priced Offers (146 of 478 grouped
+cards) matched an image;
 every distinct matched name was reviewed for false positives.
 
 `sharp` orients each image, contains it without cropping on a white 192×192
