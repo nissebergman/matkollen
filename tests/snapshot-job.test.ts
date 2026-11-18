@@ -3,9 +3,9 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   buildHemkopSnapshot,
-  buildSnapshots,
   HEMKOP_SOURCE_ADAPTER,
-} from "../src/snapshot/job";
+} from "../src/snapshot/hemkop";
+import { buildSnapshots } from "../src/snapshot/job";
 import {
   buildSnapshot,
   type ChainRefreshResult,

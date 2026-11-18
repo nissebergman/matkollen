@@ -14,6 +14,7 @@ import {
   type SnapshotJobDependencies,
 } from "./runner";
 import type { CoopLocation } from "./coop";
+import { parseResponse, sourceId } from "./source-parsing";
 
 export const COOP_FLYER_PDF_SOURCE = "coop-flyer-pdf";
 export const COOP_PDF_REQUEST_DELAY_MS = 1_000;
@@ -137,31 +138,12 @@ const COMPARISON_PRICE_PATTERN =
   /\b(?:jämförpris|jmf\.?\s*pris|jfr\.?\s*[-–]?\s*pris)\s*:?\s*(.+)$/iu;
 const LIMIT_PATTERN = /^(?:max(?:imum)?\.?\b|högst\b)/iu;
 
-function describeValidationError(error: z.ZodError): string {
-  const issue = error.issues[0];
-  const path = issue.path.length ? issue.path.join(".") : "response";
-  return `fältet ${path} har ett oväntat format`;
-}
-
-function parseResponse<T>(schema: z.ZodType<T>, value: unknown, label: string): T {
-  const result = schema.safeParse(value);
-  if (!result.success) {
-    throw new Error(
-      `Ogiltigt svar från Coop (${label}): ${describeValidationError(result.error)}.`,
-    );
-  }
-  return result.data;
-}
-
-function sourceId(value: string | number): string {
-  return String(value);
-}
-
 function mapStoresFromResponse(value: unknown): CoopMapStore[] {
   const parsed = parseResponse(
     CoopStoreMapResponseSchema,
     value,
     "butikskarta",
+    "Coop",
   );
   if (Array.isArray(parsed)) {
     return parsed;
@@ -949,6 +931,7 @@ async function refreshCoopFlyerPdf(
         CoopStoreDetailsSchema,
         await responseJson(detailResponse, `butiksuppgifter för ${mapStore.name}`),
         `butiksuppgifter för ${mapStore.name}`,
+        "Coop",
       );
       if (
         sourceId(details.id) !== sourceId(mapStore.storeId) ||

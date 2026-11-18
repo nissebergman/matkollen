@@ -8,6 +8,7 @@ import {
   type Store,
 } from "../domain/snapshot";
 import { stockholmDate } from "../domain/date";
+import { currentOfferWeekEnd } from "./source-parsing";
 
 export interface SnapshotLocation {
   id: string;
@@ -58,14 +59,6 @@ export class ChainRefreshError extends Error {
   ) {
     super(message);
   }
-}
-
-function currentOfferWeekEnd(today: string): string {
-  const day = new Date(`${today}T00:00:00.000Z`).getUTCDay();
-  const daysUntilSunday = (7 - day) % 7;
-  const end = new Date(`${today}T00:00:00.000Z`);
-  end.setUTCDate(end.getUTCDate() + daysUntilSunday);
-  return end.toISOString().slice(0, 10);
 }
 
 function errorMessage(error: unknown): string {

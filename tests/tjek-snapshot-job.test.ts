@@ -206,6 +206,7 @@ function fixtureFetcher(
     offers?: Map<string, unknown[]>;
     stores?: Map<string, unknown>;
     fronts?: unknown;
+    frontsByStore?: Map<string, unknown>;
     frontsStatus?: number;
     publicationPages?: unknown;
     publicationPagesStatus?: number;
@@ -303,9 +304,13 @@ function fixtureFetcher(
               status: options.frontsStatus,
             });
           }
-          return options.fronts === undefined
+          const storeId = String(
+            (parameters.localBusinessIds as string[] | undefined)?.[0] ?? "",
+          );
+          const fronts = options.frontsByStore?.get(storeId) ?? options.fronts;
+          return fronts === undefined
             ? new Response("No recorded Tjek fronts fixture", { status: 404 })
-            : Response.json(options.fronts);
+            : Response.json(fronts);
         }
         if (action === "offer") {
           const publicId = String(parameters.publicId ?? "");
@@ -708,6 +713,44 @@ describe("Tjek Snapshot adapter", () => {
     ]);
   });
 
+  it("warns about a Store without a current publication while other Stores have Offers", async () => {
+    const stores = structuredClone(tjekCoopStoreExcerpt) as {
+      value: { data: Array<Record<string, unknown>> };
+    };
+    stores.value.data.push({
+      ...stores.value.data[0]!,
+      id: "coop-empty-store",
+      name: "Coop Tom Butik Linköping",
+      streetAddress: "Tomgatan 1",
+    });
+    const replay = fixtureFetcher(() => 0, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", stores]]),
+      fronts: tjekCoopFronts,
+      frontsByStore: new Map([
+        ["coop-empty-store", { key: "[redacted]", status: "success", value: [] }],
+      ]),
+      publicationPages: tjekCoopPublicationPages,
+      offerLookups: tjekCoopOfferLookups,
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.chains.find(({ chain }) => chain === "Coop"),
+    ).toMatchObject({
+      status: "ok",
+      error: expect.stringContaining("Coop Tom Butik Linköping"),
+    });
+    const coopOffers = snapshot.offers.filter(({ chain }) => chain === "Coop");
+    expect(coopOffers.length).toBeGreaterThan(0);
+    expect(coopOffers.some(({ storeId }) => storeId.includes("coop-empty-store"))).toBe(false);
+  });
+
   it("treats a local-midnight publication end as an exclusive boundary", async () => {
     const fronts = structuredClone(tjekCoopFronts) as {
       value: Array<{ publications: Array<{ validUntil: string }> }>;
@@ -763,6 +806,43 @@ describe("Tjek Snapshot adapter", () => {
       "stores",
       "fronts",
     ]);
+  });
+
+  it("does not turn a zero placeholder price into a 0 kr Offer", async () => {
+    const placeholderPublicId = "if-FEwMj9_SuqzsDZ7fOj";
+    const placeholderOffer = structuredClone(
+      tjekCoopOfferLookups.get(placeholderPublicId),
+    ) as { value: Record<string, unknown> };
+    for (const field of [
+      "price", "membershipPrice", "fromPrice", "priceText", "offerText",
+      "mechanicText", "membershipPriceText", "memberPriceText", "description",
+    ]) {
+      delete placeholderOffer.value[field];
+    }
+    placeholderOffer.value.unitPrice = 0;
+    const offerLookups = new Map(tjekCoopOfferLookups);
+    offerLookups.set(placeholderPublicId, placeholderOffer);
+    const replay = fixtureFetcher(() => 0, {
+      businesses: tjekCoopBrandExcerpt,
+      stores: new Map([["63eeoD", tjekCoopStoreExcerpt]]),
+      fronts: tjekCoopFronts,
+      publicationPages: tjekCoopPublicationPages,
+      offerLookups,
+    });
+
+    const snapshot = await buildLocationSnapshot(linkopingLocation, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(
+      snapshot.chains.find(({ chain }) => chain === "Coop"),
+    ).toMatchObject({ status: "ok" });
+    const offer = snapshot.offers.find(({ id }) => id.endsWith(placeholderPublicId));
+    expect(offer).toMatchObject({ mechanicText: "Se reklambladet" });
+    expect(offer).not.toHaveProperty("price");
+    expect(offer).not.toHaveProperty("unitPrice");
   });
 
   it("filters expired individual Offers after the publication pages are fetched", async () => {

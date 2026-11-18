@@ -7,8 +7,8 @@ import {
   buildSnapshots,
   snapshotAdaptersFromConfig,
   snapshotLocationFromConfig,
-  type HemkopLocation,
 } from "./job";
+import type { HemkopLocation } from "./hemkop";
 import {
   buildSnapshot,
   type ChainSourceAdapter,

@@ -1,0 +1,605 @@
+import { z } from "zod";
+import { mapHemkopCategory } from "../domain/categories";
+import { stockholmDate } from "../domain/date";
+import {
+  type Offer,
+  type Snapshot,
+  type Store,
+} from "../domain/snapshot";
+import type { StoreDiscoveryConfig } from "./config";
+import { discoverStores } from "./store-discovery";
+import {
+  ChainRefreshError,
+  buildSnapshot,
+  type ChainRefreshContext,
+  type ChainRefreshResult,
+  type ChainSourceAdapter,
+  type SnapshotJobDependencies as RunnerJobDependencies,
+} from "./runner";
+import {
+  amountFromMechanic,
+  isIsoDate,
+  parseAmount,
+  parseResponse,
+  positiveInteger,
+  sourceText,
+} from "./source-parsing";
+
+export const HEMKOP_REQUEST_DELAY_MS = 10_000;
+export const HEMKOP_SOURCE = "hemkop-first-party";
+const HEMKOP_ORIGIN = "https://www.hemkop.se";
+
+export interface HemkopLocation {
+  id: string;
+  name: string;
+  city?: string;
+  storeDiscovery?: StoreDiscoveryConfig;
+}
+
+export type HemkopJobDependencies = RunnerJobDependencies;
+
+const optionalText = z.string().nullable().optional();
+const optionalNumber = z
+  .union([
+    z.number().finite().nonnegative(),
+    z.string().refine((value) => parseAmount(value) !== undefined),
+    z.null(),
+  ])
+  .optional();
+const optionalLimit = z
+  .union([
+    z.number().int().nonnegative().finite(),
+    z.string().refine((value) => {
+      const limit = parseAmount(value);
+      return limit !== undefined && Number.isInteger(limit);
+    }),
+    z.null(),
+  ])
+  .optional();
+const optionalDate = z
+  .union([z.string().min(1), z.number().finite(), z.null()])
+  .optional();
+const optionalIdentifier = z.union([z.string(), z.number().finite()]).optional();
+const nonBlankText = z
+  .string()
+  .min(1)
+  .refine((value) => value.trim().length > 0);
+const optionalComparisonPrice = z
+  .union([z.number().finite().nonnegative(), nonBlankText, z.null()])
+  .optional();
+const sourceStoreId = z.union([
+  nonBlankText,
+  z.number().int().nonnegative(),
+]);
+
+const HemkopStoreSchema = z
+  .object({
+    storeId: sourceStoreId,
+    name: nonBlankText,
+    address: z
+      .object({
+        town: nonBlankText,
+        line1: optionalText,
+        postalCode: optionalText,
+      })
+      .passthrough(),
+  })
+  .passthrough();
+
+const HemkopPromotionSchema = z
+  .object({
+    id: optionalIdentifier,
+    campaignId: optionalIdentifier,
+    campaignType: optionalText,
+    promotionType: optionalText,
+    price: optionalNumber,
+    priceUnit: optionalText,
+    cartLabel: optionalText,
+    conditionLabel: optionalText,
+    rewardLabel: optionalText,
+    textLabel: optionalText,
+    description: optionalText,
+    qualifyingCount: z.number().int().positive().nullable().optional(),
+    threshold: z.number().finite().nonnegative().nullable().optional(),
+    redeemLimit: optionalLimit,
+    limitText: optionalText,
+    startDate: optionalDate,
+    endDate: optionalDate,
+    validUntil: optionalDate,
+    comparePrice: optionalComparisonPrice,
+    comparePriceUnit: optionalText,
+    ordinaryPrice: optionalNumber,
+    regularPrice: optionalNumber,
+  })
+  .passthrough();
+
+const HemkopProductSchema = z
+  .object({
+    id: optionalIdentifier,
+    code: optionalIdentifier,
+    ean: optionalIdentifier,
+    name: nonBlankText,
+    manufacturer: optionalText,
+    brands: z.union([z.string(), z.array(z.string()), z.null()]).optional(),
+    price: optionalNumber,
+    priceNoUnit: optionalNumber,
+    priceUnit: optionalText,
+    regularPrice: optionalNumber,
+    ordinaryPrice: optionalNumber,
+    displayVolume: optionalText,
+    googleAnalyticsCategory: optionalText,
+    promotionProductOrdinaryComparePrice: optionalNumber,
+    promotionProductOrdinaryComparePriceUnit: optionalText,
+    potentialPromotions: z.array(HemkopPromotionSchema),
+    image: z
+      .union([
+        z.string(),
+        z.object({ url: optionalText }).passthrough(),
+        z.null(),
+      ])
+      .optional(),
+    originalImage: z
+      .union([
+        z.string(),
+        z.object({ url: optionalText }).passthrough(),
+        z.null(),
+      ])
+      .optional(),
+    thumbnail: z
+      .union([
+        z.string(),
+        z.object({ url: optionalText }).passthrough(),
+        z.null(),
+      ])
+      .optional(),
+  })
+  .passthrough();
+
+const HemkopPageSchema = z
+  .object({
+    results: z.array(HemkopProductSchema),
+    pagination: z
+      .object({
+        currentPage: z.number().int().nonnegative().optional(),
+        numberOfPages: z.number().int().nonnegative(),
+        totalNumberOfResults: z.number().int().nonnegative().optional(),
+      })
+      .passthrough(),
+  })
+  .passthrough()
+  .superRefine((page, context) => {
+    if (page.results.length > 0 && page.pagination.numberOfPages === 0) {
+      context.addIssue({
+        code: "custom",
+        message: "A nonempty page must report at least one page",
+        path: ["pagination", "numberOfPages"],
+      });
+    }
+    if (
+      page.pagination.currentPage !== undefined &&
+      page.pagination.numberOfPages > 0 &&
+      page.pagination.currentPage >= page.pagination.numberOfPages
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "currentPage must be inside numberOfPages",
+        path: ["pagination", "currentPage"],
+      });
+    }
+  });
+
+type HemkopStore = z.infer<typeof HemkopStoreSchema>;
+type HemkopProduct = z.infer<typeof HemkopProductSchema>;
+type HemkopPromotion = z.infer<typeof HemkopPromotionSchema>;
+
+function assertWithinHemkopVisitTime(date: Date): void {
+  const utcMinutes = date.getUTCHours() * 60 + date.getUTCMinutes();
+  if (utcMinutes < 4 * 60 || utcMinutes >= 8 * 60 + 45) {
+    throw new Error("Hemköps besöksfönster är 04:00–08:45 UTC; ingen begäran skickades.");
+  }
+}
+
+function dateFromSource(value: string | number | null | undefined): string | undefined {
+  if (typeof value === "number") {
+    const date = new Date(value);
+    return Number.isFinite(date.getTime()) ? stockholmDate(date) : undefined;
+  }
+  if (typeof value !== "string" || !value.trim()) {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  const swedishDate = normalized.match(/^(\d{1,2})\/(\d{1,2})-(\d{4})$/);
+  if (swedishDate) {
+    const [, day, month, year] = swedishDate;
+    const isoDate = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+    return isIsoDate(isoDate) ? isoDate : undefined;
+  }
+  if (isIsoDate(normalized)) {
+    return normalized;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+    return undefined;
+  }
+  if (/^\d{10,13}$/.test(normalized)) {
+    const rawTimestamp = Number(normalized);
+    const timestamp = normalized.length === 10 ? rawTimestamp * 1_000 : rawTimestamp;
+    const date = new Date(timestamp);
+    return Number.isFinite(date.getTime()) ? stockholmDate(date) : undefined;
+  }
+
+  const time = Date.parse(normalized);
+  return Number.isFinite(time) ? stockholmDate(new Date(time)) : undefined;
+}
+
+function mechanicText(promotion: HemkopPromotion): string {
+  const composedLabels = [
+    sourceText(promotion.conditionLabel),
+    sourceText(promotion.rewardLabel),
+  ]
+    .filter(Boolean)
+    .join(" ");
+  const direct =
+    sourceText(promotion.cartLabel) ??
+    sourceText(composedLabels) ??
+    sourceText(promotion.description) ??
+    sourceText(promotion.textLabel);
+  if (!direct) {
+    throw new Error("Hemköps kampanj saknar en visbar erbjudandetext.");
+  }
+  return direct;
+}
+
+function quantityFor(promotion: HemkopPromotion, text: string): number {
+  const multiBuy = text.match(/(\d+)\s*för\s*\d+/iu);
+  return (
+    positiveInteger(multiBuy ? Number(multiBuy[1]) : undefined) ??
+    positiveInteger(promotion.qualifyingCount ?? undefined) ??
+    1
+  );
+}
+
+function priceUnitFrom(...values: Array<string | null | undefined>): Offer["priceUnit"] {
+  const text = values.filter(Boolean).join(" ").toLowerCase();
+  if (/(?:\/|\b)kg\b/.test(text)) {
+    return "kg";
+  }
+  if (/(?:\/|\b)l\b|liter/.test(text)) {
+    return "l";
+  }
+  if (/(?:\/|\b)st\b|styck/.test(text)) {
+    return "st";
+  }
+  return undefined;
+}
+
+function comparisonPriceText(
+  promotion: HemkopPromotion,
+  product: HemkopProduct,
+): string | undefined {
+  const raw = promotion.comparePrice;
+  if (typeof raw === "string" && raw.trim()) {
+    return raw.trim();
+  }
+  if (typeof raw === "number" && Number.isFinite(raw)) {
+    const unit = sourceText(promotion.comparePriceUnit);
+    return unit ? `${raw} ${unit}` : String(raw);
+  }
+
+  const ordinaryComparePrice = product["promotionProductOrdinaryComparePrice"];
+  if (typeof ordinaryComparePrice === "string" && ordinaryComparePrice.trim()) {
+    const unit = sourceText(product["promotionProductOrdinaryComparePriceUnit"] as string | null);
+    return unit ? `${ordinaryComparePrice.trim()} ${unit}` : ordinaryComparePrice.trim();
+  }
+  if (typeof ordinaryComparePrice === "number" && Number.isFinite(ordinaryComparePrice)) {
+    const unit = sourceText(product["promotionProductOrdinaryComparePriceUnit"] as string | null);
+    return unit ? `${ordinaryComparePrice} ${unit}` : String(ordinaryComparePrice);
+  }
+  return undefined;
+}
+
+function imageUrl(product: HemkopProduct): string | undefined {
+  for (const image of [product.image, product.originalImage, product.thumbnail]) {
+    const url = typeof image === "string" ? image : image?.url;
+    if (typeof url === "string" && url.startsWith("https://")) {
+      return url;
+    }
+  }
+  return undefined;
+}
+
+function storeFromSource(store: HemkopStore): Store {
+  const sourceId = String(store.storeId);
+  const address = [
+    sourceText(store.address.line1),
+    sourceText(store.address.postalCode),
+    store.address.town.trim(),
+  ]
+    .filter(Boolean)
+    .join(", ");
+  return {
+    id: `Hemköp:${sourceId}`,
+    chain: "Hemköp",
+    name: store.name.trim(),
+    address,
+  };
+}
+
+function stableOfferId(
+  storeId: string,
+  product: HemkopProduct,
+  promotion: HemkopPromotion,
+  text: string,
+): string {
+  const productKey =
+    product.id ?? product.code ?? product.ean ?? `${product.name}:${product.manufacturer ?? ""}`;
+  const promotionKey =
+    promotion.id ??
+    promotion.campaignId ??
+    [
+      promotion.campaignType,
+      promotion.promotionType,
+      promotion.startDate,
+      promotion.endDate,
+      text,
+    ].join(":");
+  return `hemkop:${storeId}:${encodeURIComponent(String(productKey))}:${encodeURIComponent(String(promotionKey))}`;
+}
+
+function normalizeOffer(
+  storeId: string,
+  product: HemkopProduct,
+  promotion: HemkopPromotion,
+  sourceUrl: string,
+  runDate: string,
+  weekEnd: string,
+): Offer | undefined {
+  const text = mechanicText(promotion);
+  const validFrom = dateFromSource(promotion.startDate);
+  const endDate = dateFromSource(promotion.endDate);
+  const validUntil = dateFromSource(promotion.validUntil);
+  if (promotion.startDate != null && !validFrom) {
+    throw new Error(`Erbjudandet "${product.name}" har ett ogiltigt startdatum.`);
+  }
+  if (promotion.endDate != null && !endDate) {
+    throw new Error(`Erbjudandet "${product.name}" har ett ogiltigt slutdatum.`);
+  }
+  if (promotion.validUntil != null && !validUntil) {
+    throw new Error(`Erbjudandet "${product.name}" har ett ogiltigt slutdatum.`);
+  }
+  const validTo = endDate ?? validUntil;
+  if (!validTo) {
+    throw new Error(`Erbjudandet "${product.name}" saknar ett giltigt slutdatum.`);
+  }
+  if (validFrom && validFrom > validTo) {
+    throw new Error(`Erbjudandet "${product.name}" har ett ogiltigt giltighetsintervall.`);
+  }
+  if (validTo < runDate || (validFrom && validFrom > weekEnd)) {
+    return undefined;
+  }
+
+  const quantity = quantityFor(promotion, text);
+  const price = parseAmount(promotion.price) ?? amountFromMechanic(text);
+  const priceUnit = priceUnitFrom(
+    promotion.priceUnit,
+    product.priceUnit,
+    text,
+  );
+  const regularPrice =
+    parseAmount(promotion.regularPrice) ??
+    parseAmount(product.regularPrice) ??
+    parseAmount(promotion.ordinaryPrice) ??
+    parseAmount(product.ordinaryPrice) ??
+    parseAmount(product.priceNoUnit) ??
+    parseAmount(product.price);
+  const brand =
+    sourceText(product.manufacturer) ??
+    (typeof product.brands === "string"
+      ? sourceText(product.brands)
+      : product.brands?.map((value) => value.trim()).find(Boolean));
+  const limit = sourceText(promotion.limitText);
+  const redeemLimit = parseAmount(promotion.redeemLimit);
+  const limitText =
+    limit ??
+    (redeemLimit !== undefined
+      ? `Max ${new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 0 }).format(redeemLimit)}`
+      : undefined);
+
+  return {
+    id: stableOfferId(storeId, product, promotion, text),
+    chain: "Hemköp",
+    storeId,
+    name: product.name.trim(),
+    mechanicText: text,
+    category: mapHemkopCategory(product.googleAnalyticsCategory),
+    validTo,
+    sourceUrl,
+    quantity,
+    ...(brand ? { brand } : {}),
+    ...(sourceText(product.displayVolume) ? { packageSize: sourceText(product.displayVolume) } : {}),
+    ...(price !== undefined ? { price, unitPrice: price / quantity } : {}),
+    ...(priceUnit ? { priceUnit } : {}),
+    ...(regularPrice !== undefined ? { regularPrice } : {}),
+    ...(comparisonPriceText(promotion, product)
+      ? { comparisonPriceText: comparisonPriceText(promotion, product) }
+      : {}),
+    ...(limitText ? { limitText } : {}),
+    ...(validFrom ? { validFrom } : {}),
+    ...(imageUrl(product) ? { imageUrl: imageUrl(product) } : {}),
+    ...(product.googleAnalyticsCategory
+      ? { sourceCategory: product.googleAnalyticsCategory }
+      : {}),
+  };
+}
+
+function requestedPageUrl(storeId: string, page: number): string {
+  const url = new URL("/search/campaigns/offline", HEMKOP_ORIGIN);
+  url.searchParams.set("q", storeId);
+  url.searchParams.set("type", "PERSONAL_GENERAL");
+  url.searchParams.set("page", String(page));
+  url.searchParams.set("size", "30");
+  url.searchParams.set("disableMimerSort", "true");
+  return url.toString();
+}
+
+function formatRequestError(status: number): string {
+  if (status === 403 || status === 429) {
+    return `Hemköp nekade begäran (HTTP ${status}); uppdateringen avbryts utan återförsök.`;
+  }
+  return `Hemköp svarade med HTTP ${status}.`;
+}
+
+async function refreshHemkop(
+  location: HemkopLocation,
+  context: ChainRefreshContext,
+): Promise<ChainRefreshResult> {
+  const {
+    fetcher,
+    now,
+    waitForRequest,
+    runDate,
+    offerWeekEnd: weekEnd,
+  } = context;
+  let discoveredStores: Store[] = [];
+
+  const requestJson = async (url: string, label: string): Promise<unknown> => {
+    await waitForRequest(HEMKOP_SOURCE, HEMKOP_REQUEST_DELAY_MS);
+    assertWithinHemkopVisitTime(now());
+    const response = await fetcher(url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      credentials: "omit",
+    });
+    if (!response.ok) {
+      throw new Error(formatRequestError(response.status));
+    }
+    try {
+      return await response.json();
+    } catch {
+      throw new Error(`Hemköp svarade inte med giltig JSON (${label}).`);
+    }
+  };
+
+  try {
+    const storesResponse = await requestJson(
+      `${HEMKOP_ORIGIN}/axfood/rest/store?online=false&clickAndCollect=false&b2bClickAndCollect=false`,
+      "butiker",
+    );
+    const sourceStores = parseResponse(
+      z.array(HemkopStoreSchema),
+      storesResponse,
+      "butiker",
+      "Hemköp",
+    );
+    const discovery =
+      location.storeDiscovery ??
+      (location.city
+        ? {
+            exactCity: { field: "address.town", value: location.city },
+            pinStoreIds: [],
+            excludeStoreIds: [],
+          }
+        : undefined);
+    if (!discovery) {
+      throw new Error("Hemköp saknar konfigurerade kriterier för butiksupptäckt.");
+    }
+    const matchingStores = discoverStores(
+      sourceStores,
+      discovery,
+      "Hemköp",
+      (store) => String(store.storeId),
+    );
+    const mappedStores = matchingStores.map(storeFromSource);
+    discoveredStores = [
+      ...new Map(mappedStores.map((store) => [store.id, store])).values(),
+    ];
+    if (discoveredStores.length !== mappedStores.length) {
+      throw new Error("Hemköps butikslista innehåller dubbla Store ids.");
+    }
+
+    const offers: Offer[] = [];
+    const offersByStore = new Map<string, number>();
+
+    for (const sourceStore of matchingStores) {
+      const sourceStoreId = String(sourceStore.storeId);
+      const storeId = `Hemköp:${sourceStoreId}`;
+      let expectedPages: number | undefined;
+      let page = 0;
+      let storeOfferCount = 0;
+
+      while (expectedPages === undefined || page < expectedPages) {
+        const sourceUrl = requestedPageUrl(sourceStoreId, page);
+        const pageResponse = await requestJson(sourceUrl, "kampanjer");
+        const campaignPage = parseResponse(
+          HemkopPageSchema,
+          pageResponse,
+          "kampanjer",
+          "Hemköp",
+        );
+        if (campaignPage.pagination.currentPage !== undefined &&
+            campaignPage.pagination.currentPage !== page) {
+          throw new Error("Hemköps kampanjpaginering ändrades under hämtningen.");
+        }
+        if (expectedPages === undefined) {
+          expectedPages = campaignPage.pagination.numberOfPages;
+        } else if (campaignPage.pagination.numberOfPages !== expectedPages) {
+          throw new Error("Hemköps kampanjpaginering ändrades under hämtningen.");
+        }
+
+        for (const product of campaignPage.results) {
+          const loyaltyPromotions = product.potentialPromotions.filter(
+            (promotion) => promotion.campaignType?.toUpperCase() === "LOYALTY",
+          );
+          const promotions = loyaltyPromotions.length
+            ? loyaltyPromotions
+            : product.potentialPromotions;
+          for (const promotion of promotions) {
+            const offer = normalizeOffer(
+              storeId,
+              product,
+              promotion,
+              sourceUrl,
+              runDate,
+              weekEnd,
+            );
+            if (offer) {
+              offers.push(offer);
+              storeOfferCount += 1;
+            }
+          }
+        }
+        page += 1;
+      }
+      offersByStore.set(storeId, storeOfferCount);
+    }
+
+    const emptyStores = discoveredStores
+      .filter((store) => offersByStore.get(store.id) === 0)
+      .map((store) => store.name);
+    const warning =
+      offers.length > 0 && emptyStores.length > 0
+        ? `Inga aktuella erbjudanden hämtades från: ${emptyStores.join(", ")}.`
+        : undefined;
+    return {
+      stores: discoveredStores,
+      offers,
+      ...(warning ? { warning } : {}),
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Okänt fel.";
+    throw new ChainRefreshError(message.slice(0, 240), discoveredStores);
+  }
+}
+
+export const HEMKOP_SOURCE_ADAPTER: ChainSourceAdapter<HemkopLocation> = {
+  chain: "Hemköp",
+  source: HEMKOP_SOURCE,
+  refresh: refreshHemkop,
+};
+
+export function buildHemkopSnapshot(
+  location: HemkopLocation,
+  dependencies: HemkopJobDependencies = {},
+): Promise<Snapshot> {
+  return buildSnapshot(location, [HEMKOP_SOURCE_ADAPTER], dependencies);
+}

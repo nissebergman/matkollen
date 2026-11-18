@@ -16,6 +16,14 @@ import {
   type ChainSourceAdapter,
   type SnapshotLocation,
 } from "./runner";
+import {
+  amountFromMechanic,
+  isIsoDate,
+  parseAmount,
+  parseResponse,
+  sourceId,
+  sourceText,
+} from "./source-parsing";
 
 export const TJEK_REQUEST_DELAY_MS = 1_000;
 export const TJEK_SOURCE = "tjek-ereklamblad";
@@ -238,28 +246,6 @@ type TjekBusiness = z.infer<typeof TjekBusinessSchema>;
 export type TjekOffer = z.infer<typeof TjekOfferSchema>;
 type TjekStore = z.infer<typeof TjekStoreSchema>;
 
-function describeValidationError(error: z.ZodError): string {
-  const issue = error.issues[0];
-  const path = issue.path.length ? issue.path.join(".") : "response";
-  return `fältet ${path} har ett oväntat format`;
-}
-
-function parseResponse<T>(schema: z.ZodType<T>, value: unknown, label: string): T {
-  const result = schema.safeParse(value);
-  if (!result.success) {
-    throw new Error(`Ogiltigt svar från Tjek (${label}): ${describeValidationError(result.error)}.`);
-  }
-  return result.data;
-}
-
-function isIsoDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return false;
-  }
-  const parsed = new Date(`${value}T00:00:00.000Z`);
-  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
-}
-
 function dateFromSource(value: string | number | null | undefined): string | undefined {
   if (typeof value === "number") {
     const date = new Date(value);
@@ -340,7 +326,7 @@ function publicationsFromResponse(
   label: string,
   expectedBusinessId: string,
 ): z.infer<typeof TjekPublicationSchema>[] {
-  const fronts = parseResponse(TjekFrontsResponseSchema, value, label).value;
+  const fronts = parseResponse(TjekFrontsResponseSchema, value, label, "Tjek").value;
   const publications: z.infer<typeof TjekPublicationSchema>[] = [];
   for (const front of fronts) {
     if (sourceId(front.business.publicId) !== expectedBusinessId) {
@@ -375,61 +361,12 @@ function publicationDetails(
   return { id: sourceId(id), validFrom, validTo };
 }
 
-function parseAmount(value: unknown): number | undefined {
-  if (typeof value === "number") {
-    return Number.isFinite(value) && value >= 0 ? value : undefined;
-  }
-  if (typeof value !== "string") {
-    return undefined;
-  }
-
-  const normalized = value.trim();
-  if (normalized.startsWith("-")) {
-    return undefined;
-  }
-  const numericTokens = normalized.match(/\d[\d\s.,]*\d|\d/g);
-  if (!numericTokens || numericTokens.length !== 1) {
-    return undefined;
-  }
-  let amount = numericTokens[0].replace(/\s|\u00a0/g, "");
-  if (!/^\d+(?:[.,]\d+)*$/.test(amount)) {
-    return undefined;
-  }
-
-  const comma = amount.lastIndexOf(",");
-  const dot = amount.lastIndexOf(".");
-  if (comma >= 0 && dot >= 0) {
-    if (comma > dot) {
-      amount = amount.replace(/\./g, "").replace(",", ".");
-    } else {
-      amount = amount.replace(/,/g, "");
-    }
-  } else if (comma >= 0) {
-    amount = amount.replace(",", ".");
-  } else if ((amount.match(/\./g) ?? []).length > 1) {
-    const lastDot = amount.lastIndexOf(".");
-    amount = `${amount.slice(0, lastDot).replace(/\./g, "")}${amount.slice(lastDot)}`;
-  }
-
-  const parsed = Number(amount);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
-}
-
-function sourceText(value: string | null | undefined): string | undefined {
-  const text = value?.trim();
-  return text || undefined;
-}
-
 function normalizedKey(value: string): string {
   return value
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
     .trim()
     .toLowerCase();
-}
-
-function sourceId(value: string | number): string {
-  return String(value);
 }
 
 function chainLabels(value: unknown): string[] {
@@ -504,9 +441,19 @@ function amountText(value: number): string {
   return new Intl.NumberFormat("sv-SE", { maximumFractionDigits: 2 }).format(value);
 }
 
-function amountFromMechanic(text: string): number | undefined {
-  const match = text.match(/(\d[\d\s.,]*)\s*kr\b/i);
-  return match ? parseAmount(match[1]) : undefined;
+// Tjek sends 0 as a placeholder when an Offer has no published price.
+function sourcePrice(value: unknown): number | undefined {
+  const amount = parseAmount(value);
+  return amount === 0 ? undefined : amount;
+}
+
+function hasPlaceholderPrice(offer: TjekOffer): boolean {
+  return [
+    offer.price,
+    offer.membershipPrice,
+    offer.fromPrice,
+    offer.unitPrice,
+  ].some((value) => value != null && parseAmount(value) === 0);
 }
 
 function memberPriceText(offer: TjekOffer): string | undefined {
@@ -518,7 +465,7 @@ function memberPriceText(offer: TjekOffer): string | undefined {
 function memberPriceAmount(offer: TjekOffer): number | undefined {
   const text = memberPriceText(offer);
   return (
-    parseAmount(offer.membershipPrice) ??
+    sourcePrice(offer.membershipPrice) ??
     (text ? amountFromMechanic(text) : undefined)
   );
 }
@@ -550,7 +497,7 @@ function mechanicText(offer: TjekOffer): string {
   const priceUnit = priceUnitFrom(offer.baseUnit, offer.unitSymbol, offer.priceUnit);
   const memberPrice = memberPriceAmount(offer);
   if (memberPrice !== undefined) {
-    const sourceUnitPrice = parseAmount(offer.unitPrice);
+    const sourceUnitPrice = sourcePrice(offer.unitPrice);
     const priceIsPerUnit =
       (priceUnit === "kg" || priceUnit === "l") &&
       sourceUnitPrice === memberPrice;
@@ -558,12 +505,12 @@ function mechanicText(offer: TjekOffer): string {
   }
 
   const productPrice =
-    parseAmount(offer.fromPrice) ?? parseAmount(offer.price);
+    sourcePrice(offer.fromPrice) ?? sourcePrice(offer.price);
   if (productPrice !== undefined) {
     return `${amountText(productPrice)} kr`;
   }
 
-  const unitPrice = parseAmount(offer.unitPrice);
+  const unitPrice = sourcePrice(offer.unitPrice);
   if (unitPrice !== undefined) {
     return `${amountText(unitPrice)} kr${priceUnit ? `/${priceUnit}` : ""}`;
   }
@@ -571,6 +518,9 @@ function mechanicText(offer: TjekOffer): string {
   const description = sourceText(offer.description);
   if (description) {
     return description;
+  }
+  if (hasPlaceholderPrice(offer)) {
+    return "Se reklambladet";
   }
   throw new Error(`Tjek-erbjudandet "${offer.name}" saknar en visbar erbjudandetext.`);
 }
@@ -739,16 +689,16 @@ export function normalizeTjekOffer(
   const memberTextAmount = memberText
     ? amountFromMechanic(memberText)
     : undefined;
-  const memberPrice = parseAmount(offer.membershipPrice) ?? memberTextAmount;
+  const memberPrice = sourcePrice(offer.membershipPrice) ?? memberTextAmount;
   const price =
     bundlePrice ??
     memberPrice ??
-    parseAmount(offer.fromPrice) ??
-    parseAmount(offer.price) ??
+    sourcePrice(offer.fromPrice) ??
+    sourcePrice(offer.price) ??
     (priceUnit === "kg" || priceUnit === "l" ? undefined : mechanicAmount);
-  const sourceUnitPrice = parseAmount(offer.unitPrice);
+  const sourceUnitPrice = sourcePrice(offer.unitPrice);
   const memberUnitPrice =
-    parseAmount(offer.membershipPrice) ??
+    sourcePrice(offer.membershipPrice) ??
     (memberTextAmount !== undefined
       ? quantity > 1 && /(\d+)\s*(?:för|for)\s*\d+/iu.test(memberText ?? "")
         ? memberTextAmount / quantity
@@ -772,9 +722,9 @@ export function normalizeTjekOffer(
             ? price / quantity
             : undefined);
   const regularPrice =
-    parseAmount(offer.regularPrice) ??
-    parseAmount(offer.ordinaryPrice) ??
-    parseAmount(offer.originalPrice);
+    sourcePrice(offer.regularPrice) ??
+    sourcePrice(offer.ordinaryPrice) ??
+    sourcePrice(offer.originalPrice);
   const brand = sourceText(offer.brand) ?? sourceText(offer.manufacturer);
   const category =
     sourceText(offer.departmentSlug) ??
@@ -894,6 +844,7 @@ async function refreshTjek(
         TjekIncitoOfferIdsResponseSchema,
         incitoResponse,
         "publikationserbjudanden",
+        "Tjek",
       );
       return new Set(incitoOfferIds.map(([offerId]) => sourceId(offerId)));
     }
@@ -902,6 +853,7 @@ async function refreshTjek(
       TjekPublicationPagesResponseSchema,
       pagesResponse,
       "publikationssidor",
+      "Tjek",
     ).pages;
     return new Set(
       Object.values(pages).flatMap((page) =>
@@ -916,6 +868,7 @@ async function refreshTjek(
       TjekBusinessesResponseSchema,
       businessesResponse,
       "butiker",
+      "Tjek",
     ).value;
     const chainBusinesses = businesses.filter((business) =>
       isBusinessForChain(business, chain),
@@ -942,6 +895,7 @@ async function refreshTjek(
         TjekStoresResponseSchema,
         storesResponse,
         "butiker",
+        "Tjek",
       ).value.data;
       if (sourceStores.length === TJEK_STORE_LIMIT) {
         throw new Error(
@@ -998,6 +952,7 @@ async function refreshTjek(
     }
 
     const offers: Offer[] = [];
+    const emptyStoreNames: string[] = [];
     for (const sourceStore of locationStores) {
       const sourceStoreId = sourceId(sourceStore.id);
       const store = storeFromTjekStore(sourceStore, chain);
@@ -1035,20 +990,9 @@ async function refreshTjek(
             publication.validTo >= context.runDate &&
             publication.validFrom <= context.offerWeekEnd,
         );
-      if (currentPublications.length === 0) {
-        throw new Error(
-          `Tjek returnerade ingen verifierad aktuell publikation för Store ${sourceStoreId}.`,
-        );
-      }
-
+      let storeOfferCount = 0;
       for (const publication of currentPublications) {
         const offerIds = await requestPublicationOfferIds(publication.id);
-        if (offerIds.size === 0) {
-          throw new Error(
-            `Tjek-publikationen ${publication.id} saknar verifierade Offer-ID:n.`,
-          );
-        }
-
         for (const offerId of offerIds) {
           const offerResponse = await requestAction(
             "offer",
@@ -1059,6 +1003,7 @@ async function refreshTjek(
             TjekOfferResponseSchema,
             offerResponse,
             `erbjudande ${offerId}`,
+            "Tjek",
           ).value;
           if (sourceId(sourceOffer.publicId) !== offerId) {
             throw new Error(
@@ -1077,8 +1022,12 @@ async function refreshTjek(
           );
           if (offer) {
             offers.push(offer);
+            storeOfferCount += 1;
           }
         }
+      }
+      if (storeOfferCount === 0) {
+        emptyStoreNames.push(store.name);
       }
     }
     if (offers.length === 0) {
@@ -1087,7 +1036,15 @@ async function refreshTjek(
       );
     }
 
-    return { stores: discoveredStores, offers };
+    const warning =
+      emptyStoreNames.length > 0
+        ? `Inga aktuella erbjudanden hämtades från: ${emptyStoreNames.join(", ")}.`
+        : undefined;
+    return {
+      stores: discoveredStores,
+      offers,
+      ...(warning ? { warning } : {}),
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Okänt fel.";
     throw new ChainRefreshError(message.slice(0, 240), discoveredStores);

@@ -13,6 +13,13 @@ import type {
   StoreDiscoveryConfig,
 } from "./config";
 import { discoverStores } from "./store-discovery";
+import {
+  currentOfferWeekEnd,
+  isIsoDate,
+  parseResponse,
+  positiveInteger,
+  sourceText,
+} from "./source-parsing";
 
 export const ICA_REQUEST_DELAY_MS = 1_000;
 
@@ -216,47 +223,12 @@ function defaultSleep(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-function sourceText(value: string | null | undefined): string | undefined {
-  const text = value?.trim();
-  return text || undefined;
-}
-
-function describeValidationError(error: z.ZodError): string {
-  const issue = error.issues[0];
-  const path = issue.path.length ? issue.path.join(".") : "response";
-  return `fältet ${path} har ett oväntat format`;
-}
-
-function parseResponse<T>(schema: z.ZodType<T>, value: unknown, label: string): T {
-  const result = schema.safeParse(value);
-  if (!result.success) {
-    throw new Error(`Ogiltigt svar från ICA (${label}): ${describeValidationError(result.error)}.`);
-  }
-  return result.data;
-}
-
-function isIsoDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return false;
-  }
-  const parsed = new Date(`${value}T00:00:00.000Z`);
-  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
-}
-
 function dateFromSource(value: string | null | undefined): string | undefined {
   if (typeof value !== "string" || !value.trim()) {
     return undefined;
   }
   const date = value.trim().match(/^(\d{4}-\d{2}-\d{2})(?:T.*)?$/)?.[1];
   return date && isIsoDate(date) ? date : undefined;
-}
-
-function currentOfferWeekEnd(today: string): string {
-  const day = new Date(`${today}T00:00:00.000Z`).getUTCDay();
-  const daysUntilSunday = (7 - day) % 7;
-  const end = new Date(`${today}T00:00:00.000Z`);
-  end.setUTCDate(end.getUTCDate() + daysUntilSunday);
-  return end.toISOString().slice(0, 10);
 }
 
 function balancedValueAt(source: string, start: number): string | undefined {
@@ -469,10 +441,6 @@ function storeFromSource(source: IcaStoreSearchRecord): Store {
 function amountFromMechanic(text: string): number | undefined {
   const price = text.match(/(\d[\d\s.,:]*\d|\d)\s*kr\b/i);
   return price ? parseAmount(price[1]) : undefined;
-}
-
-function positiveInteger(value: number | undefined): number | undefined {
-  return value && Number.isInteger(value) && value > 0 ? value : undefined;
 }
 
 function quantityFor(offer: IcaOffer, text: string): number {
@@ -697,6 +665,7 @@ export async function buildIcaSnapshot(
       IcaTokenSchema,
       await responseJson(`${ICA_ORIGIN}/e11/public-access-token`, "anonym åtkomsttoken"),
       "anonym åtkomsttoken",
+      "ICA",
     );
     const accessToken =
       sourceText(tokenResponse.accessToken) ??
@@ -718,6 +687,7 @@ export async function buildIcaSnapshot(
           { Authorization: `Bearer ${accessToken}` },
         ),
         "butikslistan",
+        "ICA",
       );
       if (totalHits === undefined) {
         totalHits = page.stats.totalHits;
@@ -765,6 +735,7 @@ export async function buildIcaSnapshot(
         z.array(IcaOfferSchema),
         weeklyOffersFromHtml(html),
         "veckans erbjudanden",
+        "ICA",
       );
       let storeOfferCount = 0;
       for (const sourceOffer of sourceOffers) {
