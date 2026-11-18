@@ -27,11 +27,12 @@ adapter discovers Stores and implements the observed Store-specific
 Coop refresh validated all six configured Linköping Stores, six publications
 and 293 Offers. A separate bounded ICA check verified one Store-specific
 publication and three Offers with Store association and date normalization;
-none contained a member-price field. Hemköp was not probed. ICA's broader
-coverage and member-price behavior, and Hemköp compatibility, remain
-unverified. The sanitized fixture preserves the observed nested `fronts`
-envelope and business-to-Store association. The adapter fails closed on
-unsupported or inconsistent responses; do not switch sources automatically.
+none contained a member-price field. A bounded Hemköp Tjek check later verified
+three Offers and one member price, but not live Store discovery. The 2026-11-18
+publish run generated 293 Coop Offers; ICA and Hemköp failed closed on their
+current first-party responses. The sanitized fixtures and remaining live
+compatibility limits are documented in the source notes. Do not switch sources
+automatically.
 The flyer-PDF adapter is available as an experimental, manually selected
 fallback; a read-only check of a real flyer showed a layout that the parser
 correctly rejects rather than publishing misidentified Offers. The configured
@@ -55,15 +56,18 @@ npm test
 npm run build
 ```
 
-The checked-in Snapshot is visibly labelled as fixture data, not a live
-refresh. Automated tests replay secret-free fixtures and do not access the
-network.
+`public/snapshots/linkoping.json` contains the latest output from the refresh
+workflow, not fixture data. Failed Chains are represented in the Snapshot and
+shown in the app rather than being replaced with fixture Offers. Automated
+tests replay secret-free fixtures and do not access the network.
 
 ## GitHub Pages publication
 
 `.github/workflows/publish.yml` refreshes and publishes the app and Snapshots
 daily at 05:00 UTC, or on a manual `workflow_dispatch`. It commits the generated
 Snapshots, builds them alongside the app, and deploys the resulting static site.
+The public site is available at
+<https://nissebergman.github.io/matkollen/>.
 It stages Snapshots in a clean directory and validates one schema-valid
 Snapshot per configured Location before copying or building. If a Chain refresh
 fails but still produces valid successful/stale results, those results are

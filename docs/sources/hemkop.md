@@ -38,5 +38,9 @@ Fixture values are based on the observations in
 `.scratch/offers-v1/research/hemkop-offer-data-access.md`; synthetic rows and
 combinations are identified in `tests/fixtures/hemkop/README.md`. They are not
 live verification or a promise that the undocumented response remains stable.
-The checked-in `public/snapshots/linkoping.json` is visibly marked as fixture
-data and must be replaced with a successful refresh before publishing.
+
+The public refresh on 2026-11-18 failed closed when the first-party campaign
+response contained an unsupported `comparePrice` shape at
+`results.1.potentialPromotions.0.comparePrice`; no Hemköp Offers were included
+in that Snapshot. The generated Snapshot was deployed with the source failure
+visible in the app, and the Tjek fallback was not selected automatically.

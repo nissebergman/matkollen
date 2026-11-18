@@ -38,3 +38,7 @@ Automated tests replay trimmed, secret-free fixtures and do not call ICA.
 synthetic cases. The token response uses a nonfunctional placeholder.
 Access-denied and malformed responses are reported in the Snapshot; the job
 never falls back to the community-described mobile endpoint.
+
+The public refresh on 2026-11-18 received HTTP 403 while obtaining the
+anonymous access token. The request was not retried, and the published Snapshot
+records ICA as failed with no Offers; no alternate route was used.

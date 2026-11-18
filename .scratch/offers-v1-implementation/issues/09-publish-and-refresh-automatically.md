@@ -4,13 +4,13 @@
 
 **Blocked by:** 02: Add ICA Offers; 03: Add Coop Offers; 07: Keep Offers visible when a source fails.
 
-**Status:** in_progress
+**Status:** resolved
 
-- [ ] A GitHub Actions workflow runs the Snapshot job daily around 05:00 UTC and supports manual runs; the app and Snapshots are deployed together to GitHub Pages.
-- [ ] A partially failed refresh still publishes successful and retained stale data, then reports a failed workflow run for maintainer notification.
-- [ ] The published app loads its Snapshot correctly from the deployed site and does not request Chain endpoints from the browser.
-- [ ] No source credentials are committed or stored as CI secrets; the workflow and publication behaviour are verified without requiring live endpoints in the automated tests.
-- [ ] Document that GitHub Pages may be publicly accessible and verify that the chosen repository and Pages visibility are acceptable before publishing household data.
+- [x] A GitHub Actions workflow runs the Snapshot job daily around 05:00 UTC and supports manual runs; the app and Snapshots are deployed together to GitHub Pages.
+- [x] A partially failed refresh still publishes successful and retained stale data, then reports a failed workflow run for maintainer notification.
+- [x] The published app loads its Snapshot correctly from the deployed site and does not request Chain endpoints from the browser.
+- [x] No source credentials are committed or stored as CI secrets; the workflow and publication behaviour are verified without requiring live endpoints in the automated tests.
+- [x] Document that GitHub Pages may be publicly accessible and verify that the chosen repository and Pages visibility are acceptable before publishing household data.
 
 ## Comments
 
@@ -53,3 +53,19 @@ default branch. The workflow file is present and passes local `actionlint`,
 but GitHub's workflow API still reports no registered workflows. Pages remains
 disabled and no deployment has run; retry workflow registration after the
 default-branch push is indexed.
+
+## Answer
+
+The public Pages site is live at
+<https://nissebergman.github.io/matkollen/>. Manual run
+[44246089770](https://github.com/nissebergman/matkollen/actions/runs/44246089770)
+generated and deployed Snapshot commit
+[3b56b4c](https://github.com/nissebergman/matkollen/commit/3b56b4c) at
+2026-11-18T05:49:13Z. It contains 293 fresh Coop Tjek Offers and no fixture
+Chains or Offers. ICA's anonymous token request returned HTTP 403, and
+Hemköp's first-party campaign response had an unsupported `comparePrice`
+shape; both failed closed with no Offers. The Pages deployment succeeded, and
+the workflow then reported the partial refresh as failed as designed. The app
+and Snapshot URLs return HTTP 200, and the deployed bundle requests the
+Location Snapshot under `/matkollen/snapshots/`. No source credentials or CI
+source secrets were used.
