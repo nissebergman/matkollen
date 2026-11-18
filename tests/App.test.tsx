@@ -274,7 +274,7 @@ describe("Offers app", () => {
     expect(screen.queryByRole("heading", { name: "Noll i enhetspris" })).not.toBeInTheDocument();
   });
 
-  it("sorts by discount percentage rather than amount and puts unusable discounts last", async () => {
+  it("sorts by discount amount in SEK rather than percentage and puts unusable discounts last", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
     const sortableSnapshot = JSON.parse(JSON.stringify(snapshotFixture));
@@ -310,7 +310,7 @@ describe("Offers app", () => {
       {
         ...baseOffer,
         id: "large-amount-small-percentage",
-        name: "Liten procent",
+        name: "Stor besparing",
         price: 900,
         unitPrice: 900,
         regularPrice: 1000,
@@ -379,10 +379,10 @@ describe("Offers app", () => {
     expect(
       screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent),
     ).toEqual([
+      "Stor besparing",
       "Stor rabatt",
       "Rabatt Apelsin",
       "Rabatt Äpple",
-      "Liten procent",
       "Ingen ordinarie",
       "Noll ordinarie",
       "Oidentifierad enhet",

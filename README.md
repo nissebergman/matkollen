@@ -52,9 +52,10 @@ discount is claimed.
 
 Offers are ordered by the purchase price shown on their price ticket, not the
 kg/l comparison price. A multi-buy total is its purchase price; a numeric unit
-price is used only when no purchase price exists. Choose “Störst rabatt (%)” to
-sort by the percentage reduction from regular to effective unit price when
-both use a known, shared unit and the regular price is positive. Aggregated
+price is used only when no purchase price exists. Choose “Största rabatt (kr)”
+to sort by the saving in SEK (regular price minus effective unit price) when
+both use a known, shared unit; the **Spara** badge shows the same amount per
+unit (kr, kr/kg or kr/l). Aggregated
 Offers use the conservative Store-wide reduction described above. Offers without
 a usable price or computable reduction appear last. Offers with an explicit
 zero price or zero effective price are hidden; unknown prices remain visible.

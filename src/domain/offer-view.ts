@@ -7,7 +7,7 @@ export interface OfferGroup {
   offer: Offer;
   storeIds: string[];
   regularPriceRange?: { min: number; max: number; complete: boolean };
-  discountPercent?: number;
+  discountAmount?: number;
   discountVaries: boolean;
 }
 
@@ -15,17 +15,16 @@ export function purchasePrice(offer: Pick<Offer, "price" | "unitPrice">): number
   return offer.price ?? offer.unitPrice;
 }
 
-function discountPercent(offer: Offer): number | undefined {
+function discountAmount(offer: Offer): number | undefined {
   if (
     offer.unitPrice === undefined ||
     offer.regularPrice === undefined ||
     offer.priceUnit === undefined ||
-    offer.regularPrice <= 0 ||
     offer.unitPrice >= offer.regularPrice
   ) {
     return undefined;
   }
-  return ((offer.regularPrice - offer.unitPrice) / offer.regularPrice) * 100;
+  return offer.regularPrice - offer.unitPrice;
 }
 
 function normalizedText(value: string | undefined): string | undefined {
@@ -66,7 +65,7 @@ export function aggregateOffers(offers: readonly Offer[]): OfferGroup[] {
     const regularPrices = members
       .map((offer) => offer.regularPrice)
       .filter((price): price is number => price !== undefined && price > 0);
-    const discounts = members.map(discountPercent);
+    const discounts = members.map(discountAmount);
     const knownDiscounts = discounts.filter((value): value is number => value !== undefined);
     return {
       key,
@@ -80,7 +79,7 @@ export function aggregateOffers(offers: readonly Offer[]): OfferGroup[] {
         },
       } : {}),
       ...(knownDiscounts.length === members.length
-        ? { discountPercent: Math.min(...knownDiscounts) }
+        ? { discountAmount: Math.min(...knownDiscounts) }
         : {}),
       discountVaries: new Set(knownDiscounts).size > 1,
     };
@@ -89,8 +88,8 @@ export function aggregateOffers(offers: readonly Offer[]): OfferGroup[] {
 
 export function sortOfferGroups(groups: readonly OfferGroup[], order: SortOrder): OfferGroup[] {
   return [...groups].sort((left, right) => {
-    const leftValue = order === "price" ? purchasePrice(left.offer) : left.discountPercent;
-    const rightValue = order === "price" ? purchasePrice(right.offer) : right.discountPercent;
+    const leftValue = order === "price" ? purchasePrice(left.offer) : left.discountAmount;
+    const rightValue = order === "price" ? purchasePrice(right.offer) : right.discountAmount;
     const byName = left.offer.name.localeCompare(right.offer.name, "sv") ||
       left.key.localeCompare(right.key, "sv");
     if (leftValue === undefined) {

@@ -41,7 +41,7 @@ describe("Offer presentation", () => {
 
     expect(group.storeIds).toEqual(["Hemköp:a", "Hemköp:b"]);
     expect(group.regularPriceRange).toEqual({ min: 38.41, max: 38.41, complete: false });
-    expect(group.discountPercent).toBeUndefined();
+    expect(group.discountAmount).toBeUndefined();
   });
 
   it("sorts group discounts by the reduction available at every listed Store", () => {
@@ -57,6 +57,6 @@ describe("Offer presentation", () => {
     expect(sorted.map(({ offer }) => offer.name)).toEqual([
       "Samma ordinarie pris", "Olika ordinarie priser",
     ]);
-    expect(sorted.map(({ discountPercent }) => discountPercent)).toEqual([50, 20]);
+    expect(sorted.map(({ discountAmount }) => discountAmount)).toEqual([20, 5]);
   });
 });

@@ -56,7 +56,7 @@ describe("aggregated Offers", () => {
     expect(card.getByText("ICA A")).toBeVisible();
     expect(card.getByText("ICA B")).toBeVisible();
     expect(card.getByText(/150,00.*160,00/)).toBeVisible();
-    expect(card.getByText("Spara minst 25%")).toBeVisible();
+    expect(card.getByText("Spara minst 37,50 kr/kg")).toBeVisible();
   });
 
   it("only lists the selected Stores on an aggregated Offer", async () => {

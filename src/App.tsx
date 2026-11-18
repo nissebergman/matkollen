@@ -213,7 +213,7 @@ function OfferCard({
   stores: Array<{ id: string; name: string }>;
   stale: boolean;
 }) {
-  const { offer, discountPercent: discount, regularPriceRange } = group;
+  const { offer, discountAmount: discount, regularPriceRange } = group;
   const price = purchasePrice(offer);
   const priceParts = price === undefined ? undefined : PRICE_FORMATTER.format(price).split(",");
 
@@ -221,9 +221,10 @@ function OfferCard({
     <article className="offer-card">
       <div className="offer-card-topline">
         <span className="chain-label">{offer.chain}</span>
-        {discount !== undefined && discount >= 1 && (
+        {discount !== undefined && (
           <span className="discount-badge">
-            Spara {group.discountVaries ? "minst " : ""}{Math.floor(discount)}%
+            Spara {group.discountVaries ? "minst " : ""}{formatPrice(discount)}
+            {offer.priceUnit === "st" ? "" : `/${offer.priceUnit}`}
           </span>
         )}
       </div>
@@ -680,7 +681,7 @@ export function App({
             }}
           >
             <option value="price">Lägsta pris</option>
-            <option value="discount">Störst rabatt (%)</option>
+            <option value="discount">Största rabatt (kr)</option>
           </select>
         </label>
       </div>
