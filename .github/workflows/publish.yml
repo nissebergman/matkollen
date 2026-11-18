@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 5 * * *"
   workflow_dispatch:
+    inputs:
+      refresh_snapshots:
+        description: Refresh sources (disable to publish only app changes)
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -41,11 +46,16 @@ jobs:
         run: rm -rf generated/snapshots && mkdir -p generated/snapshots
 
       - name: Refresh Snapshots
+        if: github.event_name != 'workflow_dispatch' || inputs.refresh_snapshots
         id: refresh
         continue-on-error: true
         run: npm run snapshot -- generated/snapshots
         env:
           SNAPSHOT_PREVIOUS_DIRECTORY: public/snapshots
+
+      - name: Reuse published Snapshots for app-only deployment
+        if: github.event_name == 'workflow_dispatch' && !inputs.refresh_snapshots
+        run: cp public/snapshots/*.json generated/snapshots/
 
       - name: Validate generated Snapshots
         run: npm run snapshot:validate -- generated/snapshots

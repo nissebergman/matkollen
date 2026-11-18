@@ -61,7 +61,10 @@ async function readPreviousSnapshot(path: string): Promise<Snapshot | undefined>
   }
 }
 
-export async function validateSnapshotDirectory(directory: string): Promise<void> {
+export async function validateSnapshotDirectory(
+  directory: string,
+  { rejectFixtures = false }: { rejectFixtures?: boolean } = {},
+): Promise<void> {
   const outputDirectory = resolve(directory);
   for (const location of LOCATION_REGISTRY.locations) {
     const snapshotPath = resolve(outputDirectory, `${location.id}.json`);
@@ -97,6 +100,9 @@ export async function validateSnapshotDirectory(directory: string): Promise<void
       throw new Error(
         `Genererad Snapshot har fel Location: ${snapshotPath}`,
       );
+    }
+    if (rejectFixtures && snapshot.chains.some((chain) => chain.source.endsWith("-fixture"))) {
+      throw new Error(`Snapshot innehåller testfixturer och får inte publiceras: ${snapshotPath}`);
     }
   }
 }
@@ -148,7 +154,7 @@ async function main(): Promise<void> {
     const outputArgument = process.argv[2];
     if (outputArgument === "--validate") {
       const directory = resolve(process.argv[3] ?? "public/snapshots");
-      await validateSnapshotDirectory(directory);
+      await validateSnapshotDirectory(directory, { rejectFixtures: true });
       console.log(`Snapshots validerade: ${directory}`);
       return;
     }

@@ -23,7 +23,45 @@ async function renderOffersApp() {
   });
 }
 
+function openStores() {
+  const label = screen.getByText("Butiker");
+  if (!label.closest("details")?.open) {
+    fireEvent.click(label);
+  }
+}
+
 describe("Offer filters", () => {
+  it("selects all Stores by default and lets the dropdown select none or a subset", async () => {
+    await renderOffersApp();
+
+    expect(screen.getByText("Butiker").closest("details")).not.toHaveAttribute("open");
+    openStores();
+    expect(screen.getByRole("checkbox", { name: "Välj alla butiker" })).toBeChecked();
+    expect(
+      screen.getByRole("checkbox", { name: "ICA Supermarket Linköping City (ICA)" }),
+    ).toBeChecked();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Välj alla butiker" }));
+    expect(screen.getByText("0 erbjudanden")).toBeVisible();
+    fireEvent.click(
+      screen.getByRole("checkbox", { name: "ICA Supermarket Linköping City (ICA)" }),
+    );
+    expect(screen.getByText("1 erbjudande")).toBeVisible();
+    expect(screen.getByRole("checkbox", { name: "Välj alla butiker" })).toBePartiallyChecked();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Välj alla butiker" }));
+    expect(screen.getByText("6 erbjudanden")).toBeVisible();
+  });
+
+  it("closes the Store dropdown on Escape and outside pointer interaction", async () => {
+    await renderOffersApp();
+    openStores();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.getByText("Butiker").closest("details")).not.toHaveAttribute("open");
+    expect(screen.getByText("Butiker").closest("summary")).toHaveFocus();
+    openStores();
+    fireEvent.pointerDown(document.body);
+    expect(screen.getByText("Butiker").closest("details")).not.toHaveAttribute("open");
+  });
+
   it("shows Offers from any selected Chain and updates the matching count", async () => {
     await renderOffersApp();
 
@@ -47,6 +85,7 @@ describe("Offer filters", () => {
 
   it("narrows Store choices by Chain and combines multiple selected Stores", async () => {
     await renderOffersApp();
+    openStores();
 
     expect(
       screen.getByRole("checkbox", {
@@ -73,6 +112,7 @@ describe("Offer filters", () => {
       }),
     ).not.toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("checkbox", { name: "Välj alla butiker" }));
     fireEvent.click(
       screen.getByRole("checkbox", {
         name: "ICA Supermarket Linköping City (ICA)",
@@ -150,6 +190,8 @@ describe("Offer filters", () => {
 
     fireEvent.click(screen.getByRole("checkbox", { name: "ICA" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Hemköp" }));
+    openStores();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Välj alla butiker" }));
     fireEvent.click(
       screen.getByRole("checkbox", {
         name: "ICA Supermarket Linköping City (ICA)",
@@ -180,7 +222,7 @@ describe("Offer filters", () => {
     expect(screen.getByRole("checkbox", { name: "ICA" })).not.toBeChecked();
     expect(
       screen.getByRole("checkbox", { name: "ICA Supermarket Linköping City (ICA)" }),
-    ).not.toBeChecked();
+    ).toBeChecked();
     expect(
       screen.getByRole("checkbox", { name: "Mejeri & ost" }),
     ).not.toBeChecked();

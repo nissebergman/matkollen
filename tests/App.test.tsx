@@ -189,6 +189,13 @@ describe("Offers app", () => {
         id: "price-zero",
         name: "Kostnadsfri",
         price: 0,
+        unitPrice: undefined,
+      },
+      {
+        ...baseOffer,
+        id: "unit-price-zero",
+        name: "Noll i enhetspris",
+        price: undefined,
         unitPrice: 0,
       },
       {
@@ -254,7 +261,6 @@ describe("Offers app", () => {
     expect(
       screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent),
     ).toEqual([
-      "Kostnadsfri",
       "Zoégas",
       "Apelsin",
       "Köp två",
@@ -264,9 +270,11 @@ describe("Offers app", () => {
     expect(
       screen.queryByRole("heading", { name: "Framtida lågpris" }),
     ).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Kostnadsfri" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Noll i enhetspris" })).not.toBeInTheDocument();
   });
 
-  it("orders Offers by largest computable discount and puts missing or unknown-unit discounts last", async () => {
+  it("sorts by discount percentage rather than amount and puts unusable discounts last", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
     const sortableSnapshot = JSON.parse(JSON.stringify(snapshotFixture));
@@ -298,6 +306,24 @@ describe("Offers app", () => {
         unitPrice: 5,
         regularPrice: 10,
         priceUnit: "l",
+      },
+      {
+        ...baseOffer,
+        id: "large-amount-small-percentage",
+        name: "Liten procent",
+        price: 900,
+        unitPrice: 900,
+        regularPrice: 1000,
+        priceUnit: "st",
+      },
+      {
+        ...baseOffer,
+        id: "zero-regular-price",
+        name: "Noll ordinarie",
+        price: 10,
+        unitPrice: 10,
+        regularPrice: 0,
+        priceUnit: "st",
       },
       {
         ...baseOffer,
@@ -356,7 +382,9 @@ describe("Offers app", () => {
       "Stor rabatt",
       "Rabatt Apelsin",
       "Rabatt Äpple",
+      "Liten procent",
       "Ingen ordinarie",
+      "Noll ordinarie",
       "Oidentifierad enhet",
       "Oprissatt",
     ]);

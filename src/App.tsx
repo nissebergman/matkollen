@@ -10,6 +10,7 @@ import {
   type Snapshot,
 } from "./domain/snapshot";
 import { CATEGORIES } from "./domain/categories";
+import { StorePicker } from "./components/StorePicker";
 import {
   DEFAULT_LOCATION_ID,
   LOCATION_REGISTRY,
@@ -22,10 +23,14 @@ type SortOrder = "price" | "discount";
 type OfferView = {
   sortOrder: SortOrder;
   selectedChains: string[];
-  selectedStoreIds: string[];
+  selectedStoreIds: string[] | null;
   selectedCategories: string[];
   searchText: string;
 };
+const PRICE_FORMATTER = new Intl.NumberFormat("sv-SE", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 class SnapshotLoadError extends Error {
   constructor(
@@ -54,15 +59,14 @@ function formatTimestamp(value: string): string {
 }
 
 function formatPrice(value: number): string {
-  return `${new Intl.NumberFormat("sv-SE", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value)} kr`;
+  return `${PRICE_FORMATTER.format(value)} kr`;
 }
 
 function visibleOffers(snapshot: Snapshot, today: string): Offer[] {
   return snapshot.offers.filter(
     (offer) =>
+      offer.price !== 0 &&
+      offer.unitPrice !== 0 &&
       offer.validTo >= today && (!offer.validFrom || offer.validFrom <= today),
   );
 }
@@ -71,11 +75,13 @@ function offerDiscount(offer: Offer): number | undefined {
   if (
     offer.unitPrice === undefined ||
     offer.regularPrice === undefined ||
-    offer.priceUnit === undefined
+    offer.priceUnit === undefined ||
+    offer.regularPrice <= 0 ||
+    offer.unitPrice >= offer.regularPrice
   ) {
     return undefined;
   }
-  return offer.regularPrice - offer.unitPrice;
+  return ((offer.regularPrice - offer.unitPrice) / offer.regularPrice) * 100;
 }
 
 function sortOffers(offers: Offer[], order: SortOrder): Offer[] {
@@ -130,17 +136,17 @@ function readOfferViewFromAddress(
       .map((store) => store.id),
   );
   const validCategories = new Set<string>(CATEGORIES);
+  const requestedStores = searchParams.getAll("store");
+  const selectedStores = [
+    ...new Set(requestedStores.filter((storeId) => availableStoreIds.has(storeId))),
+  ];
 
   return {
     sortOrder: searchParams.get("sort") === "discount" ? "discount" : "price",
     selectedChains,
-    selectedStoreIds: [
-      ...new Set(
-        searchParams
-          .getAll("store")
-          .filter((storeId) => availableStoreIds.has(storeId)),
-      ),
-    ],
+    selectedStoreIds: requestedStores.length === 1 && requestedStores[0] === "none"
+      ? []
+      : selectedStores.length > 0 ? selectedStores : null,
     selectedCategories: [
       ...new Set(
         searchParams
@@ -159,9 +165,13 @@ function writeOfferViewToAddress(view: OfferView): void {
     searchParams.delete(name);
   }
   view.selectedChains.forEach((chain) => searchParams.append("chain", chain));
-  view.selectedStoreIds.forEach((storeId) =>
-    searchParams.append("store", storeId),
-  );
+  if (view.selectedStoreIds?.length === 0) {
+    searchParams.set("store", "none");
+  } else {
+    view.selectedStoreIds?.forEach((storeId) =>
+      searchParams.append("store", storeId),
+    );
+  }
   view.selectedCategories.forEach((category) =>
     searchParams.append("category", category),
   );
@@ -231,12 +241,36 @@ function OfferCard({
   storeName: string;
   stale: boolean;
 }) {
+  const discount = offerDiscount(offer);
+  const price = offer.price ?? offer.unitPrice;
+  const priceParts = price === undefined ? undefined : PRICE_FORMATTER.format(price).split(",");
+
   return (
     <article className="offer-card">
+      <div className="offer-card-topline">
+        <span className="chain-label">{offer.chain}</span>
+        {discount !== undefined && discount >= 1 && (
+          <span className="discount-badge">Spara {Math.floor(discount)}%</span>
+        )}
+      </div>
       <div className="offer-image">
         <div className="image-placeholder" role="img" aria-label="Ingen produktbild">
+          <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
+            <path d="m27 28 21-10 21 10v40L48 79 27 68V28Z" />
+            <path d="m27 28 21 11 21-11M48 39v40M37 23l21 11M36 49v14" />
+          </svg>
           <span aria-hidden="true">Bild saknas</span>
         </div>
+        {priceParts && price !== undefined && (
+          <p className="price-ticket">
+            <span className="visually-hidden">{formatPrice(price)}</span>
+            <span className="price-whole" aria-hidden="true">{priceParts[0]}</span>
+            <span className="price-fraction" aria-hidden="true">
+              {priceParts[1] === "00" ? ":-" : priceParts[1]}
+              <small>kr</small>
+            </span>
+          </p>
+        )}
       </div>
       <div className="offer-content">
         <p className="offer-category">{offer.category}</p>
@@ -333,7 +367,7 @@ export function App({
         ? {
             ...current,
             selectedChains: [],
-            selectedStoreIds: [],
+            selectedStoreIds: null,
             selectedCategories: [],
             searchText: "",
           }
@@ -449,7 +483,7 @@ export function App({
     (offer) =>
       (view.selectedChains.length === 0 ||
         view.selectedChains.includes(offer.chain)) &&
-      (view.selectedStoreIds.length === 0 ||
+      (view.selectedStoreIds === null ||
         view.selectedStoreIds.includes(offer.storeId)) &&
       (view.selectedCategories.length === 0 ||
         view.selectedCategories.includes(offer.category)) &&
@@ -490,52 +524,48 @@ export function App({
 
   return (
     <main className="app-shell">
+      <a className="skip-link" href="#erbjudanden">Till erbjudandena</a>
+      <div className="masthead">
+        <a className="wordmark" href={import.meta.env.BASE_URL} aria-label="Matkollen startsida">
+          <span className="wordmark-symbol" aria-hidden="true">m.</span>
+          Matkollen
+        </a>
+        <span className="masthead-note">Ditt lokala reklamblad</span>
+      </div>
       <header className="page-header">
-        <p className="eyebrow">Matapp · {snapshot.location.name}</p>
-        <h1>Veckans erbjudanden i {snapshot.location.name}</h1>
-        {locations.length > 1 && (
-          <label className="location-picker">
-            Plats
-            <select
-              aria-label="Plats"
-              onChange={(event) => selectLocation(event.target.value)}
-              value={snapshot.location.id}
-            >
-              {locations.map((location) => (
-                <option key={location.id} value={location.id}>
-                  {location.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        <p className="offer-count" aria-live="polite">
-          {matchingOffers.length} {matchingOffers.length === 1 ? "erbjudande" : "erbjudanden"}
-        </p>
-        <p className="updated-at">
-          Senast uppdaterad {formatTimestamp(snapshot.generatedAt)}
-        </p>
+        <div className="header-copy">
+          <p className="eyebrow">God mat. Smarta köp.</p>
+          <h1 aria-label={`Veckans erbjudanden i ${snapshot.location.name}`}>
+            Veckans <span>erbjudanden.</span>
+          </h1>
+          <p className="header-intro">Alla dina matbutiker. Ett reklamblad.</p>
+          <p className="location-label">Utvalt för {snapshot.location.name}</p>
+          {locations.length > 1 && (
+            <label className="location-picker">
+              Plats
+              <select
+                aria-label="Plats"
+                onChange={(event) => selectLocation(event.target.value)}
+                value={snapshot.location.id}
+              >
+                {locations.map((location) => (
+                  <option key={location.id} value={location.id}>
+                    {location.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+          <p className="updated-at">
+            Senast uppdaterad {formatTimestamp(snapshot.generatedAt)}
+          </p>
+        </div>
+        <div className="cover-stamp" aria-hidden="true">
+          <span>Samla veckans</span>
+          <strong>matfynd!</strong>
+          <span>ICA · Coop · Hemköp</span>
+        </div>
       </header>
-
-      <label className="sort-control">
-        <span>Sortera efter</span>
-        <select
-          value={view.sortOrder}
-          onChange={(event) =>
-            setView((current) =>
-              current
-                ? {
-                    ...current,
-                    sortOrder: event.target.value as SortOrder,
-                  }
-                : current,
-            )
-          }
-        >
-          <option value="price">Lägsta pris</option>
-          <option value="discount">Största rabatt</option>
-        </select>
-      </label>
 
       {isFixtureSnapshot && (
         <aside className="fixture-notice" role="note">
@@ -555,6 +585,32 @@ export function App({
       ))}
 
       <section className="filter-panel" aria-label="Filtrera erbjudanden">
+        <div className="filter-toolbar">
+          <div className="search-field">
+            <label htmlFor="offer-search">Sök på produkt eller varumärke</label>
+            <input
+              id="offer-search"
+              type="search"
+              value={view.searchText}
+              onChange={(event) =>
+                setView((current) =>
+                  current ? { ...current, searchText: event.target.value } : current,
+                )
+              }
+              placeholder="Vad är du sugen på?"
+            />
+          </div>
+          <StorePicker
+            stores={availableStores}
+            selectedStoreIds={view.selectedStoreIds}
+            onChange={(selectedStoreIds) =>
+              setView((current) => current ? { ...current, selectedStoreIds } : current)
+            }
+          />
+          <button className="reset-filters" type="button" onClick={resetFilters}>
+            Rensa filter
+          </button>
+        </div>
         <fieldset className="filter-group">
           <legend>Kedjor</legend>
           <div className="filter-options">
@@ -581,46 +637,20 @@ export function App({
                           )
                           .map((store) => store.id),
                       );
+                      let selectedStoreIds = current.selectedStoreIds;
+                      if (selectedStoreIds && selectedStoreIds.length > 0) {
+                        const retained = selectedStoreIds.filter((id) => availableStoreIds.has(id));
+                        selectedStoreIds = retained.length > 0 ? retained : null;
+                      }
                       return {
                         ...current,
                         selectedChains: nextChains,
-                        selectedStoreIds: current.selectedStoreIds.filter(
-                          (storeId) => availableStoreIds.has(storeId),
-                        ),
+                        selectedStoreIds,
                       };
                     });
                   }}
                 />
                 <span>{chain}</span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset className="filter-group">
-          <legend>Butiker</legend>
-          <div className="filter-options">
-            {availableStores.map((store) => (
-              <label className="filter-option" key={store.id}>
-                <input
-                  type="checkbox"
-                  checked={view.selectedStoreIds.includes(store.id)}
-                  onChange={() =>
-                    setView((current) =>
-                      current
-                        ? {
-                            ...current,
-                            selectedStoreIds: toggleSelection(
-                              current.selectedStoreIds,
-                              store.id,
-                            ),
-                          }
-                        : current,
-                    )
-                  }
-                />
-                <span>
-                  {store.name} ({store.chain})
-                </span>
               </label>
             ))}
           </div>
@@ -652,52 +682,60 @@ export function App({
             ))}
           </div>
         </fieldset>
-        <div className="search-field">
-          <label htmlFor="offer-search">Sök på produkt eller varumärke</label>
-          <input
-            id="offer-search"
-            type="search"
-            value={view.searchText}
-            onChange={(event) =>
-              setView((current) =>
-                current
-                  ? { ...current, searchText: event.target.value }
-                  : current,
-              )
-            }
-            placeholder="Sök erbjudanden"
-          />
-        </div>
-        <button className="reset-filters" type="button" onClick={resetFilters}>
-          Rensa filter
-        </button>
       </section>
 
-      {matchingOffers.length === 0 ? (
-        <section className="empty-state" aria-live="polite">
-          <h2>
-            {currentOffers.length === 0
-              ? "Inga erbjudanden just nu"
-              : "Inga erbjudanden matchar dina filter"}
-          </h2>
-          <p>
-            {currentOffers.length === 0
-              ? "Det finns inga giltiga erbjudanden att visa för tillfället."
-              : "Ändra filtren eller välj Rensa filter för att visa alla erbjudanden."}
+      <div className="results-toolbar">
+        <div>
+          <p className="eyebrow">Hitta dina favoriter</p>
+          <p className="offer-count" aria-live="polite">
+            {matchingOffers.length} {matchingOffers.length === 1 ? "erbjudande" : "erbjudanden"}
           </p>
-        </section>
-      ) : (
-        <section className="offer-list" aria-label="Erbjudanden">
-          {sortedOffers.map((offer) => (
-            <OfferCard
-              key={offer.id}
-              offer={offer}
-              storeName={storeNames.get(offer.storeId) ?? "Okänd butik"}
-              stale={staleChains.has(offer.chain)}
-            />
-          ))}
-        </section>
-      )}
+        </div>
+        <label className="sort-control">
+          <span>Sortera efter</span>
+          <select
+            value={view.sortOrder}
+            onChange={(event) => {
+              const sortOrder = event.target.value === "discount" ? "discount" : "price";
+              setView((current) => current ? { ...current, sortOrder } : current);
+            }}
+          >
+            <option value="price">Lägsta pris</option>
+            <option value="discount">Störst rabatt (%)</option>
+          </select>
+        </label>
+      </div>
+      <div id="erbjudanden" tabIndex={-1}>
+        {matchingOffers.length === 0 ? (
+          <section className="empty-state" aria-live="polite">
+            <h2>
+              {currentOffers.length === 0
+                ? "Inga erbjudanden just nu"
+                : "Inga erbjudanden matchar dina filter"}
+            </h2>
+            <p>
+              {currentOffers.length === 0
+                ? "Det finns inga giltiga erbjudanden att visa för tillfället."
+                : "Ändra filtren eller välj Rensa filter för att visa alla erbjudanden."}
+            </p>
+          </section>
+        ) : (
+          <section className="offer-list" aria-label="Erbjudanden">
+            {sortedOffers.map((offer) => (
+              <OfferCard
+                key={offer.id}
+                offer={offer}
+                storeName={storeNames.get(offer.storeId) ?? "Okänd butik"}
+                stale={staleChains.has(offer.chain)}
+              />
+            ))}
+          </section>
+        )}
+      </div>
+      <footer className="page-footer">
+        <span className="footer-wordmark">Matkollen.</span>
+        <p>Ett oberoende reklamblad för din vardag. Se butikens villkor för varje erbjudande.</p>
+      </footer>
     </main>
   );
 }

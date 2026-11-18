@@ -42,6 +42,13 @@ async function mountApp() {
   return app;
 }
 
+function openStores() {
+  const label = screen.getByText("Butiker");
+  if (!label.closest("details")?.open) {
+    fireEvent.click(label);
+  }
+}
+
 function expectSharedView() {
   expect(screen.getByText("2 erbjudanden")).toBeVisible();
   expect(screen.getByRole("combobox", { name: "Sortera efter" })).toHaveValue(
@@ -50,6 +57,7 @@ function expectSharedView() {
   expect(screen.getByRole("checkbox", { name: "ICA" })).toBeChecked();
   expect(screen.getByRole("checkbox", { name: "Hemköp" })).toBeChecked();
   expect(screen.getByRole("checkbox", { name: "Coop" })).not.toBeChecked();
+  openStores();
   expect(
     screen.getByRole("checkbox", {
       name: "ICA Supermarket Linköping City (ICA)",
@@ -100,6 +108,8 @@ describe("sharing an Offer view", () => {
 
     fireEvent.click(screen.getByRole("checkbox", { name: "ICA" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Hemköp" }));
+    openStores();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Välj alla butiker" }));
     fireEvent.click(
       screen.getByRole("checkbox", {
         name: "ICA Supermarket Linköping City (ICA)",
@@ -132,6 +142,8 @@ describe("sharing an Offer view", () => {
 
     fireEvent.click(screen.getByRole("checkbox", { name: "ICA" }));
     fireEvent.click(screen.getByRole("checkbox", { name: "Hemköp" }));
+    openStores();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Välj alla butiker" }));
     fireEvent.click(
       screen.getByRole("checkbox", {
         name: "ICA Supermarket Linköping City (ICA)",
@@ -179,5 +191,24 @@ describe("sharing an Offer view", () => {
     expect(
       screen.queryByRole("heading", { name: "Läsk nästa vecka" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("preserves an explicitly empty Store selection after reload and resets to all Stores", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
+    vi.stubGlobal("fetch", async () => Response.json(snapshotFixture));
+    const firstLoad = await mountApp();
+    openStores();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Välj alla butiker" }));
+    expect(new URLSearchParams(window.location.search).get("store")).toBe("none");
+    firstLoad.unmount();
+
+    await mountApp();
+    expect(screen.getByText("0 erbjudanden")).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "Rensa filter" }));
+    expect(screen.getByText("6 erbjudanden")).toBeVisible();
+    expect(new URLSearchParams(window.location.search).getAll("store")).toEqual([]);
+    openStores();
+    expect(screen.getByRole("checkbox", { name: "Välj alla butiker" })).toBeChecked();
   });
 });

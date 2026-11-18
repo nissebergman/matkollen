@@ -18,6 +18,22 @@ describe("static publication workflow", () => {
     expect(workflow).not.toMatch(/secrets\./);
   });
 
+  it("only reuses persisted Snapshots when a manual app-only deployment is selected", () => {
+    expect(workflow).toMatch(/refresh_snapshots:[\s\S]*?type: boolean\s+default: true/);
+    expect(workflow).toContain(
+      "if: github.event_name != 'workflow_dispatch' || inputs.refresh_snapshots",
+    );
+    expect(workflow).toContain(
+      "if: github.event_name == 'workflow_dispatch' && !inputs.refresh_snapshots",
+    );
+    const reuse = workflow.indexOf("cp public/snapshots/*.json generated/snapshots/");
+    const validate = workflow.indexOf("npm run snapshot:validate -- generated/snapshots");
+    const build = workflow.indexOf("npm run build");
+    expect(reuse).toBeGreaterThan(0);
+    expect(reuse).toBeLessThan(validate);
+    expect(validate).toBeLessThan(build);
+  });
+
   it("validates a clean generated Snapshot set before copying or deploying", () => {
     const clean = workflow.indexOf("rm -rf generated/snapshots");
     const refresh = workflow.indexOf(
@@ -56,6 +72,15 @@ describe("static publication workflow", () => {
         resolve(import.meta.dirname, "fixtures/snapshots/absent"),
       ),
     ).rejects.toThrow("Genererad Snapshot saknas för Location linkoping");
+  });
+
+  it("rejects fixture sources when validating Snapshots for publication", async () => {
+    await expect(
+      validateSnapshotDirectory(
+        resolve(import.meta.dirname, "fixtures/snapshots"),
+        { rejectFixtures: true },
+      ),
+    ).rejects.toThrow("Snapshot innehåller testfixturer");
   });
 
   it("deploys persisted Snapshot artifacts before reporting refresh failures", () => {

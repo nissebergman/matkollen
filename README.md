@@ -40,14 +40,18 @@ fallback; a read-only check of a real flyer showed a layout that the parser
 correctly rejects rather than publishing misidentified Offers. The configured
 source remains unchanged; do not switch sources automatically.
 
-Offers are ordered by lowest effective price by default. Choose “Största rabatt”
-to sort by the difference between regular and effective price when both use a
-known, shared unit; Offers without a usable price or computable discount appear
-last.
+Offers are ordered by lowest effective price by default. Choose “Störst rabatt
+(%)” to sort by the percentage reduction from regular to effective price when
+both use a known, shared unit and the regular price is positive. Offers without
+a usable price or computable reduction appear last. Offers with an explicit
+zero price or zero effective price are hidden; unknown prices remain visible.
 
-Use the multi-select Chain, Store and category filters together, or search
-product names and brands by one or more words. Select **Rensa filter** to
-return to all currently valid Offers.
+Use the multi-select Chain and category filters with the Store dropdown, or
+search product names and brands by one or more words. All Stores are selected
+by default; the dropdown supports selecting all, none or individual Stores.
+Filters and sorting are preserved in shared URLs, including an explicit empty
+Store selection (`store=none`). Select **Rensa filter** to return to all
+currently valid, nonzero-price Offers.
 
 ## Development
 
@@ -83,6 +87,11 @@ updates and deploy the Pages artifact. GitHub Pages sites may be publicly
 accessible: before configuring Pages or running the workflow, verify that the
 repository and the visibility of its Pages site are acceptable for the
 household data. The workflow does not enable Pages.
+
+For app-only changes, manually dispatch with `refresh_snapshots=false` to reuse
+the persisted live Snapshots without contacting sources. These still pass
+publication validation, which rejects fixture sources. Scheduled and ordinary
+manual runs continue to refresh sources.
 
 ## Snapshot refresh
 
