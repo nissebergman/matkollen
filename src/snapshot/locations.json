@@ -6,10 +6,10 @@
       "name": "Linköping",
       "chains": {
         "ICA": {
-          "source": "ica-first-party",
+          "source": "tjek-ereklamblad",
           "storeDiscovery": {
             "exactCity": {
-              "field": "visitingCity",
+              "field": "city",
               "value": "Linköping"
             }
           }

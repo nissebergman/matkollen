@@ -2,15 +2,27 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { buildLocationSnapshot } from "../src/snapshot/build";
-import { LOCATION_REGISTRY } from "../src/snapshot/config";
+import { LOCATION_REGISTRY, type LocationConfig } from "../src/snapshot/config";
 import snapshotFixture from "./fixtures/snapshots/linkoping.json";
 
 const fixtureRoot = resolve(import.meta.dirname, "fixtures");
 const icaRoot = resolve(fixtureRoot, "ica");
 const hemkopRoot = resolve(fixtureRoot, "hemkop");
-const linkopingLocation = LOCATION_REGISTRY.locations.find(
+const configuredLinkoping = LOCATION_REGISTRY.locations.find(
   (location) => location.id === "linkoping",
 )!;
+const linkopingLocation: LocationConfig = {
+  ...configuredLinkoping,
+  chains: {
+    ...configuredLinkoping.chains,
+    ICA: {
+      source: "ica-first-party",
+      storeDiscovery: {
+        exactCity: { field: "visitingCity", value: "Linköping" },
+      },
+    },
+  },
+};
 const linkopingIcaHemkopLocation = {
   ...linkopingLocation,
   chains: {

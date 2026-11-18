@@ -3,9 +3,9 @@
 The shared adapter in `src/snapshot/tjek.ts` can be selected as an explicit
 fallback for ICA or Hemköp by setting a Location's
 `chains.<Chain>.source` to `tjek-ereklamblad`. Change either Chain independently
-in `src/snapshot/locations.json`; the checked-in defaults remain their
-first-party sources. An explicitly selected ICA or Hemköp fallback now attempts
-the same Store-specific `fronts` → publication pages → individual `offer`
+in `src/snapshot/locations.json`; Linköping now explicitly selects Tjek for ICA
+and the first-party source for Hemköp. An explicitly selected ICA or Hemköp
+fallback attempts the same Store-specific `fronts` → publication pages → individual `offer`
 flow used by Coop. For Hemköp, a 404 from `paged-publications` falls back to
 the observed Incito `/offer-ids` route; authorization or rate-limit denials
 still stop the refresh. A bounded live ICA check on 2026-11-17 verified one
@@ -107,14 +107,17 @@ bounded ICA check verified only one Store-specific publication and three
 Offers, with no sampled member-price field. The Hemköp sample verified three
 Offers and one member price, but its Store discovery was not live-validated.
 Broader ICA coverage, ICA member-price behavior, and Hemköp Store coverage
-remain unverified. The exact live `fronts` body was not saved verbatim, but its
+remain unverified. On 2026-11-18 a bounded ICA discovery check found 12
+Linköping Stores across four ICA brands, each with a current Store-specific
+publication. The check did not retrieve their Offers or establish full
+Snapshot coverage. The exact live `fronts` body was not saved verbatim, but its
 response and nested shape are represented in the sanitized fixture. When an
 ICA or Hemköp fallback is explicitly selected, the adapter attempts the shared
 publication/Offer flow and fails closed on unsupported responses or mismatched
 associations. Offline fixtures exercise Store discovery and Snapshot
 normalization; only the separate sanitized Hemköp Offer sample reflects live
-Offer data. Keep the configured source unchanged; do not claim complete live
-coverage or replace failures with synthetic-success data.
+Offer data. Do not claim complete live coverage or replace failures with
+synthetic-success data.
 
 The adapter sends anonymous JSON `POST` requests to `https://ereklamblad.se/`
 with a base64-encoded command, plus a GET to the observed publication-pages

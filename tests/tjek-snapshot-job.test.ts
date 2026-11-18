@@ -10,9 +10,21 @@ const fixtureRoot = resolve(import.meta.dirname, "fixtures");
 const tjekRoot = resolve(fixtureRoot, "tjek");
 const icaRoot = resolve(fixtureRoot, "ica");
 const hemkopRoot = resolve(fixtureRoot, "hemkop");
-const linkopingLocation = LOCATION_REGISTRY.locations.find(
+const configuredLinkoping = LOCATION_REGISTRY.locations.find(
   (location) => location.id === "linkoping",
 )!;
+const linkopingLocation = {
+  ...configuredLinkoping,
+  chains: {
+    ...configuredLinkoping.chains,
+    ICA: {
+      source: "ica-first-party",
+      storeDiscovery: {
+        exactCity: { field: "visitingCity", value: "Linköping" },
+      },
+    },
+  },
+};
 
 const tjekBusinesses = JSON.parse(
   readFileSync(resolve(tjekRoot, "businesses.json"), "utf8"),
@@ -365,6 +377,25 @@ function fixtureFetcher(
 }
 
 describe("Tjek Snapshot adapter", () => {
+  it("uses the configured Tjek source for ICA", async () => {
+    const location = structuredClone(configuredLinkoping);
+    delete location.chains.Coop;
+    delete location.chains.Hemköp;
+    const replay = fixtureFetcher(() => 0, tjekFallbackFixtureOptions("ICA"));
+    const snapshot = await buildLocationSnapshot(location, {
+      fetcher: replay.fetcher,
+      now: () => new Date("2026-11-17T05:00:00.000Z"),
+      sleep: async () => {},
+    });
+
+    expect(snapshot.chains).toMatchObject([
+      { chain: "ICA", source: TJEK_SOURCE, status: "ok" },
+    ]);
+    expect(snapshot.offers).toContainEqual(
+      expect.objectContaining({ chain: "ICA", storeId: "ICA:synthetic-ica-berga" }),
+    );
+  });
+
   it("discovers a Coop publication and normalizes its structured Offers", async () => {
     let elapsed = 0;
     const replay = fixtureFetcher(() => elapsed, {

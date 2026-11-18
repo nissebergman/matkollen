@@ -43,4 +43,11 @@ The public refresh on 2026-11-18 failed closed when the first-party campaign
 response contained an unsupported `comparePrice` shape at
 `results.1.potentialPromotions.0.comparePrice`; no Hemköp Offers were included
 in that Snapshot. The generated Snapshot was deployed with the source failure
-visible in the app, and the Tjek fallback was not selected automatically.
+visible in the app, and the Tjek fallback was not selected automatically. A
+subsequent single Lucullus campaign-page request returned the range
+`129,00-143,33/kg` at that path. The adapter now preserves nonblank comparison
+price text, including ranges, without interpreting it as a numeric price;
+object values still fail validation. An offline Snapshot-job test covers the
+observed range. A one-Store live refresh for Lucullus subsequently completed
+three pages and produced 66 Offers. A complete Location refresh and deployment
+of this fix have not been verified.

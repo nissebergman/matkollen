@@ -19,3 +19,14 @@ The v1 spec specifies TypeScript, Vite, React and Vitest, the Snapshot fields an
 ## Answer
 
 Hemköp Linköping Offers now flow into validated, versioned Snapshots and are displayed in the Swedish, mobile-first app without login. Snapshot and UI tests use recorded fixtures and make no live requests. Validation passed: `npm test` (2 files, 21 tests), `npm run build`, and `git diff --check`.
+
+## Comments
+
+On 2026-11-18 the published refresh failed on `comparePrice`. A single
+Lucullus campaign-page response showed a comparison-price range
+`129,00-143,33/kg`: the adapter had incorrectly required one numeric amount
+for this display-only field. It now preserves nonblank text and still rejects
+object values; offline Snapshot-job regression tests cover both cases. This
+change has not yet been deployed or verified with a complete live refresh.
+A subsequent bounded live refresh completed all three Lucullus campaign pages
+and produced 66 Offers; the other Stores remain unverified after the fix.

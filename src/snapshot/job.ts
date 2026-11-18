@@ -77,6 +77,9 @@ const nonBlankText = z
   .string()
   .min(1)
   .refine((value) => value.trim().length > 0);
+const optionalComparisonPrice = z
+  .union([z.number().finite().nonnegative(), nonBlankText, z.null()])
+  .optional();
 const sourceStoreId = z.union([
   nonBlankText,
   z.number().int().nonnegative(),
@@ -116,7 +119,7 @@ const HemkopPromotionSchema = z
     startDate: optionalDate,
     endDate: optionalDate,
     validUntil: optionalDate,
-    comparePrice: optionalNumber,
+    comparePrice: optionalComparisonPrice,
     comparePriceUnit: optionalText,
     ordinaryPrice: optionalNumber,
     regularPrice: optionalNumber,

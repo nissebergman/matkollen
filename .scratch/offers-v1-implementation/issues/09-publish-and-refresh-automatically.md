@@ -54,6 +54,13 @@ but GitHub's workflow API still reports no registered workflows. Pages remains
 disabled and no deployment has run; retry workflow registration after the
 default-branch push is indexed.
 
+**Status note (2026-11-18, after publication):** The Hemköp `comparePrice`
+failure was traced to an observed price range and fixed locally with offline
+regression coverage; see ticket 01 and the Hemköp source notes. The deployed
+Snapshot still contains the original failures. ICA's HTTP 403 has not been
+retried or bypassed, and a complete refresh after the Hemköp fix has not been
+verified.
+
 ## Answer
 
 The public Pages site is live at

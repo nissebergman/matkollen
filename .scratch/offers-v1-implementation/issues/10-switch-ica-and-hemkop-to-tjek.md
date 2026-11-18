@@ -35,6 +35,13 @@ live Offer sample with synthetic Store discovery. Live Store discovery and
 broader coverage remain unverified, as does ICA member pricing. Keep this
 ticket in progress.
 
+**Status note (2026-11-18, ICA configuration):** ICA is explicitly configured
+to use Tjek instead of the denied first-party token endpoint. A bounded check
+found 12 Linköping Stores across four ICA brands, each with a current
+Store-specific publication. Full Offer coverage and ICA member-price mapping
+are still unverified. Tjek's undocumented API and content-reuse risks remain;
+there is no automatic source switch on a denial.
+
 - [x] Each Chain can independently select Tjek through Location configuration.
 - [x] Each fallback Chain discovers its Stores and produces Offers in the existing Snapshot contract through offline Snapshot-job fixtures.
 - [ ] Verify live Store association, member prices, validity and representative mechanics for ICA and Hemköp.

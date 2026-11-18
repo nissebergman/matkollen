@@ -20,19 +20,20 @@ precedence over pins.
 Add a Location by adding a configuration entry and publishing a Snapshot named
 `public/snapshots/<id>.json`. The app shows a Location picker only when more
 than one Location is configured. A configured source without a registered
-adapter is reported as a failed Chain. The ICA and Hemköp adapters and both Coop source adapters are implemented.
-Linköping keeps `coop-tjek` configured as Coop's source. The shared Tjek
-adapter discovers Stores and implements the observed Store-specific
+adapter is reported as a failed Chain. The ICA and Hemköp adapters and both
+Coop source adapters are implemented. Linköping uses `tjek-ereklamblad` for ICA
+and `coop-tjek` for Coop. The shared Tjek adapter discovers Stores and implements the observed Store-specific
 `fronts` → publication pages → individual Offer lookup flow. A 2026-11-17
 Coop refresh validated all six configured Linköping Stores, six publications
-and 293 Offers. A separate bounded ICA check verified one Store-specific
-publication and three Offers with Store association and date normalization;
-none contained a member-price field. A bounded Hemköp Tjek check later verified
-three Offers and one member price, but not live Store discovery. The 2026-11-18
+and 293 Offers. An ICA check found 12 Linköping Stores with current Store-specific
+publications; a separate sample verified three Offers with Store association
+and date normalization but no member-price field. A bounded Hemköp Tjek check
+later verified three Offers and one member price, but not live Store discovery. The 2026-11-18
 publish run generated 293 Coop Offers; ICA and Hemköp failed closed on their
-current first-party responses. The sanitized fixtures and remaining live
-compatibility limits are documented in the source notes. Do not switch sources
-automatically.
+first-party responses. Hemköp's comparison-price handling has since been fixed
+and verified for one Store. The ICA source change is an explicit configuration,
+not an automatic response to a denial. The sanitized fixtures, remaining live
+compatibility limits and Tjek's terms risks are documented in the source notes.
 The flyer-PDF adapter is available as an experimental, manually selected
 fallback; a read-only check of a real flyer showed a layout that the parser
 correctly rejects rather than publishing misidentified Offers. The configured
@@ -95,8 +96,8 @@ refreshing, read the
 [Tjek/eReklamblad](docs/sources/tjek-ereklamblad.md),
 [Coop flyer-PDF](docs/sources/coop-pdf.md), and
 [Coop Tjek](docs/sources/coop-tjek.md) source-access notes. The Coop-specific
-Tjek note records its retained Snapshot source id. ICA fetches an anonymous
-token at runtime for Store
+Tjek note records its retained Snapshot source id. The first-party ICA adapter
+fetches an anonymous token at runtime for Store
 discovery, then requests public per-Store Offers pages sequentially. Hemköp
 requests only run during its stated UTC visiting window and wait at least ten
 seconds between requests. Tjek and both Coop sources make sequential requests

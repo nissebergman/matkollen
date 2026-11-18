@@ -494,6 +494,67 @@ describe("Hemköp Snapshot job", () => {
     expect(snapshot.offers).toHaveLength(0);
   });
 
+  it("preserves comparison-price ranges as text in the Snapshot", async () => {
+    const { fetcher: replay } = fixtureFetcher(() => 0);
+    const page = structuredClone(campaignPages.get("4552-0"));
+    page.results[0].potentialPromotions[0].comparePrice = "129,00-143,33/kg";
+    const fetcher: typeof fetch = async (input) => {
+      const url = new URL(String(input));
+      if (
+        url.pathname === "/search/campaigns/offline" &&
+        url.searchParams.get("q") === "4552" &&
+        url.searchParams.get("page") === "0"
+      ) {
+        return Response.json(page);
+      }
+      return replay(input);
+    };
+
+    const snapshot = await buildHemkopSnapshot(
+      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      {
+        fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        sleep: async () => {},
+      },
+    );
+
+    expect(snapshot.chains[0].status).toBe("ok");
+    expect(snapshot.offers).toContainEqual(
+      expect.objectContaining({ comparisonPriceText: "129,00-143,33/kg" }),
+    );
+  });
+
+  it("fails the Chain on an object comparison-price value", async () => {
+    const { fetcher: replay } = fixtureFetcher(() => 0);
+    const page = structuredClone(campaignPages.get("4552-0"));
+    page.results[0].potentialPromotions[0].comparePrice = { amount: 10 };
+    const fetcher: typeof fetch = async (input) => {
+      const url = new URL(String(input));
+      if (
+        url.pathname === "/search/campaigns/offline" &&
+        url.searchParams.get("q") === "4552" &&
+        url.searchParams.get("page") === "0"
+      ) {
+        return Response.json(page);
+      }
+      return replay(input);
+    };
+
+    const snapshot = await buildHemkopSnapshot(
+      { id: "linkoping", name: "Linköping", city: "Linköping" },
+      {
+        fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        sleep: async () => {},
+      },
+    );
+
+    expect(snapshot.chains[0].status).toBe("failed");
+    expect(snapshot.chains[0].error).toContain("comparePrice");
+    expect(snapshot.offers).toHaveLength(0);
+  });
+
   it("keeps still-valid Offers and reports stale data when refresh fails", async () => {
     const now = () => new Date("2026-11-17T05:00:00.000Z");
     const { fetcher: replay } = fixtureFetcher(() => 0);
