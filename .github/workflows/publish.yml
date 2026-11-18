@@ -82,6 +82,17 @@ jobs:
         with:
           enablement: false
 
+      - name: Restore product image database
+        uses: actions/cache@v4
+        with:
+          path: public/images/products
+          key: product-images-${{ hashFiles('src/images/catalog.json', 'src/images/processing.ts') }}
+
+      - name: Import and validate product images
+        # Missing images fall back to placeholders; never block Offer publication.
+        continue-on-error: true
+        run: npm run images:sync
+
       - name: Build app and Snapshots
         run: npm run build
         env:

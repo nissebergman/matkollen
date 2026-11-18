@@ -113,4 +113,11 @@ describe("static publication workflow", () => {
     expect(upload).toBeLessThan(deploy);
     expect(deploy).toBeLessThan(reportFailure);
   });
+
+  it("regenerates the product image database before building without blocking Offers", () => {
+    const images = workflow.indexOf("run: npm run images:sync");
+    expect(images).toBeGreaterThan(workflow.indexOf("path: public/images/products"));
+    expect(images).toBeLessThan(workflow.indexOf("run: npm run build"));
+    expect(workflow).toMatch(/continue-on-error:\s*true\s*\n\s*run: npm run images:sync/);
+  });
 });

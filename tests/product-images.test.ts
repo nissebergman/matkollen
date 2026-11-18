@@ -9,16 +9,23 @@ import {
 } from "../src/images/processing";
 
 describe("local product image catalogue", () => {
-  it("only matches curated full names, including case and whitespace normalization", () => {
+  it("matches Swedish compound words by their head noun and ignores excluded words", () => {
     expect(productImage({ name: " CHIPS,  Ringar och Bågar " })?.id).toBe("potato-chips");
-    expect(productImage({ name: "Krossade tomater" })).toBeUndefined();
+    expect(productImage({ name: "Snacktomater" })?.id).toBe("tomatoes");
+    expect(productImage({ name: "Potatischips" })?.id).toBe("potato-chips");
+    expect(productImage({ name: "Färsk blandfärs" })?.id).toBe("minced-meat");
+    expect(productImage({ name: "Färsk laxfilé" })?.id).toBe("salmon");
+    expect(productImage({ name: "Riven ost" })?.id).toBe("cheese");
     expect(productImage({ name: "Granatäpple" })).toBeUndefined();
-    expect(productImage({ name: "Taco kryddmix, nachochips" })).toBeUndefined();
+    expect(productImage({ name: "Köttbullar" })).toBeUndefined();
+    expect(productImage({ name: "Vattenkokare" })).toBeUndefined();
+    expect(productImage({ name: "Kostymbyxor" })).toBeUndefined();
   });
 
   it("rejects ambiguous aliases, unsafe paths/hosts, and licenses outside the CC0 policy", () => {
     const image = imageCatalog[0];
     expect(imageCatalogSchema.safeParse([image, { ...image, id: "another" }]).success).toBe(false);
+    expect(imageCatalogSchema.safeParse([{ ...image, keywords: ["två ord"] }]).success).toBe(false);
     expect(imageCatalogSchema.safeParse([{ ...image, id: "../outside" }]).success).toBe(false);
     expect(imageCatalogSchema.safeParse([{
       ...image, downloadUrl: "https://example.com/image.jpg",

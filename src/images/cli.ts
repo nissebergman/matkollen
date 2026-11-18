@@ -15,23 +15,31 @@ async function main(args: string[]): Promise<void> {
   }
   if (download) await mkdir(directory, { recursive: true });
 
+  const failures: string[] = [];
   for (const image of imageCatalog) {
-    const path = resolve(directory, `${image.id}.jpg`);
-    const existing = await readFile(path).catch((error: NodeJS.ErrnoException) => {
-      if (error.code === "ENOENT") return undefined;
-      throw error;
-    });
-    if (existing) {
-      await validateProductImage(existing);
-      console.log(`${image.id}: verified (${existing.length} bytes)`);
-      continue;
+    try {
+      const path = resolve(directory, `${image.id}.jpg`);
+      const existing = await readFile(path).catch((error: NodeJS.ErrnoException) => {
+        if (error.code === "ENOENT") return undefined;
+        throw error;
+      });
+      if (existing) {
+        await validateProductImage(existing);
+        console.log(`${image.id}: verified (${existing.length} bytes)`);
+        continue;
+      }
+      if (!download) {
+        throw new Error("missing; run npm run images:sync after checking its source and license");
+      }
+      const bytes = await compressProductImage(await downloadSourceImage(image.downloadUrl));
+      await writeFile(path, bytes, { flag: "wx" });
+      console.log(`${image.id}: imported (${bytes.length} bytes)`);
+    } catch (error) {
+      failures.push(`${image.id}: ${error instanceof Error ? error.message : String(error)}`);
     }
-    if (!download) {
-      throw new Error(`Missing ${image.id}.jpg; run npm run images:sync after checking its source and license`);
-    }
-    const bytes = await compressProductImage(await downloadSourceImage(image.downloadUrl));
-    await writeFile(path, bytes, { flag: "wx" });
-    console.log(`${image.id}: imported (${bytes.length} bytes)`);
+  }
+  if (failures.length > 0) {
+    throw new Error(`${failures.length} of ${imageCatalog.length} images failed:\n${failures.join("\n")}`);
   }
 }
 

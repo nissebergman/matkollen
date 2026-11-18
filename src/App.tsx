@@ -17,6 +17,7 @@ import {
   type OfferGroup,
   type SortOrder,
 } from "./domain/offer-view";
+import { OfferIllustration } from "./components/OfferIllustration";
 import { StorePicker } from "./components/StorePicker";
 import {
   DEFAULT_LOCATION_ID,
@@ -227,13 +228,7 @@ function OfferCard({
         )}
       </div>
       <div className="offer-image">
-        <div className="image-placeholder" role="img" aria-label="Ingen produktbild">
-          <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
-            <path d="m27 28 21-10 21 10v40L48 79 27 68V28Z" />
-            <path d="m27 28 21 11 21-11M48 39v40M37 23l21 11M36 49v14" />
-          </svg>
-          <span aria-hidden="true">Bild saknas</span>
-        </div>
+        <OfferIllustration offer={offer} />
         {priceParts && price !== undefined && (
           <p className="price-ticket">
             <span className="visually-hidden">{formatPrice(price)}</span>

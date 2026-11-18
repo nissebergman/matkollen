@@ -170,9 +170,9 @@ describe("Offers app", () => {
     expect(
       screen.queryByRole("heading", { name: "Utgånget ICA-exempel" }),
     ).not.toBeInTheDocument();
-    expect(
-      screen.getAllByRole("img", { name: "Ingen produktbild" }),
-    ).toHaveLength(3);
+    expect(screen.getAllByRole("img", {
+      name: /Ingen produktbild|illustrationsbild, inte exakt produkt/,
+    })).toHaveLength(3);
     expect(screen.getByText("Max 2")).toBeVisible();
     expect(screen.getAllByText(/t\.o\.m\./i)).toHaveLength(3);
     expect(screen.getByText(/senast uppdaterad/i)).toBeVisible();
@@ -503,12 +503,11 @@ describe("Offers app", () => {
       await Promise.resolve();
     });
 
-    expect(
-      screen.getAllByRole("img", { name: "Ingen produktbild" }),
-    ).toHaveLength(3);
-    expect(
-      screen.queryByRole("img", { name: "Krossade tomater" }),
-    ).not.toBeInTheDocument();
+    const images = Array.from(document.querySelectorAll("img"));
+    expect(images.length).toBeGreaterThan(0);
+    for (const image of images) {
+      expect(image.getAttribute("src")).toMatch(/^\/images\/products\/[a-z-]+\.jpg$/);
+    }
     expect(requestedUrls).toEqual(["/snapshots/linkoping.json"]);
   });
 

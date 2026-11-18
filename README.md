@@ -3,9 +3,8 @@
 A Swedish, mobile-first view of supermarket Offers. The app reads a versioned
 Snapshot for the Location in the page address (`?location=<id>`), defaulting to
 the configured default Location. It never calls a Chain or third-party Offer
-source directly. The browser never loads remote Offer `imageUrl`s. The
-placeholder remains while local JPEG publication is blocked by content
-exclusion.
+source directly. The browser never loads remote Offer `imageUrl`s; cards use
+the [local product image database](#local-product-image-database) instead.
 
 ## Locations
 
@@ -80,33 +79,40 @@ workflow, not fixture data. Failed Chains are represented in the Snapshot and
 shown in the app rather than being replaced with fixture Offers. Automated
 tests replay secret-free fixtures and do not access the network.
 
-## Prepared local product illustrations
+## Local product image database
 
-Source research and an ingestion script are prepared for five Wikimedia
-Commons CC0 photos: chips, ham, bread, fresh tomatoes and apples. They are
-**illustrations, not exact products or brands**. The prepared renderer labels
-them accordingly and links their author, source and license, but is not
-connected to the published app.
+Offer cards show local illustrations from 33 Wikimedia Commons CC0 photos
+(fruit, vegetables, dairy, meat, bread, snacks, household goods). They are
+**illustrations, not exact products or brands**: each card labels the image
+“Illustrationsbild” and links its author, source and license. Offers without a
+match, or whose image is missing from the build, show a placeholder. Remote
+Offer `imageUrl`s are never loaded.
 
-**Blocked:** `.jpg` files are globally excluded by the current content policy.
-The image assets cannot be accessed, committed or published by Copilot.
-The published app therefore retains placeholders rather than broken image
-links. Publication uses only checked-in assets and does not invoke image scripts.
+[`src/images/catalog.json`](src/images/catalog.json) is the database: per image,
+its keywords, optional excluded words, original title, source and download
+URLs, author, license and verification date. The importer only accepts CC0.
+Matching tokenizes the Offer name and compares each word with the keywords.
+Swedish compounds put the head noun last, so a suffix match (“snack**tomater**”,
+“grill**korv**”) outranks a prefix match (“**kyckling**innerfilé”), and
+“potatischips” is chips, not potatoes. Keywords shorter than four letters
+(“ost”, “lax”, “ägg”) only match whole words. Excluded words stop false
+positives such as “färsk” for “färs” or “köttbullar” for “bullar”.
 
-[`src/images/catalog.json`](src/images/catalog.json) records curated full-name
-aliases, original titles, source and original download URLs, authors, licenses
-and verification dates. The importer currently accepts only CC0; adding other
-licenses requires an explicit policy change. Matching ignores case and repeated whitespace but is never fuzzy:
-fresh tomatoes must not accidentally match canned tomatoes, for example.
-The [source research](docs/sources/product-images.md) records verification and
-licensing limits. Check a new image's source, license and suitability before
-adding it; do not assume public availability permits reuse.
+`npm run images:sync` downloads each missing image and uses `sharp` (no AI) to
+orient it, contain it on a white 192×192 canvas, strip metadata and encode a
+JPEG at quality 55 with mozjpeg into `public/images/products/` (typically
+2–6 KB each). `npm run images:check` validates existing files offline. Both
+continue past individual failures and exit non-zero if any image failed.
 
-The prepared local script uses `sharp`, not AI, to orient each photo, contain it on a
-white 192×192 canvas, strip metadata and encode JPEG at quality 55 with mozjpeg.
-Its importer and offline validator target metadata-free 192×192 JPEGs of at
-most 20 KiB, reuse existing files, and stop on source errors or access denials
-without retries or alternate routes. They are not invoked by publication.
+The image files themselves are not committed. The publish workflow restores
+them from an Actions cache keyed on the catalogue and processing code, runs
+`images:sync`, and then builds. A Wikimedia outage cannot block Offer
+publication; affected cards fall back to placeholders.
+
+To add an image, find a CC0 file on Commons, check its license through the
+Commons API ([source research](docs/sources/product-images.md)), add a catalogue
+entry with keywords, run `npm run images:sync`, and check the matches against
+the current Snapshot. Do not assume public availability permits reuse.
 
 ## GitHub Pages publication
 

@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { OfferIllustration } from "../src/components/OfferIllustration";
 import { parseSnapshot } from "../src/domain/snapshot";
@@ -25,6 +25,15 @@ describe("Offer illustrations", () => {
     expect(screen.getByRole("link", { name: "CC0-1.0" }))
       .toHaveAttribute("href", "https://creativecommons.org/publicdomain/zero/1.0/");
     expect(screen.getByText("Storleksändrad och komprimerad.")).toBeVisible();
+  });
+
+  it("falls back to the placeholder when the local image is missing from the build", () => {
+    render(<OfferIllustration offer={{ ...offer, name: "Chips, Ringar och Bågar" }} />);
+
+    fireEvent.error(screen.getByRole("img", { name: /Potatischips/ }));
+
+    expect(screen.getByRole("img", { name: "Ingen produktbild" })).toBeVisible();
+    expect(document.querySelector("img")).not.toBeInTheDocument();
   });
 
   it("retains the placeholder rather than fetching an uncurated remote product image", () => {

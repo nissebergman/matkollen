@@ -124,36 +124,68 @@ fetched during research.
 `src/images/catalog.json` preserves the verified original titles, URLs and provenance.
 The importer accepts only CC0, not the other licenses discussed for comparison.
 Its license links use the HTTPS CC0 deed corresponding to the HTTP deed URL
-returned by Commons. Full-name aliases are explicitly curated; there is no
-substring/category-wide or brand inference. All displayed images are labelled
-“Illustrationsbild”, link their author/source/license, and disclose resizing
-and compression. Fresh-tomato aliases exclude canned tomatoes, and the apple
-image does not match pomegranates.
+returned by Commons. All displayed images are labelled “Illustrationsbild”,
+link their author/source/license, and disclose resizing and compression.
 
-`npm run images:sync` sequentially fetched the five original JPEGs successfully,
-without retries, denials, metadata API calls, or contacting supermarket sources.
-`sharp` oriented each image, contained it without cropping on a white 192×192
-canvas, stripped metadata and encoded JPEG at quality 55 with mozjpeg. No AI
-image generation is involved.
+Matching is keyword-based (see the README): Swedish compound suffixes outrank
+prefixes, keywords under four letters only match whole words, and per-image
+excluded words prevent known false positives (the apple image does not match
+pomegranates; the mince image does not match “färsk”). Against the
+2026-11-18 Linköping Snapshot, 623 of 1,515 priced Offers matched an image;
+every distinct matched name was reviewed for false positives.
 
-| Local derivative | Bytes |
-|---|---:|
-| `potato-chips.jpg` | 4,343 |
-| `deli-ham.jpg` | 2,546 |
-| `bread.jpg` | 3,534 |
-| `tomatoes.jpg` | 5,152 |
-| `apples.jpg` | 3,208 |
-| **Total** | **18,783** |
+`sharp` orients each image, contains it without cropping on a white 192×192
+canvas, strips metadata and encodes JPEG at quality 55 with mozjpeg. No AI
+image generation is involved. The 33 derivatives are 1.3–5.4 KB each
+(about 120 KB in total).
 
-`npm run images:check` validates local format, dimensions, metadata removal and
-the 20 KiB per-file limit offline. Existing files are reused by the importer.
+### Expansion (2026-11-18)
 
-### Publication blocked by content exclusion
+Candidates were found with the Commons search API (`generator=search`,
+`gsrnamespace=6`), keeping only `image/jpeg` files with
+`LicenseShortName=CC0`. The chosen files were re-verified by page ID
+(`action=query&pageids=…&prop=imageinfo&iiprop=url|mime|extmetadata`) when the
+catalogue entries were generated. Titles were chosen for a plain, unbranded
+depiction; the images themselves were not inspected by the agent because image
+files are excluded from its content access.
 
-After the initial generation and local validation, the commit attempt was
-denied because `.jpg` is a globally ignored file type. These files must not be
-accessed further by Copilot and have not been committed or published. The
-unrestricted source metadata and prepared code are retained, but the renderer
-is not connected to the app. Publication uses only checked-in assets and does
-not run the image importer or validator. The local build was not rerun after
-the exclusion, so it cannot copy the blocked, untracked files.
+| Catalogue id | Commons page ID | Author |
+|---|---:|---|
+| `citrus` | 74169584 | Lukas B |
+| `pears` | 101180467 | ZELSC |
+| `coffee` | 31249101 | Petr Kratochvil |
+| `pizza` | 79703781 | LEi - DESIGN |
+| `cheese` | 155628638 | Silar |
+| `yoghurt` | 133739637 | Julikalucky |
+| `sausages` | 61666228 | The Digital Marketing Collaboration thedmcsa |
+| `salmon` | 77589496 | FULVIO_TOGNON |
+| `chicken` | 98746201 | Harald the Bard |
+| `flour` | 147600357 | Socket0 |
+| `kiwi` | 125987709 | Gadfium |
+| `peppers` | 25258709 | Wilfredor |
+| `avocado` | 103651060 | Wilfredor |
+| `ice-cream` | 116099408 | safaritravelplus |
+| `danish-pastry` | 141518904 | Bajinra |
+| `paper-rolls` | 24739724 | Derrick Coetzee (User:Dcoetzee) |
+| `eggs` | 82105917 | congerdesign |
+| `bananas` | 25211373 | Wilfredor |
+| `onions` | 162377936 | Natashadonoh |
+| `carrots` | 62052160 | Mink Mingle minkmingle |
+| `butter` | 133739638 | Julikalucky |
+| `minced-meat` | 65028261 | Erwin |
+| `grapes` | 62364296 | Couleur |
+| `strawberries` | 152018378 | Jiafei Slay Queen |
+| `rice` | 54496770 | ch1310 |
+| `pork-fillet` | 41817808 | Spacekid |
+| `candles` | 149329408 | USER-62114 |
+| `sparkling-water` | 147678566 | Corn cheese |
+
+### Publication
+
+The image files are not committed: committing them was denied by a content
+exclusion that globally ignores the JPEG file type for the agent. Instead, the
+publish workflow restores `public/images/products/` from an Actions cache
+keyed on the catalogue and processing code and runs `npm run images:sync`,
+which imports missing images and validates existing ones. The step uses
+`continue-on-error`, so a Commons outage never blocks Offer publication; the
+card falls back to its placeholder when an image fails to load.

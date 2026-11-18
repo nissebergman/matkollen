@@ -1,9 +1,11 @@
+import { useState } from "react";
 import type { Offer } from "../domain/snapshot";
 import { productImage } from "../images/catalog";
 
 export function OfferIllustration({ offer }: { offer: Offer }) {
   const image = productImage(offer);
-  if (!image) {
+  const [failedId, setFailedId] = useState<string>();
+  if (!image || failedId === image.id) {
     return (
       <div className="image-placeholder" role="img" aria-label="Ingen produktbild">
         <svg viewBox="0 0 96 96" fill="none" aria-hidden="true">
@@ -23,6 +25,7 @@ export function OfferIllustration({ offer }: { offer: Offer }) {
         height={192}
         loading="lazy"
         decoding="async"
+        onError={() => setFailedId(image.id)}
       />
       <figcaption className="image-credit">
         Illustrationsbild · <a href={image.sourceUrl} title={image.sourceTitle}>{image.author}</a>

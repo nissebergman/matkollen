@@ -10,15 +10,22 @@ function httpsUrl(host?: string) {
   }, "Expected a public HTTPS source URL");
 }
 
-function normalizedName(name: string): string {
-  return name.normalize("NFC").trim().replace(/\s+/g, " ").toLocaleLowerCase("sv-SE");
+function normalized(text: string): string {
+  return text.normalize("NFC").trim().toLocaleLowerCase("sv-SE");
 }
+
+function nameTokens(name: string): string[] {
+  return normalized(name).split(/[^\p{L}]+/u).filter(Boolean);
+}
+
+const keywordSchema = z.string().trim().regex(/^\p{Ll}+$/u, "Expected one lowercase word");
 
 const imageSchema = z.strictObject({
   id: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   title: z.string().trim().min(1),
   sourceTitle: z.string().trim().min(1),
-  names: z.array(z.string().trim().min(1)).min(1),
+  keywords: z.array(keywordSchema).min(1),
+  exclude: z.array(keywordSchema).optional(),
   author: z.string().trim().min(1),
   license: z.literal("CC0-1.0"),
   licenseUrl: z.literal("https://creativecommons.org/publicdomain/zero/1.0/"),
@@ -29,22 +36,21 @@ const imageSchema = z.strictObject({
 
 export const imageCatalogSchema = z.array(imageSchema).superRefine((images, context) => {
   const ids = new Set<string>();
-  const names = new Set<string>();
+  const keywords = new Set<string>();
   images.forEach((image, index) => {
     if (ids.has(image.id)) {
       context.addIssue({ code: "custom", path: [index, "id"], message: "Duplicate image id" });
     }
     ids.add(image.id);
-    image.names.forEach((name, nameIndex) => {
-      const normalized = normalizedName(name);
-      if (names.has(normalized)) {
+    image.keywords.forEach((keyword, keywordIndex) => {
+      if (keywords.has(keyword)) {
         context.addIssue({
           code: "custom",
-          path: [index, "names", nameIndex],
-          message: "Ambiguous image alias",
+          path: [index, "keywords", keywordIndex],
+          message: "Ambiguous image keyword",
         });
       }
-      names.add(normalized);
+      keywords.add(keyword);
     });
   });
 });
@@ -52,10 +58,33 @@ export const imageCatalogSchema = z.array(imageSchema).superRefine((images, cont
 export const imageCatalog = imageCatalogSchema.parse(catalogData);
 export type ProductImage = z.infer<typeof imageSchema>;
 
-const imagesByName = new Map(
-  imageCatalog.flatMap((image) => image.names.map((name) => [normalizedName(name), image] as const)),
-);
+// Swedish compounds put the head noun last ("snacktomater", "grillkorv"), so a
+// suffix match outranks a prefix match ("potatischips" is chips, not potatoes).
+// Keywords shorter than four letters only match whole words ("ost", "lax").
+function matchScore(token: string, keyword: string): number {
+  if (token === keyword) return 200 + keyword.length;
+  if (keyword.length < 4) return 0;
+  if (token.endsWith(keyword)) return 100 + keyword.length;
+  if (token.startsWith(keyword)) return keyword.length;
+  return 0;
+}
 
 export function productImage(offer: Pick<Offer, "name">): ProductImage | undefined {
-  return imagesByName.get(normalizedName(offer.name));
+  const tokens = nameTokens(offer.name);
+  let best: ProductImage | undefined;
+  let bestScore = 0;
+  for (const image of imageCatalog) {
+    const candidates = tokens.filter((token) =>
+      !image.exclude?.some((term) => matchScore(token, term) > 0));
+    for (const keyword of image.keywords) {
+      for (const token of candidates) {
+        const score = matchScore(token, keyword);
+        if (score > bestScore) {
+          best = image;
+          bestScore = score;
+        }
+      }
+    }
+  }
+  return best;
 }

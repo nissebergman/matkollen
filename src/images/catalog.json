@@ -3,7 +3,10 @@
     "id": "potato-chips",
     "title": "Potatischips",
     "sourceTitle": "Potato chips - Massachusetts.jpg",
-    "names": ["Chips, Ringar och Bågar", "Chips", "Potatischips"],
+    "keywords": [
+      "chips",
+      "potatischips"
+    ],
     "author": "Daderot",
     "license": "CC0-1.0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
@@ -15,7 +18,10 @@
     "id": "deli-ham",
     "title": "Skinka",
     "sourceTitle": "Coupe jambon de pays.jpg",
-    "names": ["Smörgåspålägg", "Skinka", "Skivad skinka"],
+    "keywords": [
+      "pålägg",
+      "skinka"
+    ],
     "author": "Tejoja",
     "license": "CC0-1.0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
@@ -27,7 +33,12 @@
     "id": "bread",
     "title": "Bröd",
     "sourceTitle": "Loaf Of Bread.jpg",
-    "names": ["Bröd", "Mjukt bröd", "Rostbröd", "Skogaholmslimpa", "Grekiskt lantbröd, Italienskt surdegsbröd"],
+    "keywords": [
+      "bröd",
+      "limpa",
+      "levain",
+      "baguette"
+    ],
     "author": "congerdesign",
     "license": "CC0-1.0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
@@ -39,7 +50,10 @@
     "id": "tomatoes",
     "title": "Färska tomater",
     "sourceTitle": "Tomato Fruit.jpg",
-    "names": ["Tomater", "Babyplommontomater i ask", "Färgmixade småtomater i ask", "Plommontomater i ask", "Romanticatomater i ask", "Snacktomater"],
+    "keywords": [
+      "tomat",
+      "tomater"
+    ],
     "author": "Judethedeus",
     "license": "CC0-1.0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
@@ -51,12 +65,483 @@
     "id": "apples",
     "title": "Äpplen",
     "sourceTitle": "Apples fruit.jpg",
-    "names": ["Äpplen", "Äpplen Pink Lady", "Svenska äpplen", "Röda äpplen", "Gröna äpplen"],
+    "keywords": [
+      "äpple",
+      "äpplen"
+    ],
+    "exclude": [
+      "granatäpple",
+      "granatäpplen"
+    ],
     "author": "safaritravelplus",
     "license": "CC0-1.0",
     "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
     "sourceUrl": "https://commons.wikimedia.org/wiki/File:Apples_fruit.jpg",
     "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/0/00/Apples_fruit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "citrus",
+    "title": "Småcitrus",
+    "sourceTitle": "Clementine Close Up (132208599).jpeg",
+    "keywords": [
+      "småcitrus",
+      "clementin",
+      "clementiner",
+      "mandarin",
+      "mandariner",
+      "citrus"
+    ],
+    "author": "Lukas B",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Clementine_Close_Up_(132208599).jpeg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/e/ee/Clementine_Close_Up_%28132208599%29.jpeg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "pears",
+    "title": "Päron",
+    "sourceTitle": "Red Sienna Pride pear Australian.jpg",
+    "keywords": [
+      "päron"
+    ],
+    "author": "ZELSC",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Red_Sienna_Pride_pear_Australian.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Red_Sienna_Pride_pear_Australian.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "coffee",
+    "title": "Kaffe",
+    "sourceTitle": "Coffee cup surrounded by coffee beans.jpg",
+    "keywords": [
+      "kaffe",
+      "kaffebönor"
+    ],
+    "exclude": [
+      "ikaffe"
+    ],
+    "author": "Petr Kratochvil",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Coffee_cup_surrounded_by_coffee_beans.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/2/20/Coffee_cup_surrounded_by_coffee_beans.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "pizza",
+    "title": "Pizza",
+    "sourceTitle": "Pizza with mushrooms and cheese.jpg",
+    "keywords": [
+      "pizza",
+      "pizzor"
+    ],
+    "author": "LEi - DESIGN",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pizza_with_mushrooms_and_cheese.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/1/16/Pizza_with_mushrooms_and_cheese.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "cheese",
+    "title": "Ost",
+    "sourceTitle": "02024 1727 Cheese from Silesia.jpg",
+    "keywords": [
+      "ost",
+      "hushållsost",
+      "cheddar",
+      "gorgonzola",
+      "grevé",
+      "herrgård",
+      "präst",
+      "prästost",
+      "herrgårdsost",
+      "grevéost",
+      "västerbottensost",
+      "brie"
+    ],
+    "author": "Silar",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:02024_1727_Cheese_from_Silesia.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/0/04/02024_1727_Cheese_from_Silesia.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "yoghurt",
+    "title": "Yoghurt",
+    "sourceTitle": "Yoghurt and spoon.jpg",
+    "keywords": [
+      "yoghurt",
+      "kvarg",
+      "filmjölk",
+      "gräddfil",
+      "fraiche"
+    ],
+    "author": "Julikalucky",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Yoghurt_and_spoon.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/f/fa/Yoghurt_and_spoon.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "sausages",
+    "title": "Korv",
+    "sourceTitle": "Grilling Sausages (Unsplash).jpg",
+    "keywords": [
+      "korv",
+      "chorizo",
+      "salami"
+    ],
+    "author": "The Digital Marketing Collaboration thedmcsa",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grilling_Sausages_(Unsplash).jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/4/47/Grilling_Sausages_%28Unsplash%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "salmon",
+    "title": "Laxfilé",
+    "sourceTitle": "Raw salmon fillets.jpg",
+    "keywords": [
+      "lax",
+      "laxfilé",
+      "laxfiléer",
+      "laxportioner"
+    ],
+    "author": "FULVIO_TOGNON",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Raw_salmon_fillets.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/2/24/Raw_salmon_fillets.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "chicken",
+    "title": "Kyckling",
+    "sourceTitle": "Chicken breasts and wing quarters.jpg",
+    "keywords": [
+      "kyckling",
+      "kycklingfilé"
+    ],
+    "author": "Harald the Bard",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Chicken_breasts_and_wing_quarters.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/4/42/Chicken_breasts_and_wing_quarters.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "flour",
+    "title": "Mjöl",
+    "sourceTitle": "Bag of flour, Bornholm.jpg",
+    "keywords": [
+      "mjöl",
+      "vetemjöl"
+    ],
+    "exclude": [
+      "mjölk"
+    ],
+    "author": "Socket0",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bag_of_flour,_Bornholm.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a0/Bag_of_flour%2C_Bornholm.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "kiwi",
+    "title": "Kiwi",
+    "sourceTitle": "Seeka Kiwifruit.jpg",
+    "keywords": [
+      "kiwi"
+    ],
+    "author": "Gadfium",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Seeka_Kiwifruit.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Seeka_Kiwifruit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "peppers",
+    "title": "Paprika",
+    "sourceTitle": "Capsicum ..jpg",
+    "keywords": [
+      "paprika"
+    ],
+    "author": "Wilfredor",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Capsicum_..jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Capsicum_..jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "avocado",
+    "title": "Avokado",
+    "sourceTitle": "Persea americana from Canadian supermarket.jpg",
+    "keywords": [
+      "avokado",
+      "avokador"
+    ],
+    "author": "Wilfredor",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Persea_americana_from_Canadian_supermarket.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Persea_americana_from_Canadian_supermarket.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "ice-cream",
+    "title": "Glass",
+    "sourceTitle": "Ice cream flavor.jpg",
+    "keywords": [
+      "glass"
+    ],
+    "author": "safaritravelplus",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ice_cream_flavor.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/f/fd/Ice_cream_flavor.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "danish-pastry",
+    "title": "Wienerbröd",
+    "sourceTitle": "Danish Roll Raisin.jpg",
+    "keywords": [
+      "wienerbröd",
+      "bullar",
+      "bulle"
+    ],
+    "exclude": [
+      "köttbullar",
+      "potatisbullar"
+    ],
+    "author": "Bajinra",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Danish_Roll_Raisin.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/c/c2/Danish_Roll_Raisin.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "paper-rolls",
+    "title": "Toalettpapper",
+    "sourceTitle": "Roll of toilet paper with one sheet folded down in front.jpg",
+    "keywords": [
+      "toalettpapper",
+      "hushållspapper"
+    ],
+    "author": "Derrick Coetzee (User:Dcoetzee)",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Roll_of_toilet_paper_with_one_sheet_folded_down_in_front.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/2/23/Roll_of_toilet_paper_with_one_sheet_folded_down_in_front.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "eggs",
+    "title": "Ägg",
+    "sourceTitle": "Egg-3506222 1920.jpg",
+    "keywords": [
+      "ägg"
+    ],
+    "author": "congerdesign",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Egg-3506222_1920.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Egg-3506222_1920.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "bananas",
+    "title": "Bananer",
+    "sourceTitle": "Bunch of bananas on sale.jpg",
+    "keywords": [
+      "banan",
+      "bananer"
+    ],
+    "author": "Wilfredor",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bunch_of_bananas_on_sale.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Bunch_of_bananas_on_sale.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "onions",
+    "title": "Lök",
+    "sourceTitle": "Bowl of onions 18th march 2025.jpg",
+    "keywords": [
+      "lök",
+      "gullök",
+      "rödlök",
+      "schalottenlök"
+    ],
+    "author": "Natashadonoh",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bowl_of_onions_18th_march_2025.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f7/Bowl_of_onions_18th_march_2025.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "carrots",
+    "title": "Morötter",
+    "sourceTitle": "Carrots (Unsplash).jpg",
+    "keywords": [
+      "morot",
+      "morötter"
+    ],
+    "author": "Mink Mingle minkmingle",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Carrots_(Unsplash).jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/b/bf/Carrots_%28Unsplash%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "butter",
+    "title": "Smör",
+    "sourceTitle": "Butter and Knive.jpg",
+    "keywords": [
+      "smör",
+      "bregott"
+    ],
+    "exclude": [
+      "smörgås",
+      "jordnötssmör",
+      "smördeg"
+    ],
+    "author": "Julikalucky",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Butter_and_Knive.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0d/Butter_and_Knive.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "minced-meat",
+    "title": "Färs",
+    "sourceTitle": "Minced meat.jpg",
+    "keywords": [
+      "färs"
+    ],
+    "exclude": [
+      "färsk",
+      "färska",
+      "färskost"
+    ],
+    "author": "Erwin",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Minced_meat.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Minced_meat.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "grapes",
+    "title": "Vindruvor",
+    "sourceTitle": "Grapes 1.jpg",
+    "keywords": [
+      "vindruvor",
+      "druvor"
+    ],
+    "author": "Couleur",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Grapes_1.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f6/Grapes_1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "strawberries",
+    "title": "Jordgubbar",
+    "sourceTitle": "Strawberries in a tray.jpg",
+    "keywords": [
+      "jordgubbar"
+    ],
+    "author": "Jiafei Slay Queen",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Strawberries_in_a_tray.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/c/cc/Strawberries_in_a_tray.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "rice",
+    "title": "Ris",
+    "sourceTitle": "Short-grain rice (japonica).jpg",
+    "keywords": [
+      "ris",
+      "grötris",
+      "jasminris",
+      "basmatiris"
+    ],
+    "author": "ch1310",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Short-grain_rice_(japonica).jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/2/29/Short-grain_rice_%28japonica%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "pork-fillet",
+    "title": "Fläskfilé",
+    "sourceTitle": "Pork fillet in Montenegro.jpg",
+    "keywords": [
+      "fläsk",
+      "fläskfilé",
+      "ryggfilé"
+    ],
+    "author": "Spacekid",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Pork_fillet_in_Montenegro.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Pork_fillet_in_Montenegro.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "candles",
+    "title": "Ljus",
+    "sourceTitle": "Burning-candle.jpg",
+    "keywords": [
+      "blockljus",
+      "kronljus",
+      "värmeljus",
+      "stearinljus",
+      "doftljus"
+    ],
+    "author": "USER-62114",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Burning-candle.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/5/5b/Burning-candle.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "sparkling-water",
+    "title": "Vatten",
+    "sourceTitle": "Bottled sparkling water.jpg",
+    "keywords": [
+      "vatten"
+    ],
+    "exclude": [
+      "vattenkokare"
+    ],
+    "author": "Corn cheese",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bottled_sparkling_water.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e6/Bottled_sparkling_water.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
     "verifiedAt": "2026-11-18"
   }
 ]
