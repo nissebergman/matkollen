@@ -25,13 +25,14 @@ Coop source adapters are implemented. Linköping uses `tjek-ereklamblad` for ICA
 and `coop-tjek` for Coop. The shared Tjek adapter discovers Stores and implements the observed Store-specific
 `fronts` → publication pages → individual Offer lookup flow. A 2026-11-17
 Coop refresh validated all six configured Linköping Stores, six publications
-and 293 Offers. An ICA check found 12 Linköping Stores with current Store-specific
-publications; a separate sample verified three Offers with Store association
-and date normalization but no member-price field. A bounded Hemköp Tjek check
-later verified three Offers and one member price, but not live Store discovery. The 2026-11-18
-publish run initially failed for ICA and Hemköp. A later refresh succeeded for
-all three Chains: 787 ICA Offers across 12 Stores, 293 Coop Offers across six,
-and 452 Hemköp Offers across seven. The ICA source change is an explicit
+and 293 Offers. An ICA check found current Store-specific publications for all
+12 Linköping Stores; a later bounded sample verified 21 Offer associations and
+validity, with a member-price field present in two. The sample does not
+establish broad Offer coverage or mechanic prevalence. A bounded Hemköp Tjek
+check verified three Offers and one member price, but not live Store discovery.
+The 2026-11-18 publish run initially failed for ICA and Hemköp. A later refresh
+succeeded for all three Chains: 787 ICA Offers across 12 Stores, 293 Coop
+Offers across six, and 452 Hemköp Offers across seven. The ICA source change is an explicit
 configuration, not an automatic response to a denial. The sanitized fixtures,
 remaining live compatibility limits and Tjek's terms risks are documented in
 the source notes.

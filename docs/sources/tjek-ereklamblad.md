@@ -102,15 +102,23 @@ fixtures and never contact Tjek.
 Compatibility remains partial. A complete Coop refresh on 2026-11-17 verified
 all six configured Linköping Stores, six publications and 293 Offers; a later
 bounded Coop-only attempt reached only a subset before the cumulative request
-cap, so one complete refresh does not establish ongoing completeness. The
-bounded ICA check verified only one Store-specific publication and three
-Offers, with no sampled member-price field. The Hemköp sample verified three
-Offers and one member price, but its Store discovery was not live-validated.
-On 2026-11-18 a bounded ICA discovery check found 12
-Linköping Stores across four ICA brands, each with a current Store-specific
-publication. A subsequent full refresh published 787 ICA Offers across those
-12 Stores, with at least one Offer per Store; ICA member-price behavior remains
-unverified. The exact live `fronts` body was not saved verbatim, but its
+cap, so one complete refresh does not establish ongoing completeness. Earlier
+ICA samples verified Store/publication association and date normalization but
+did not include member-price fields. On 2026-11-18 a bounded ICA discovery
+check found 12 Linköping Stores across four ICA brands, each with a current
+Store-specific publication, and a subsequent full refresh published 787 ICA
+Offers across those Stores. A separate bounded check made 50 anonymous,
+sequential requests at least 1.25 seconds apart: all 12 publication labels
+matched their queried Store names, and 21 individual Offer samples across all
+12 Stores matched their business/publication associations and had validity in
+the current Offer Week. Two samples included a member-price field, and all 21
+included at least one Offer text/mechanic field; none matched a simple
+`N för M` text check. No raw Offer records were retained. This verifies only
+the sampled fields, not broad coverage, mechanic prevalence, or normalization
+of those particular live records. The Hemköp sample verified three Offers and
+one member price, but its Store discovery was not live-validated; no Hemköp
+Tjek requests were made during this check because the documented visit window
+was closed. The exact live `fronts` body was not saved verbatim, but its
 response and nested shape are represented in the sanitized fixture. When an
 ICA or Hemköp fallback is explicitly selected, the adapter attempts the shared
 publication/Offer flow and fails closed on unsupported responses or mismatched

@@ -100,7 +100,7 @@ failed images use a placeholder. Catalogue and source details are in
 
 | Chain | Primary source | Fallback |
 |---|---|---|
-| ICA | Tjek/eReklamblad, configured after first-party access returned HTTP 403; the 2026-11-18 refresh published Offers for all 12 discovered Stores | First-party path is not automatically retried; ICA member-price mapping remains unverified |
+| ICA | Tjek/eReklamblad, configured after first-party access returned HTTP 403; the 2026-11-18 refresh published Offers for all 12 discovered Stores | First-party path is not automatically retried; a bounded sample found member-price fields in 2 of 21 Offers, while broader prevalence and live-record normalization remain unverified |
 | Coop | Tjek/eReklamblad; the 2026-11-17 refresh published Offers for all six configured Stores | Experimental flyer-PDF adapter fails closed on an ambiguous live row; see [ticket 11](../../offers-v1-implementation/issues/11-switch-coop-to-flyer-pdfs.md) |
 | Hemköp | Axfood first-party campaign API; the 2026-11-18 refresh published Offers for all seven configured Stores | Tjek's Incito Offer lookup returned one member-price sample, but live Store discovery and broad coverage remain unverified; see [ticket 10](../../offers-v1-implementation/issues/10-switch-ica-and-hemkop-to-tjek.md) |
 

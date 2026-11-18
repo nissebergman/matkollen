@@ -48,9 +48,23 @@ represented. The adapter validated Store, business and publication associations
 and validity. ICA member-price behavior and Hemköp's live Tjek Store discovery
 remain unverified, so this ticket remains in progress.
 
+**Status note (2026-11-18, bounded ICA Offer validation):** A 50-request
+anonymous check, with at least 1.25 seconds between requests and no retries,
+covered four ICA businesses and all 12 Linköping Stores. All 12 Stores had a
+current publication whose label matched the queried Store. Twenty-one
+individual Offer lookups across those Stores matched the expected business and
+publication and had validity in the current Offer Week; two included a
+member-price field, and all 21 included at least one Offer text/mechanic field.
+None matched a simple `N för M` text check. No raw Offer records were retained,
+so this does not establish broad coverage, mechanic prevalence, or normalization
+of those specific live records. No Hemköp Tjek requests were made because its
+documented visit window was closed. Keep the remaining live-validation
+criterion open.
+
 - [x] Each Chain can independently select Tjek through Location configuration.
 - [x] Each fallback Chain discovers its Stores and produces Offers in the existing Snapshot contract through offline Snapshot-job fixtures.
-- [ ] Verify live Store association, member prices, validity and representative mechanics for ICA and Hemköp.
+- [x] A bounded ICA sample verifies current Store-labeled publications and 21 Offer associations/validity; two samples included a member-price field.
+- [ ] Verify Hemköp live Store discovery and broader member-price/mechanic compatibility for both Chains.
 - [x] Switching sources leaves the app unchanged, and failed or blocked sources are reported rather than bypassed.
 - [x] Fixture-based tests cover configuration, failure paths and Incito 404 fallback without live requests; synthetic Store discovery remains distinct from the sanitized live Hemköp Offer sample.
 

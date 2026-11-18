@@ -16,7 +16,7 @@ The configured source is selected independently per Chain in
 
 | Chain | Configured source | Fallback / limitation |
 |---|---|---|
-| ICA | Tjek/eReklamblad | First-party access returned HTTP 403; no automatic retry or source switch. ICA member-price mapping remains unverified. |
+| ICA | Tjek/eReklamblad | First-party access returned HTTP 403; no automatic retry or source switch. A bounded 2026-11-18 sample found member-price fields in 2 of 21 Offers; broader prevalence and live-record normalization remain unverified. |
 | Coop | Tjek/eReklamblad | Experimental Store-specific flyer-PDF adapter exists but fails closed on the observed ambiguous row; keep Tjek configured. |
 | Hemköp | Axfood first-party campaign API | Tjek's observed Incito Offer lookup works for a small sample, but live Store discovery and broad coverage are unverified. |
 

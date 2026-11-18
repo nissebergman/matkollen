@@ -36,7 +36,7 @@ Production: https://nissebergman.github.io/matkollen/
 
 ## Known limitations
 
-- **Source validation:** ICA member-price mapping and Hemköp Tjek Store discovery remain unverified (#10); the Coop PDF adapter fails closed on the observed real flyer (#11).
+- **Source validation:** a bounded ICA sample verified current Store-labeled publications and 21 Offer associations/validity, with member-price fields in 2 samples; broader member-price/mechanic coverage and Hemköp Tjek Store discovery remain unverified (#10). The Coop PDF adapter fails closed on the observed real flyer (#11).
 - **Source rights/freshness:** Tjek has no licensed public API or freshness SLA; risks are documented alongside the source adapters.
 - **Location scale:** Linköping is the only configured Location; multi-Location behavior is designed but has not been validated with a second live Location.
 
