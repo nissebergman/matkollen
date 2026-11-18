@@ -366,6 +366,10 @@ h1 span { display: block; }
   font-size: 0.6rem;
 }
 .image-placeholder svg { width: 6rem; height: 6rem; stroke: #cbb59b; stroke-width: 1.5; stroke-linejoin: round; }
+.offer-product-image { width: 48%; min-width: 0; margin: 0; text-align: center; }
+.offer-product-image img { display: block; width: 100%; height: 8.5rem; object-fit: contain; mix-blend-mode: multiply; }
+.image-credit { margin-top: 0.35rem; color: var(--muted); font-size: 0.57rem; line-height: 1.35; overflow-wrap: anywhere; }
+.image-credit span { display: block; }
 .price-ticket {
   position: absolute;
   right: 0.8rem;
@@ -396,6 +400,7 @@ h1 span { display: block; }
 .offer-details dt { color: var(--muted); }
 .offer-details dt::after { content: ":"; }
 .offer-details dd { min-width: 0; margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+.offer-stores { display: grid; gap: 0.2rem; margin: 0; padding: 0; list-style: none; }
 
 .stale-marker { width: fit-content; margin: 0 0 0.6rem; padding: 0.3rem 0.5rem; background: #fff1bd; color: #664400; font-size: 0.72rem; font-weight: 700; }
 .source-warning, .error-message, .fixture-notice {

@@ -178,7 +178,7 @@ describe("Offers app", () => {
     expect(screen.getByText(/senast uppdaterad/i)).toBeVisible();
   });
 
-  it("orders visible Offers by effective price, breaks ties by name, and puts missing prices last", async () => {
+  it("orders Offers by the purchase price shown on cards, with a unit-price fallback and missing last", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-11-17T09:00:00.000Z"));
     const sortableSnapshot = JSON.parse(JSON.stringify(snapshotFixture));
@@ -227,7 +227,7 @@ describe("Offers app", () => {
         ...baseOffer,
         id: "price-three",
         name: "Zoégas",
-        price: 3,
+        price: undefined,
         unitPrice: 3,
       },
       {
@@ -262,9 +262,9 @@ describe("Offers app", () => {
       screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent),
     ).toEqual([
       "Zoégas",
-      "Apelsin",
-      "Köp två",
       "Köp en",
+      "Köp två",
+      "Apelsin",
       "Oprissatt",
     ]);
     expect(

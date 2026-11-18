@@ -3,8 +3,9 @@
 A Swedish, mobile-first view of supermarket Offers. The app reads a versioned
 Snapshot for the Location in the page address (`?location=<id>`), defaulting to
 the configured default Location. It never calls a Chain or third-party Offer
-source directly. Offer image display is deferred: the current placeholder
-remains, and the browser does not load remote `imageUrl`s.
+source directly. The browser never loads remote Offer `imageUrl`s. The
+placeholder remains while local JPEG publication is blocked by content
+exclusion.
 
 ## Locations
 
@@ -40,9 +41,21 @@ fallback; a read-only check of a real flyer showed a layout that the parser
 correctly rejects rather than publishing misidentified Offers. The configured
 source remains unchanged; do not switch sources automatically.
 
-Offers are ordered by lowest effective price by default. Choose “Störst rabatt
-(%)” to sort by the percentage reduction from regular to effective price when
-both use a known, shared unit and the regular price is positive. Offers without
+Equivalent Offers within a Chain appear once, with every matching Store listed
+in the **Butik** row. Brand, package size, purchase price, quantity, mechanics,
+comparison price, restrictions and validity must agree. Store filtering happens
+before aggregation; raw per-Store Snapshots and provenance remain unchanged.
+Different regular prices do not split an otherwise identical Offer: the card
+shows their range, and **Spara minst** uses the smallest reduction available at
+every listed Store. If any Store lacks a usable regular price, no group-wide
+discount is claimed.
+
+Offers are ordered by the purchase price shown on their price ticket, not the
+kg/l comparison price. A multi-buy total is its purchase price; a numeric unit
+price is used only when no purchase price exists. Choose “Störst rabatt (%)” to
+sort by the percentage reduction from regular to effective unit price when
+both use a known, shared unit and the regular price is positive. Aggregated
+Offers use the conservative Store-wide reduction described above. Offers without
 a usable price or computable reduction appear last. Offers with an explicit
 zero price or zero effective price are hidden; unknown prices remain visible.
 
@@ -66,6 +79,34 @@ npm run build
 workflow, not fixture data. Failed Chains are represented in the Snapshot and
 shown in the app rather than being replaced with fixture Offers. Automated
 tests replay secret-free fixtures and do not access the network.
+
+## Prepared local product illustrations
+
+Source research and an ingestion script are prepared for five Wikimedia
+Commons CC0 photos: chips, ham, bread, fresh tomatoes and apples. They are
+**illustrations, not exact products or brands**. The prepared renderer labels
+them accordingly and links their author, source and license, but is not
+connected to the published app.
+
+**Blocked:** `.jpg` files are globally excluded by the current content policy.
+The image assets cannot be accessed, committed or published by Copilot.
+The published app therefore retains placeholders rather than broken image
+links. Publication uses only checked-in assets and does not invoke image scripts.
+
+[`src/images/catalog.json`](src/images/catalog.json) records curated full-name
+aliases, original titles, source and original download URLs, authors, licenses
+and verification dates. The importer currently accepts only CC0; adding other
+licenses requires an explicit policy change. Matching ignores case and repeated whitespace but is never fuzzy:
+fresh tomatoes must not accidentally match canned tomatoes, for example.
+The [source research](docs/sources/product-images.md) records verification and
+licensing limits. Check a new image's source, license and suitability before
+adding it; do not assume public availability permits reuse.
+
+The prepared local script uses `sharp`, not AI, to orient each photo, contain it on a
+white 192×192 canvas, strip metadata and encode JPEG at quality 55 with mozjpeg.
+Its importer and offline validator target metadata-free 192×192 JPEGs of at
+most 20 KiB, reuse existing files, and stop on source errors or access denials
+without retries or alternate routes. They are not invoked by publication.
 
 ## GitHub Pages publication
 

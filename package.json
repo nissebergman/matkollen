@@ -9,7 +9,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "snapshot": "tsx src/snapshot/cli.ts",
-    "snapshot:validate": "tsx src/snapshot/cli.ts --validate"
+    "snapshot:validate": "tsx src/snapshot/cli.ts --validate",
+    "images:sync": "tsx src/images/cli.ts --download",
+    "images:check": "tsx src/images/cli.ts"
   },
   "dependencies": {
     "pdfjs-dist": "^6.5.438",
@@ -25,6 +27,7 @@
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^5.0.0",
     "jsdom": "^27.2.0",
+    "sharp": "^0.35.5",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3",
     "vite": "^7.2.2",

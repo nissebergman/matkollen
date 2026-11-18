@@ -1,0 +1,62 @@
+[
+  {
+    "id": "potato-chips",
+    "title": "Potatischips",
+    "sourceTitle": "Potato chips - Massachusetts.jpg",
+    "names": ["Chips, Ringar och Bågar", "Chips", "Potatischips"],
+    "author": "Daderot",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Potato_chips_-_Massachusetts.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Potato_chips_-_Massachusetts.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "deli-ham",
+    "title": "Skinka",
+    "sourceTitle": "Coupe jambon de pays.jpg",
+    "names": ["Smörgåspålägg", "Skinka", "Skivad skinka"],
+    "author": "Tejoja",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Coupe_jambon_de_pays.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/d/dd/Coupe_jambon_de_pays.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "bread",
+    "title": "Bröd",
+    "sourceTitle": "Loaf Of Bread.jpg",
+    "names": ["Bröd", "Mjukt bröd", "Rostbröd", "Skogaholmslimpa", "Grekiskt lantbröd, Italienskt surdegsbröd"],
+    "author": "congerdesign",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Loaf_Of_Bread.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2c/Loaf_Of_Bread.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "tomatoes",
+    "title": "Färska tomater",
+    "sourceTitle": "Tomato Fruit.jpg",
+    "names": ["Tomater", "Babyplommontomater i ask", "Färgmixade småtomater i ask", "Plommontomater i ask", "Romanticatomater i ask", "Snacktomater"],
+    "author": "Judethedeus",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tomato_Fruit.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4d/Tomato_Fruit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  },
+  {
+    "id": "apples",
+    "title": "Äpplen",
+    "sourceTitle": "Apples fruit.jpg",
+    "names": ["Äpplen", "Äpplen Pink Lady", "Svenska äpplen", "Röda äpplen", "Gröna äpplen"],
+    "author": "safaritravelplus",
+    "license": "CC0-1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Apples_fruit.jpg",
+    "downloadUrl": "https://upload.wikimedia.org/wikipedia/commons/0/00/Apples_fruit.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
+    "verifiedAt": "2026-11-18"
+  }
+]

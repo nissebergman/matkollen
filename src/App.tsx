@@ -10,6 +10,13 @@ import {
   type Snapshot,
 } from "./domain/snapshot";
 import { CATEGORIES } from "./domain/categories";
+import {
+  aggregateOffers,
+  purchasePrice,
+  sortOfferGroups,
+  type OfferGroup,
+  type SortOrder,
+} from "./domain/offer-view";
 import { StorePicker } from "./components/StorePicker";
 import {
   DEFAULT_LOCATION_ID,
@@ -19,7 +26,6 @@ import {
 import "./styles.css";
 
 type LocationOption = Pick<LocationConfig, "id" | "name">;
-type SortOrder = "price" | "discount";
 type OfferView = {
   sortOrder: SortOrder;
   selectedChains: string[];
@@ -69,41 +75,6 @@ function visibleOffers(snapshot: Snapshot, today: string): Offer[] {
       offer.unitPrice !== 0 &&
       offer.validTo >= today && (!offer.validFrom || offer.validFrom <= today),
   );
-}
-
-function offerDiscount(offer: Offer): number | undefined {
-  if (
-    offer.unitPrice === undefined ||
-    offer.regularPrice === undefined ||
-    offer.priceUnit === undefined ||
-    offer.regularPrice <= 0 ||
-    offer.unitPrice >= offer.regularPrice
-  ) {
-    return undefined;
-  }
-  return ((offer.regularPrice - offer.unitPrice) / offer.regularPrice) * 100;
-}
-
-function sortOffers(offers: Offer[], order: SortOrder): Offer[] {
-  return [...offers].sort((left, right) => {
-    const leftValue =
-      order === "price" ? left.unitPrice : offerDiscount(left);
-    const rightValue =
-      order === "price" ? right.unitPrice : offerDiscount(right);
-
-    if (leftValue === undefined) {
-      return rightValue === undefined
-        ? left.name.localeCompare(right.name, "sv")
-        : 1;
-    }
-    if (rightValue === undefined) {
-      return -1;
-    }
-
-    const valueDifference =
-      order === "price" ? leftValue - rightValue : rightValue - leftValue;
-    return valueDifference || left.name.localeCompare(right.name, "sv");
-  });
 }
 
 function toggleSelection(selected: string[], value: string): string[] {
@@ -233,16 +204,16 @@ async function loadSnapshot(snapshotUrl: string): Promise<Snapshot> {
 }
 
 function OfferCard({
-  offer,
-  storeName,
+  group,
+  stores,
   stale,
 }: {
-  offer: Offer;
-  storeName: string;
+  group: OfferGroup;
+  stores: Array<{ id: string; name: string }>;
   stale: boolean;
 }) {
-  const discount = offerDiscount(offer);
-  const price = offer.price ?? offer.unitPrice;
+  const { offer, discountPercent: discount, regularPriceRange } = group;
+  const price = purchasePrice(offer);
   const priceParts = price === undefined ? undefined : PRICE_FORMATTER.format(price).split(",");
 
   return (
@@ -250,7 +221,9 @@ function OfferCard({
       <div className="offer-card-topline">
         <span className="chain-label">{offer.chain}</span>
         {discount !== undefined && discount >= 1 && (
-          <span className="discount-badge">Spara {Math.floor(discount)}%</span>
+          <span className="discount-badge">
+            Spara {group.discountVaries ? "minst " : ""}{Math.floor(discount)}%
+          </span>
         )}
       </div>
       <div className="offer-image">
@@ -289,10 +262,16 @@ function OfferCard({
               <dd>{offer.comparisonPriceText}</dd>
             </div>
           )}
-          {offer.regularPrice !== undefined && (
+          {regularPriceRange && (
             <div>
               <dt>Ordinarie pris</dt>
-              <dd>{formatPrice(offer.regularPrice)}</dd>
+              <dd>
+                {regularPriceRange.min === regularPriceRange.max
+                  ? formatPrice(regularPriceRange.min)
+                  : `${PRICE_FORMATTER.format(regularPriceRange.min)}–${formatPrice(regularPriceRange.max)}`}
+                {offer.priceUnit && <span>/{offer.priceUnit}</span>}
+                {!regularPriceRange.complete && " (där uppgift finns)"}
+              </dd>
             </div>
           )}
           {offer.limitText && (
@@ -307,7 +286,11 @@ function OfferCard({
           </div>
           <div>
             <dt>Butik</dt>
-            <dd>{storeName}</dd>
+            <dd>
+              <ul className="offer-stores">
+                {stores.map((store) => <li key={store.id}>{store.name}</li>)}
+              </ul>
+            </dd>
           </div>
           <div>
             <dt>Giltigt</dt>
@@ -498,7 +481,8 @@ export function App({
     currentOffers.some((offer) => offer.category === category) ||
     view.selectedCategories.includes(category),
   );
-  const sortedOffers = sortOffers(matchingOffers, view.sortOrder);
+  const groupedOffers = aggregateOffers(matchingOffers);
+  const sortedOffers = sortOfferGroups(groupedOffers, view.sortOrder);
   const storeNames = new Map(snapshot.stores.map((store) => [store.id, store.name]));
   const staleChains = new Set(
     snapshot.chains
@@ -688,7 +672,7 @@ export function App({
         <div>
           <p className="eyebrow">Hitta dina favoriter</p>
           <p className="offer-count" aria-live="polite">
-            {matchingOffers.length} {matchingOffers.length === 1 ? "erbjudande" : "erbjudanden"}
+            {groupedOffers.length} {groupedOffers.length === 1 ? "erbjudande" : "erbjudanden"}
           </p>
         </div>
         <label className="sort-control">
@@ -721,12 +705,14 @@ export function App({
           </section>
         ) : (
           <section className="offer-list" aria-label="Erbjudanden">
-            {sortedOffers.map((offer) => (
+            {sortedOffers.map((group) => (
               <OfferCard
-                key={offer.id}
-                offer={offer}
-                storeName={storeNames.get(offer.storeId) ?? "Okänd butik"}
-                stale={staleChains.has(offer.chain)}
+                key={group.key}
+                group={group}
+                stores={group.storeIds
+                  .map((id) => ({ id, name: storeNames.get(id) ?? "Okänd butik" }))
+                  .sort((a, b) => a.name.localeCompare(b.name, "sv"))}
+                stale={staleChains.has(group.offer.chain)}
               />
             ))}
           </section>
