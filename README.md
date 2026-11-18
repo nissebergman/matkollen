@@ -98,16 +98,20 @@ Swedish compounds put the head noun last, so a suffix match (“snack**tomater**
 (“ost”, “lax”, “ägg”) only match whole words. Excluded words stop false
 positives such as “färsk” for “färs” or “köttbullar” for “bullar”.
 
-`npm run images:sync` downloads each missing image and uses `sharp` (no AI) to
+`npm run images:sync` downloads each missing image as a 330px Commons
+thumbnail (Wikimedia rate-limits bulk original downloads), pausing one second
+between requests and stopping the batch on HTTP 429. It uses `sharp` (no AI) to
 orient it, contain it on a white 192×192 canvas, strip metadata and encode a
 JPEG at quality 55 with mozjpeg into `public/images/products/` (typically
 2–6 KB each). `npm run images:check` validates existing files offline. Both
 continue past individual failures and exit non-zero if any image failed.
+Existing files are never re-downloaded, so give an image a new `id` when
+replacing its source.
 
-The image files themselves are not committed. The publish workflow restores
-them from an Actions cache keyed on the catalogue and processing code, runs
-`images:sync`, and then builds. A Wikimedia outage cannot block Offer
-publication; affected cards fall back to placeholders.
+The image files are generated, not committed. The publish workflow restores
+the latest set from an incremental Actions cache, runs `images:sync` to fill in
+missing images, builds, and saves the set again. A Wikimedia outage or rate
+limit cannot block Offer publication; affected cards fall back to placeholders.
 
 To add an image, find a CC0 file on Commons, check its license through the
 Commons API ([source research](docs/sources/product-images.md)), add a catalogue

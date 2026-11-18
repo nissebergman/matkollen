@@ -25,6 +25,25 @@ export async function compressProductImage(bytes: Buffer): Promise<Buffer> {
   return encoded;
 }
 
+const THUMBNAIL_WIDTH = 330;
+
+/**
+ * Wikimedia rate-limits bulk original downloads and asks clients to use one of
+ * its standard thumbnail widths instead. Every catalogue source is wider than
+ * 330px, which is still well above the 192px derivative.
+ */
+export function commonsThumbnailUrl(downloadUrl: string, width = THUMBNAIL_WIDTH): string {
+  const url = new URL(downloadUrl);
+  const match = /^\/wikipedia\/commons\/([0-9a-f])\/([0-9a-f]{2})\/([^/]+)$/.exec(url.pathname);
+  if (url.hostname !== "upload.wikimedia.org" || !match) {
+    throw new Error("Expected an original Wikimedia Commons upload URL");
+  }
+  const [, shard, subshard, file] = match;
+  return `https://upload.wikimedia.org/wikipedia/commons/thumb/${shard}/${subshard}/${file}/${width}px-${file}`;
+}
+
+export class RateLimitedError extends Error {}
+
 export async function downloadSourceImage(
   url: string,
   fetchSource: typeof fetch = fetch,
@@ -39,7 +58,8 @@ export async function downloadSourceImage(
   });
   if (!response.ok) {
     await response.body?.cancel();
-    throw new Error(`Image source returned HTTP ${response.status}; stopped without retrying`);
+    const message = `Image source returned HTTP ${response.status}; stopped without retrying`;
+    throw response.status === 429 ? new RateLimitedError(message) : new Error(message);
   }
   if (
     response.headers.get("content-type")?.split(";")[0].trim() !== "image/jpeg" ||

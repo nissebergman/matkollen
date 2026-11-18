@@ -83,10 +83,13 @@ jobs:
           enablement: false
 
       - name: Restore product image database
+        # Incremental: restore the latest set and save it again after the run,
+        # so images imported before a rate limit are kept for the next run.
         uses: actions/cache@v4
         with:
           path: public/images/products
-          key: product-images-${{ hashFiles('src/images/catalog.json', 'src/images/processing.ts') }}
+          key: product-images-${{ github.run_id }}
+          restore-keys: product-images-
 
       - name: Import and validate product images
         # Missing images fall back to placeholders; never block Offer publication.

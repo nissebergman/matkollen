@@ -184,8 +184,15 @@ files are excluded from its content access.
 
 The image files are not committed: committing them was denied by a content
 exclusion that globally ignores the JPEG file type for the agent. Instead, the
-publish workflow restores `public/images/products/` from an Actions cache
-keyed on the catalogue and processing code and runs `npm run images:sync`,
-which imports missing images and validates existing ones. The step uses
-`continue-on-error`, so a Commons outage never blocks Offer publication; the
-card falls back to its placeholder when an image fails to load.
+publish workflow restores `public/images/products/` from an incremental
+Actions cache (latest `product-images-*` entry, saved again under the run ID)
+and runs `npm run images:sync`, which imports missing images and validates
+existing ones. The step uses `continue-on-error`, so a Commons outage never
+blocks Offer publication; the card falls back to its placeholder when an image
+fails to load.
+
+The first CI import (run 44278707418) fetched originals and received HTTP 429
+after 11 images: Wikimedia rate-limits bulk original downloads from cloud
+runners. The importer now fetches 330px standard thumbnails
+(`/wikipedia/commons/thumb/<a>/<ab>/<file>/330px-<file>`), pauses one second
+between downloads, and stops the batch after the first 429.

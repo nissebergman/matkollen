@@ -3,8 +3,10 @@ import sharp from "sharp";
 import { describe, expect, it, vi } from "vitest";
 import { imageCatalog, imageCatalogSchema, productImage } from "../src/images/catalog";
 import {
+  commonsThumbnailUrl,
   compressProductImage,
   downloadSourceImage,
+  RateLimitedError,
   validateProductImage,
 } from "../src/images/processing";
 
@@ -46,6 +48,24 @@ describe("local product image catalogue", () => {
     expect(metadata.exif).toBeUndefined();
     expect(metadata.icc).toBeUndefined();
     expect(result.length).toBeLessThanOrEqual(20 * 1024);
+  });
+
+  it("downloads a standard-width Commons thumbnail instead of the original", () => {
+    expect(commonsThumbnailUrl(
+      "https://upload.wikimedia.org/wikipedia/commons/f/f1/Potato_chips_-_Massachusetts.jpg?utm_source=x",
+    )).toBe(
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f1/Potato_chips_-_Massachusetts.jpg/330px-Potato_chips_-_Massachusetts.jpg",
+    );
+    for (const image of imageCatalog) {
+      expect(() => commonsThumbnailUrl(image.downloadUrl)).not.toThrow();
+    }
+    expect(() => commonsThumbnailUrl("https://example.com/wikipedia/commons/f/f1/a.jpg")).toThrow();
+  });
+
+  it("reports rate limiting distinctly so the importer can stop the batch", async () => {
+    const fetchSource = vi.fn<typeof fetch>().mockResolvedValue(new Response("Slow down", { status: 429 }));
+    await expect(downloadSourceImage(imageCatalog[0].downloadUrl, fetchSource))
+      .rejects.toBeInstanceOf(RateLimitedError);
   });
 
   it("stops on access denial without retrying", async () => {
