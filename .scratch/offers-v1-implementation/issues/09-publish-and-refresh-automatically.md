@@ -46,3 +46,10 @@ configured as its default branch, and Pages is disabled (`has_pages: false`).
 The integration branch must be pushed first; it may need to become the default
 branch before the workflow can be dispatched. No remote branch, Pages setting
 or deployment has changed yet.
+
+**Status note (2026-11-18, branch published):** Commit `af71763` pushed
+`integration/offers-v1` as the sole remote branch, and GitHub set it as the
+default branch. The workflow file is present and passes local `actionlint`,
+but GitHub's workflow API still reports no registered workflows. Pages remains
+disabled and no deployment has run; retry workflow registration after the
+default-branch push is indexed.
