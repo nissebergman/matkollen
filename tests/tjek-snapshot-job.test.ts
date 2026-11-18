@@ -57,6 +57,12 @@ const tjekFallbackFixtures = JSON.parse(
     "utf8",
   ),
 ) as Record<"ICA" | "Hemköp", TjekFallbackFixtures>;
+const tjekHemkopIncitoOfferSample = JSON.parse(
+  readFileSync(
+    resolve(tjekRoot, "hemkop-incito-offer-2026-11-18.json"),
+    "utf8",
+  ),
+);
 const tjekStoreResponses = new Map<string, unknown>([
   ["63eeoD", tjekCoopStoreExcerpt],
   [
@@ -190,6 +196,8 @@ function fixtureFetcher(
     fronts?: unknown;
     frontsStatus?: number;
     publicationPages?: unknown;
+    publicationPagesStatus?: number;
+    incitoOfferIds?: unknown;
     offerLookups?: Map<string, unknown>;
     tjekStatus?: number;
   } = {},
@@ -225,9 +233,26 @@ function fixtureFetcher(
       });
 
       if (url.hostname === "publication-viewer.tjek.com") {
-        return options.publicationPages === undefined
-          ? new Response("No recorded publication fixture", { status: 404 })
-          : Response.json(options.publicationPages);
+        if (url.pathname.startsWith("/api/paged-publications/")) {
+          if (options.publicationPagesStatus !== undefined) {
+            return new Response("Tjek publication pages fixture", {
+              status: options.publicationPagesStatus,
+            });
+          }
+          return options.publicationPages === undefined
+            ? new Response("No recorded publication fixture", { status: 404 })
+            : Response.json(options.publicationPages);
+        }
+        if (url.pathname.startsWith("/api/incito-publications/")) {
+          return options.incitoOfferIds === undefined
+            ? new Response("No recorded Incito Offer IDs fixture", {
+                status: 404,
+              })
+            : Response.json(options.incitoOfferIds);
+        }
+        return new Response("Unexpected publication viewer route", {
+          status: 404,
+        });
       }
 
       if (url.hostname === "ereklamblad.se") {
@@ -920,7 +945,128 @@ describe("Tjek Snapshot adapter", () => {
     },
   );
 
-  it.skip("normalizes Tjek Offers for ICA and Hemköp through the shared Snapshot contract (live publication and Offer IDs remain unverified)", async () => {
+  it("uses Incito Offer IDs for Hemköp when paged-publications returns 404", async () => {
+    let elapsed = 0;
+    const options = tjekFallbackFixtureOptions("Hemköp");
+    const businesses = structuredClone(options.businesses) as {
+      value: Array<{ publicId: string }>;
+    };
+    businesses.value[0]!.publicId = "d9b6XA";
+    const sourceStores = options.stores.get("synthetic-hemkop-brand");
+    if (!sourceStores) {
+      throw new Error("Missing synthetic Hemköp Store fixture.");
+    }
+    const fronts = structuredClone(options.fronts) as {
+      value: Array<{
+        business: { publicId: string };
+        publications: Array<{
+          id: string;
+          validFrom: string;
+          validUntil: string;
+        }>;
+      }>;
+    };
+    fronts.value[0]!.business.publicId = "d9b6XA";
+    fronts.value[0]!.publications[0]!.id = "0Z78Bmhd";
+    fronts.value[0]!.publications[0]!.validFrom =
+      "2026-11-15T23:00:00+0000";
+    fronts.value[0]!.publications[0]!.validUntil =
+      "2026-11-22T22:59:59+0000";
+    const offerId = "dRkret65t9A0RPhpkhqug";
+    const replay = fixtureFetcher(() => elapsed, {
+      businesses,
+      stores: new Map([["d9b6XA", sourceStores]]),
+      fronts,
+      publicationPagesStatus: 404,
+      incitoOfferIds: [[offerId, "synthetic-reference"]],
+      offerLookups: new Map([[offerId, tjekHemkopIncitoOfferSample]]),
+    });
+
+    const snapshot = await buildLocationSnapshot(
+      locationWithTjek(["Hemköp"]),
+      {
+        fetcher: replay.fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        sleep: async (milliseconds) => {
+          elapsed += milliseconds;
+        },
+      },
+    );
+
+    expect(
+      snapshot.chains.find((status) => status.chain === "Hemköp"),
+    ).toMatchObject({ source: TJEK_SOURCE, status: "ok" });
+    expect(
+      snapshot.offers.find(
+        (offer) => offer.chain === "Hemköp" && offer.name === "Ryggfilé 3-pack",
+      ),
+    ).toMatchObject({
+      chain: "Hemköp",
+      storeId: "Hemköp:synthetic-hemkop-lucullus",
+      mechanicText: "39,95 kr",
+      price: 39.95,
+      validFrom: "2026-11-16",
+      validTo: "2026-11-22",
+    });
+    expect(
+      replay.requests
+        .filter(({ hostname }) => hostname === "publication-viewer.tjek.com")
+        .map(({ pathname }) => pathname),
+    ).toEqual([
+      "/api/paged-publications/0Z78Bmhd/pages",
+      "/api/incito-publications/0Z78Bmhd/offer-ids",
+    ]);
+    expect(replay.tjekCommands.map(({ action }) => action)).toEqual([
+      "businesses",
+      "stores",
+      "fronts",
+      "offer",
+    ]);
+    const tjekRequests = replay.requests.filter(
+      ({ hostname }) =>
+        hostname === "ereklamblad.se" ||
+        hostname === "publication-viewer.tjek.com",
+    );
+    expect(
+      tjekRequests.slice(1).every(
+        (request, index) => request.at - tjekRequests[index]!.at >= 1_000,
+      ),
+    ).toBe(true);
+  });
+
+  it("does not try Hemköp Incito after a paged-publications access denial", async () => {
+    const replay = fixtureFetcher(
+      () => 0,
+      {
+        ...tjekFallbackFixtureOptions("Hemköp"),
+        publicationPagesStatus: 403,
+        incitoOfferIds: [["synthetic-hemkop-offer", "synthetic-reference"]],
+      },
+    );
+
+    const snapshot = await buildLocationSnapshot(
+      locationWithTjek(["Hemköp"]),
+      {
+        fetcher: replay.fetcher,
+        now: () => new Date("2026-11-17T05:00:00.000Z"),
+        sleep: async () => {},
+      },
+    );
+
+    expect(
+      snapshot.chains.find((status) => status.chain === "Hemköp"),
+    ).toMatchObject({ source: TJEK_SOURCE, status: "failed" });
+    expect(snapshot.offers.filter((offer) => offer.chain === "Hemköp")).toEqual(
+      [],
+    );
+    expect(
+      replay.requests
+        .filter(({ hostname }) => hostname === "publication-viewer.tjek.com")
+        .map(({ pathname }) => pathname),
+    ).toEqual(["/api/paged-publications/synthetic-hemkop-week/pages"]);
+  });
+
+  it.skip("replays legacy ICA and Hemköp bulk fixtures (the current fallback uses Store-specific publications)", async () => {
     let elapsed = 0;
     const replay = fixtureFetcher(() => elapsed);
     const snapshot = await buildLocationSnapshot(

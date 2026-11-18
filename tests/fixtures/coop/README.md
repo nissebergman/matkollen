@@ -14,10 +14,11 @@ network requests. A generated 100-record first page exercises the observed
 offset pagination boundary without storing a large repetitive fixture.
 
 The files under `public/` and `flyers/` are synthetic Coop API/page and
-text-only PDF fixtures. The public configuration contains an obvious
-fixture-only placeholder, not a Coop key. The PDFs are generated examples,
-not copies of real flyers. `observed-coop-layout-synthetic.pdf` is a generated
-two-page example built from short text fragments observed in one public
-Stora Coop Garnisonen flyer: a `Jfr-pris`-only product description and a
-price-first `2 för 169:-` Libero offer with a preceding purchase limit. It
-models those text structures without preserving the source PDF.
+text-only PDF fixtures. The public configuration's quoted
+`storeApiSubscriptionKey` field contains an obvious fixture-only placeholder,
+not a Coop key. The PDFs are generated examples, not copies of real flyers.
+`observed-coop-layout-synthetic.pdf` is a generated two-page example built
+from short text fragments observed in one public Stora Coop Garnisonen flyer:
+a `Jfr-pris`-only product description and a price-first `2 för 169:-` Libero
+offer with a preceding purchase limit. It models those text structures without
+preserving the source PDF.

@@ -42,12 +42,12 @@ returned “Färsk fläskfilé” with membership and unit price 79.9 per kilogr
 its full response is not included because the retained summary did not
 contain all fields needed for a fixture.
 
-The ICA and Hemköp Store/Offer examples are synthetic, secret-free fixtures
-for the legacy adapter schema. Their Store identities, Offer values, and
-associations are fabricated and do not verify the current Tjek response
-shapes. `ica-hemkop-publication-flow-synthetic.json` is a hypothetical
-end-to-end fixture for the shared Store/publication/Offer flow. It tests the
-Snapshot contract and fail-closed association checks only; it is not based on
-live ICA or Hemköp responses and does not establish source compatibility.
-Tests replay fixtures through an injected fetcher and make no network
-requests.
+The ICA and Hemköp Store-discovery examples are synthetic, secret-free
+fixtures. `ica-hemkop-publication-flow-synthetic.json` is a hypothetical
+end-to-end fixture for the shared Store/publication/Offer flow; it tests the
+Snapshot contract and fail-closed association checks, not live discovery.
+`hemkop-incito-offer-2026-11-18.json` is a sanitized live Hemköp Offer sample
+from the Lucullus Incito publication. It verifies the observed Offer shape and
+member-price normalization only; it does not include a live Store-discovery
+response or establish broader source coverage. Tests replay fixtures through
+an injected fetcher and make no network requests.

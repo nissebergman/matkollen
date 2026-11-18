@@ -31,11 +31,19 @@ validate extraction. A regression now rejects this purchase-threshold pattern
 and requires a failed Chain with no Offers; the live PDF was not saved, and
 post-fix live validation remains pending. Keep this ticket blocked.
 
+**Status note (2026-11-18, post-fix):** The production adapter obtained the
+public Store config without persisting its key, discovered Vallaplan
+(`Coop:239`, ledger `056019`), and fetched only its current flyer. The parser
+failed the Chain on the ambiguous `vid inköp för` row and published zero
+Offers. This confirms one-Store Store-detail/flyer discovery and fail-closed
+behavior, but the real flyer still does not parse accurately. Keep Tjek
+configured and this ticket blocked.
+
 - [ ] Discover the configured Location's Coop Stores and their current Store-specific flyers, obtaining any public-page configuration needed at runtime without storing credentials.
-- [ ] Extract representative Offers from flyer PDF fixtures with the correct Store, validity, name and mechanic; preserve available product and price details and never invent a numeric price.
-- [ ] The fallback produces the shared Snapshot contract and displays Offers without app changes; configuration can switch back to Tjek.
-- [ ] Missing, blocked or unparseable flyers are reported as source failures instead of silently publishing an apparently complete result; source risks are documented and requests remain low-rate and sequential.
-- [ ] Fixture-based job and whole-app tests cover representative extracted Offers, source switching and an unparseable or missing flyer without live requests.
+- [x] Extract representative Offers from flyer PDF fixtures with the correct Store, validity, name and mechanic; preserve available product and price details and never invent a numeric price.
+- [x] The fallback produces the shared Snapshot contract and displays Offers without app changes; configuration can switch back to Tjek.
+- [x] Missing, blocked or unparseable flyers are reported as source failures instead of silently publishing an apparently complete result; source risks are documented and requests remain low-rate and sequential.
+- [x] Fixture-based job and whole-app tests cover representative extracted Offers, source switching and an unparseable or missing flyer without live requests.
 
 ## Comments
 

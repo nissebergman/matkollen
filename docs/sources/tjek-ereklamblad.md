@@ -6,11 +6,12 @@ fallback for ICA or Hemköp by setting a Location's
 in `src/snapshot/locations.json`; the checked-in defaults remain their
 first-party sources. An explicitly selected ICA or Hemköp fallback now attempts
 the same Store-specific `fronts` → publication pages → individual `offer`
-flow used by Coop. A bounded live ICA check on 2026-11-17 verified one
+flow used by Coop. For Hemköp, a 404 from `paged-publications` falls back to
+the observed Incito `/offer-ids` route; authorization or rate-limit denials
+still stop the refresh. A bounded live ICA check on 2026-11-17 verified one
 Store-specific publication and three Offers, including Store association and
-date normalization; none contained a member-price field. Hemköp was not
-probed, and the checked-in ICA/Hemköp fixtures remain synthetic. Coop uses the
-same adapter with the compatibility source id `coop-tjek` so existing Coop
+date normalization; none contained a member-price field. Coop uses the same
+adapter with the compatibility source id `coop-tjek` so existing Coop
 Snapshots keep their identity. A complete Coop refresh is documented below,
 but a later bounded attempt stopped before a complete Snapshot.
 
@@ -18,8 +19,17 @@ A follow-up ICA check on 2026-11-18 looked up three Offers from pages 12–14 of
 Signalen publication `0xK8wQA9`. All three linked to ICA business `9cb4wA` and
 that publication, and their validity fell within 2026-11-16 through 2026-11-22.
 None contained a member-price field. The previous sample's Offer IDs were not
-retained, so distinctness from that sample could not be confirmed. Hemköp
-remains unprobed.
+retained, so distinctness from that sample could not be confirmed.
+
+During Hemköp's permitted window on 2026-11-18, the Lucullus Incito
+publication `0Z78Bmhd` returned 74 two-item Offer-ID tuples. Only the first
+three individual Offers were requested. All three identified Hemköp business
+`d9b6XA`, publication `0Z78Bmhd`, and validity 2026-11-16 through 2026-11-22.
+The third was “Ryggfilé 3-pack” with `price: null` and `membershipPrice:
+39.95`; no further Offer lookups were made. Its sanitized record is replayed
+through the Snapshot job with synthetic Store discovery. This verifies the
+observed Offer shape and member-price mapping, not live Store discovery or
+broader Hemköp coverage.
 
 ## Live compatibility status
 
@@ -43,6 +53,10 @@ publication labelled “Coop Järntorget”, not a Linköping Store. The publica
 viewer exposes flyer pages with Offer hotspots/IDs. The official client also
 uses individual `offer` lookups with `{publicId}`; the bulk `offers` action
 uses `{offerIds, pagination, sources: ["publication"]}`.
+The Hemköp Lucullus Incito publication exposes Offer IDs at
+`/api/incito-publications/{publicationId}/offer-ids`; its observed response
+contains two-item tuples. The adapter uses this route only when a Hemköp
+`paged-publications` request returns HTTP 404.
 
 The first anonymous `businesses` request returned HTTP 401; an exact retry
 authorized by the user returned HTTP 200 with 188 brands. One authorized
@@ -90,16 +104,17 @@ all six configured Linköping Stores, six publications and 293 Offers; a later
 bounded Coop-only attempt reached only a subset before the cumulative request
 cap, so one complete refresh does not establish ongoing completeness. The
 bounded ICA check verified only one Store-specific publication and three
-Offers, with no sampled member-price field. Hemköp was not probed. Broader ICA
-coverage and member-price behavior, and Hemköp compatibility, remain
-unverified. The exact live `fronts` body was not saved verbatim, but its
+Offers, with no sampled member-price field. The Hemköp sample verified three
+Offers and one member price, but its Store discovery was not live-validated.
+Broader ICA coverage, ICA member-price behavior, and Hemköp Store coverage
+remain unverified. The exact live `fronts` body was not saved verbatim, but its
 response and nested shape are represented in the sanitized fixture. When an
 ICA or Hemköp fallback is explicitly selected, the adapter attempts the shared
 publication/Offer flow and fails closed on unsupported responses or mismatched
-associations. Synthetic fixtures exercise that path and Snapshot contract
-only; they are not evidence of live compatibility. Keep the configured source
-unchanged; do not claim complete live coverage or replace failures with
-synthetic-success data.
+associations. Offline fixtures exercise Store discovery and Snapshot
+normalization; only the separate sanitized Hemköp Offer sample reflects live
+Offer data. Keep the configured source unchanged; do not claim complete live
+coverage or replace failures with synthetic-success data.
 
 The adapter sends anonymous JSON `POST` requests to `https://ereklamblad.se/`
 with a base64-encoded command, plus a GET to the observed publication-pages
@@ -128,5 +143,6 @@ observed Coop brand entry. `stores-coop-63eeoD.json` contains one sanitized
 Store row from the authorized 621-record response. The publication and
 individual-Offer fixtures preserve sanitized samples; the `fronts` shape is
 observed but its key/status/category values are not retained. The ICA and
-Hemköp Store/Offer fixtures remain synthetic examples.
+Hemköp Store-discovery fixtures remain synthetic examples;
+`hemkop-incito-offer-2026-11-18.json` is a sanitized live Offer sample.
 Automated tests replay fixtures and never contact Tjek.

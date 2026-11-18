@@ -62,5 +62,14 @@ declares validity 2026-11-18–24), so this check did not revalidate live Store
 discovery or flyer dates. It returned a false-positive Offer named “vid inköp
 för” at 8,000 kr. This is a purchase threshold, not a product; the parser now
 rejects that ambiguous pattern and the Snapshot-job tests require the Chain to
-fail closed. The PDF was not saved, and post-fix live revalidation is pending.
-Keep Tjek configured until a real flyer is parsed accurately.
+fail closed.
+
+A post-fix live run on 2026-11-18 at 05:30 UTC used the public Store page and
+its linked script to read `storeApiSubscriptionKey` in memory, then queried the
+Store map and details for Vallaplan only (`Coop:239`, ledger `056019`). The
+adapter fetched exactly one current PDF and rejected the same ambiguous
+purchase-threshold row, producing a failed Chain and zero Offers. This
+revalidates public config extraction, one-Store discovery, current flyer
+metadata and fail-closed parsing; it does not validate accurate extraction
+from the real flyer. Neither the key nor the PDF was saved. Keep Tjek
+configured until a real flyer is parsed accurately.

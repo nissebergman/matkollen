@@ -1,0 +1,14 @@
+{
+  "key": "sanitized-live-sample",
+  "status": "success",
+  "value": {
+    "publicId": "dRkret65t9A0RPhpkhqug",
+    "name": "Ryggfilé 3-pack",
+    "businessPublicId": "d9b6XA",
+    "publicationPublicId": "0Z78Bmhd",
+    "price": null,
+    "membershipPrice": 39.95,
+    "validFrom": "2026-11-15T23:00:00+0000",
+    "validUntil": "2026-11-22T22:59:59+0000"
+  }
+}

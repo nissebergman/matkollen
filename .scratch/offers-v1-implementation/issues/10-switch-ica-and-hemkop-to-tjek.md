@@ -24,19 +24,31 @@ keep this ticket in progress.
 of Signalen publication `0xK8wQA9` were linked to ICA business `9cb4wA` and the
 same publication; their dates fell within the current Offer Week, and none
 contained a member-price field. The prior Offer IDs were not retained, so
-distinctness from the earlier sample could not be confirmed. Hemköp is still
-awaiting its permitted UTC window. Keep this ticket in progress.
+distinctness from the earlier sample could not be confirmed. During Hemköp's
+permitted window, the Lucullus Incito publication `0Z78Bmhd` returned 74
+two-item Offer-ID tuples. The first three individual Offers all identified
+Hemköp business `d9b6XA`, that publication, and dates 2026-11-16–22; the third
+had `price: null` and `membershipPrice: 39.95`, after which lookups stopped.
+The adapter now falls back to Incito Offer IDs only when Hemköp's
+`paged-publications` request returns 404; Snapshot tests replay the sanitized
+live Offer sample with synthetic Store discovery. Live Store discovery and
+broader coverage remain unverified, as does ICA member pricing. Keep this
+ticket in progress.
 
 - [x] Each Chain can independently select Tjek through Location configuration.
-- [ ] Each fallback Chain discovers its Stores and produces Offers in the existing Snapshot contract.
+- [x] Each fallback Chain discovers its Stores and produces Offers in the existing Snapshot contract through offline Snapshot-job fixtures.
 - [ ] Verify live Store association, member prices, validity and representative mechanics for ICA and Hemköp.
 - [x] Switching sources leaves the app unchanged, and failed or blocked sources are reported rather than bypassed.
-- [x] Fixture-based tests cover configuration and failure paths without live requests; synthetic Offers do not verify Tjek compatibility.
+- [x] Fixture-based tests cover configuration, failure paths and Incito 404 fallback without live requests; synthetic Store discovery remains distinct from the sanitized live Hemköp Offer sample.
 
 ## Answer
 
 Merged Tjek fallback support into `integration/offers-v1` as `831a4a2`. Earlier
 validation passed: `npm test` (8 files, 61 tests), `npm run build`, and
 `git diff --check`. The build reported Rollup warnings about `@__PURE__`
-comments in Zod dependencies. The new Coop sample does not change this
-ticket's blocked status: ICA and Hemköp Offer behavior remains unverified.
+comments in Zod dependencies. The Hemköp adapter now supports the observed
+Incito Offer-ID route after a 404 from `paged-publications`; an offline
+Snapshot-job test replays the sanitized live member-price Offer with synthetic
+Store discovery. The bounded ICA sample still has no member-price field, and
+Hemköp Store discovery is not live-verified, so the final live-validation
+criterion remains open.

@@ -402,10 +402,13 @@ function subscriptionKeyFromPublicConfig(
   const directHeader = config.match(
     /["']?Ocp-Apim-Subscription-Key["']?\s*:\s*["']([^"']+)["']/iu,
   );
+  const storeApiKey = config.match(
+    /["']storeApiSubscriptionKey["']\s*:\s*["']([^"']+)["']/iu,
+  );
   const publicConfig = config.match(
     /(?:subscription[-_]?key|ocpApimSubscriptionKey|apiSubscriptionKey|storeApiKey)\s*[:=]\s*["']([^"']+)["']/iu,
   );
-  const key = (directHeader?.[1] ?? publicConfig?.[1])?.trim();
+  const key = (storeApiKey?.[1] ?? directHeader?.[1] ?? publicConfig?.[1])?.trim();
   if (!key) {
     throw new Error(
       "Coops publika butikskonfiguration saknar en läsbar API-nyckel.",

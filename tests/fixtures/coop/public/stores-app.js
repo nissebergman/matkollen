@@ -1,3 +1,5 @@
 window.CoopStoreConfiguration = {
-  subscriptionKey: "fixture-only-public-client-value"
+  serviceAccess: {
+    "storeApiSubscriptionKey": "fixture-only-public-client-value"
+  }
 };

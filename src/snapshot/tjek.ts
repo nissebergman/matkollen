@@ -23,6 +23,8 @@ export const TJEK_SOURCE = "tjek-ereklamblad";
 const TJEK_ENDPOINT = "https://ereklamblad.se/";
 const TJEK_PUBLICATION_PAGES_ENDPOINT =
   "https://publication-viewer.tjek.com/api/paged-publications";
+const TJEK_INCITO_PUBLICATION_OFFERS_ENDPOINT =
+  "https://publication-viewer.tjek.com/api/incito-publications";
 const TJEK_STORE_LIMIT = 3_000;
 
 export interface TjekLocation extends SnapshotLocation {
@@ -133,6 +135,9 @@ const TjekPublicationPagesResponseSchema = z
     ),
   })
   .passthrough();
+const TjekIncitoOfferIdsResponseSchema = z.array(
+  z.tuple([sourceIdentifier, z.unknown()]),
+);
 
 const sourceBusinessSchema = z
   .object({
@@ -823,10 +828,14 @@ async function refreshTjek(
     url: string,
     init: RequestInit,
     label: string,
-  ): Promise<unknown> => {
+    allowNotFound = false,
+  ): Promise<unknown | undefined> => {
     await context.waitForRequest(TJEK_SOURCE, TJEK_REQUEST_DELAY_MS);
     const response = await context.fetcher(url, { ...init, credentials: "omit" });
     if (!response.ok) {
+      if (allowNotFound && response.status === 404) {
+        return undefined;
+      }
       throw new Error(requestError(response.status));
     }
     try {
@@ -859,15 +868,47 @@ async function refreshTjek(
     );
   };
 
-  const requestPublicationPages = (publicationId: string) =>
-    requestJson(
-      `${TJEK_PUBLICATION_PAGES_ENDPOINT}/${encodeURIComponent(publicationId)}/pages?from=1&to=20`,
+  const requestPublicationOfferIds = async (
+    publicationId: string,
+  ): Promise<Set<string>> => {
+    const publicationPath = encodeURIComponent(publicationId);
+    const pagesResponse = await requestJson(
+      `${TJEK_PUBLICATION_PAGES_ENDPOINT}/${publicationPath}/pages?from=1&to=20`,
       {
         method: "GET",
         headers: { Accept: "application/json" },
       },
       "publikationssidor",
+      chain === "Hemköp",
     );
+    if (pagesResponse === undefined) {
+      const incitoResponse = await requestJson(
+        `${TJEK_INCITO_PUBLICATION_OFFERS_ENDPOINT}/${publicationPath}/offer-ids`,
+        {
+          method: "GET",
+          headers: { Accept: "application/json" },
+        },
+        "publikationserbjudanden",
+      );
+      const incitoOfferIds = parseResponse(
+        TjekIncitoOfferIdsResponseSchema,
+        incitoResponse,
+        "publikationserbjudanden",
+      );
+      return new Set(incitoOfferIds.map(([offerId]) => sourceId(offerId)));
+    }
+
+    const pages = parseResponse(
+      TjekPublicationPagesResponseSchema,
+      pagesResponse,
+      "publikationssidor",
+    ).pages;
+    return new Set(
+      Object.values(pages).flatMap((page) =>
+        page.hotspots?.map((hotspot) => sourceId(hotspot.offer.id)) ?? [],
+      ),
+    );
+  };
 
   try {
     const businessesResponse = await requestAction("businesses", {}, "butiker");
@@ -1001,17 +1042,7 @@ async function refreshTjek(
       }
 
       for (const publication of currentPublications) {
-        const pagesResponse = await requestPublicationPages(publication.id);
-        const pages = parseResponse(
-          TjekPublicationPagesResponseSchema,
-          pagesResponse,
-          "publikationssidor",
-        ).pages;
-        const offerIds = new Set(
-          Object.values(pages).flatMap((page) =>
-            page.hotspots?.map((hotspot) => sourceId(hotspot.offer.id)) ?? [],
-          ),
-        );
+        const offerIds = await requestPublicationOfferIds(publication.id);
         if (offerIds.size === 0) {
           throw new Error(
             `Tjek-publikationen ${publication.id} saknar verifierade Offer-ID:n.`,

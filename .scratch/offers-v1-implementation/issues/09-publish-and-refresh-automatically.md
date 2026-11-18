@@ -31,9 +31,18 @@ complete multi-Chain deployment data. Actual publication and Pages verification
 remain pending; do not enable Pages, deploy, or publish the fixture as part of
 this repair.
 
-**Status note (2026-11-18):** The user has now authorized public Pages
-deployment after source validation, using fresh live Snapshots only. GitHub
+**Status note (2026-11-18, pre-publication):** The user authorized public Pages
+deployment after source validation, using generated live Snapshots only. GitHub
 reports Pages is disabled (`has_pages: false`) and no workflow is listed on the
 remote default branch; the integration branch has not been pushed. No Pages
 setting, push, or deployment has been changed. Hemköp validation remains
 pending its permitted UTC window.
+
+**Status note (2026-11-18, pre-publication):** Hemköp's bounded check is
+complete; see ticket 10 and the Tjek source notes. The user authorized public
+Pages deployment using generated live Snapshots only. GitHub reports this
+public repository is empty (size 0, no branch refs), despite `main` being
+configured as its default branch, and Pages is disabled (`has_pages: false`).
+The integration branch must be pushed first; it may need to become the default
+branch before the workflow can be dispatched. No remote branch, Pages setting
+or deployment has changed yet.
