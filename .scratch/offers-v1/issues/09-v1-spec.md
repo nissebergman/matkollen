@@ -1,8 +1,8 @@
 # Spec: Weekly grocery Offers in one view (v1)
 
 Type: spec
-Status: open
-Labels: ready-for-agent
+Status: implemented (source validation tracked separately)
+Labels: v1
 Blocked by:
 Parent: ../map.md
 
@@ -73,9 +73,11 @@ The app never calls the Chains live. A scheduled job fetches each Chain's Offers
 53. As the maintainer, I want the ToS and robots risks of each source documented next to its adapter, so that the trade-off we accepted stays visible.
 54. As the maintainer, I want free, static hosting for the app and Snapshot, so that running the household tool costs nothing.
 
-**Decision (2026-11-17):** Offer image display is deferred. Keep the current
-placeholder and do not load remote `imageUrl`s in the browser. Image fetching
-or proxying is out of scope.
+**Decision (2026-11-18):** Offer images use a curated local CC0 catalogue of
+illustrations. Images are generated as 192×192 JPEGs by `sharp` and published
+with the app; the browser never loads remote Offer `imageUrl`s. Unmatched or
+failed images use a placeholder. Catalogue and source details are in
+[`README.md`](../../../README.md#local-product-image-database).
 
 ## Implementation Decisions
 
@@ -98,12 +100,12 @@ or proxying is out of scope.
 
 | Chain | Primary source | Fallback |
 |---|---|---|
-| ICA | First-party: the anonymous-token Store search, then each Store's public offers page and its embedded weekly-Offer state | Tjek/eReklamblad (Store/publication/Offer flow unverified for ICA) |
-| Coop | Target: Tjek/eReklamblad structured Offers for Coop's Linköping Stores. One Store/publication/sample Offer path is verified; complete response shape and Store coverage remain blocked | Coop flyer PDF parsing, only if Tjek fails for a long time |
-| Hemköp | First-party: the Axfood Store listing, then the per-Store paginated campaign JSON | Tjek/eReklamblad (Store/publication/Offer flow unverified for Hemköp) |
+| ICA | Tjek/eReklamblad, configured after first-party access returned HTTP 403; the 2026-11-18 refresh published Offers for all 12 discovered Stores | First-party path is not automatically retried; ICA member-price mapping remains unverified |
+| Coop | Tjek/eReklamblad; the 2026-11-17 refresh published Offers for all six configured Stores | Experimental flyer-PDF adapter fails closed on an ambiguous live row; see [ticket 11](../../offers-v1-implementation/issues/11-switch-coop-to-flyer-pdfs.md) |
+| Hemköp | Axfood first-party campaign API; the 2026-11-18 refresh published Offers for all seven configured Stores | Tjek's Incito Offer lookup returned one member-price sample, but live Store discovery and broad coverage remain unverified; see [ticket 10](../../offers-v1-implementation/issues/10-switch-ica-and-hemkop-to-tjek.md) |
 
 - Each source is implemented as a **Chain adapter** with one shared interface. Given a Location config, it discovers that Chain's Stores and returns their Offers in the normalised Offer shape. A Location config picks which adapter each Chain uses, so moving to a fallback is a configuration change.
-- **Current Tjek compatibility (2026-11-17):** Tjek remains selected in the existing configuration. The shared adapter uses the observed `stores` action and one Coop Store-list response (621 records, including five Linköping Stores). An authorized exact Store-specific `fronts` retry, a publication-pages GET and sample individual Offer lookups succeeded. The observed `{key, status, value: [{business, publications}]}` shape is represented in a sanitized fixture, and the adapter checks front business IDs against the Store's brand ID. Only one of five Linköping Stores plus a small Offer sample was checked; complete live coverage remains blocked. See [ticket 04](04-third-party-offer-sources.md) and the [Tjek source note](../../../docs/sources/tjek-ereklamblad.md); do not change the configured source as part of this work.
+- **Current Tjek compatibility (2026-11-18):** Tjek is configured for ICA and Coop. A production refresh published 787 ICA Offers across 12 Stores and 293 Coop Offers across six Stores. Hemköp's configured primary remains Axfood; its Tjek fallback has a bounded three-Offer Incito sample including one member-price Offer, but live Store discovery and broad coverage remain unverified. These results do not establish an SLA or remove Tjek's terms risk. See [ticket 04](04-third-party-offer-sources.md), [ticket 10](../../offers-v1-implementation/issues/10-switch-ica-and-hemkop-to-tjek.md), and the [Tjek source note](../../../docs/sources/tjek-ereklamblad.md).
 - ToS and robots risk is accepted for this personal household tool and must be recorded with each adapter. ICA's offers page is an undocumented extraction surface. Hemköp's robots.txt disallows the campaign query route. Tjek's API is customer-only and its consumer endpoint is undocumented. The job must not disguise itself or work around blocks. When a source blocks the job, that Chain fails and is reported.
 - Politeness rules: requests to a source are sequential, never parallel. There is at least a 10-second delay between Hemköp requests, and a small fixed delay between requests to other sources. Back off and fail the Chain on 403/429 responses or repeated errors. Pagination is always followed until the source reports the last page.
 
@@ -157,11 +159,12 @@ or proxying is out of scope.
     - `comparisonPriceText`: for example "15,38 kr/kg"
     - `limitText`: for example "Max 2 per hushåll"
     - `validFrom`
-    - `imageUrl`
+    - `imageUrl` (source metadata only; never loaded by the browser)
     - `sourceCategory`: the Chain's own category label, kept for debugging and future remapping
 - Mechanics are represented as the displayed `mechanicText` plus the numeric fields that can be derived from it. Mechanics such as "3 för 2" (with no price) or weight-based Offers with no numeric price keep `mechanicText`, and their numeric price fields are left empty. Parsing must never invent a price.
 - There is **no member flag**. Member-only prices are ordinary Offers. When a source gives both a member price and an ordinary Offer price, the member price is used.
 - **Discount** is `regularPrice − unitPrice` in SEK, computed only when both are present and in the same unit. It is computed in the SPA, not stored.
+- Equivalent Offers from Stores of the same Chain are grouped in the view after Store filtering when product identity, purchase price, quantity, mechanics, comparison price and validity agree. The card lists every matching Store; differing regular prices are shown as a range and any displayed discount is conservative. Raw Snapshot Offers remain per Store.
 
 ### Category taxonomy
 
@@ -214,7 +217,7 @@ or proxying is out of scope.
   - Search: free text matching `name` and `brand`, ignoring case, with each word of the search matched separately (AND).
 - Filters combine with OR inside one filter type and AND between filter types. An empty filter type means "all".
 - Sort options:
-  - "Lägsta pris": sorts by `unitPrice` ascending. Offers without `unitPrice` go last.
+  - "Lägsta pris": sorts by the purchase price shown on the card, falling back to a numeric unit price only when no purchase price exists. Offers without a usable price go last.
   - "Största rabatt": sorts by discount, largest first. Offers with no computable discount go last.
   - Ties are broken by name.
 - Filter and sort state is kept in the URL query string.
