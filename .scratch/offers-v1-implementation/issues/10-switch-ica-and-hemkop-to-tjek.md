@@ -42,6 +42,12 @@ Store-specific publication. Full Offer coverage and ICA member-price mapping
 are still unverified. Tjek's undocumented API and content-reuse risks remain;
 there is no automatic source switch on a denial.
 
+**Status note (2026-11-18, full refresh):** A subsequent production refresh
+published 787 ICA Offers across all 12 discovered Stores, with each Store
+represented. The adapter validated Store, business and publication associations
+and validity. ICA member-price behavior and Hemköp's live Tjek Store discovery
+remain unverified, so this ticket remains in progress.
+
 - [x] Each Chain can independently select Tjek through Location configuration.
 - [x] Each fallback Chain discovers its Stores and produces Offers in the existing Snapshot contract through offline Snapshot-job fixtures.
 - [ ] Verify live Store association, member prices, validity and representative mechanics for ICA and Hemköp.

@@ -106,11 +106,11 @@ cap, so one complete refresh does not establish ongoing completeness. The
 bounded ICA check verified only one Store-specific publication and three
 Offers, with no sampled member-price field. The Hemköp sample verified three
 Offers and one member price, but its Store discovery was not live-validated.
-Broader ICA coverage, ICA member-price behavior, and Hemköp Store coverage
-remain unverified. On 2026-11-18 a bounded ICA discovery check found 12
+On 2026-11-18 a bounded ICA discovery check found 12
 Linköping Stores across four ICA brands, each with a current Store-specific
-publication. The check did not retrieve their Offers or establish full
-Snapshot coverage. The exact live `fronts` body was not saved verbatim, but its
+publication. A subsequent full refresh published 787 ICA Offers across those
+12 Stores, with at least one Offer per Store; ICA member-price behavior remains
+unverified. The exact live `fronts` body was not saved verbatim, but its
 response and nested shape are represented in the sanitized fixture. When an
 ICA or Hemköp fallback is explicitly selected, the adapter attempts the shared
 publication/Offer flow and fails closed on unsupported responses or mismatched

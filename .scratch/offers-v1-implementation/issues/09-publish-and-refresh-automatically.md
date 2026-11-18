@@ -61,6 +61,15 @@ Snapshot still contains the original failures. ICA's HTTP 403 has not been
 retried or bypassed, and a complete refresh after the Hemköp fix has not been
 verified.
 
+**Status note (2026-11-18, successful refresh):** ICA was explicitly
+configured to use Tjek. Run
+[44256936947](https://github.com/nissebergman/matkollen/actions/runs/44256936947)
+successfully deployed Snapshot commit
+[60ce187](https://github.com/nissebergman/matkollen/commit/60ce187). The live
+Snapshot reports all Chains fresh: ICA 787 Offers across 12 Stores, Coop 293
+across six, and Hemköp 452 across seven; each discovered Store has Offers.
+ICA member-price compatibility and Tjek's terms risks remain documented.
+
 ## Answer
 
 The public Pages site is live at

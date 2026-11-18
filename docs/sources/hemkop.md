@@ -49,5 +49,5 @@ subsequent single Lucullus campaign-page request returned the range
 price text, including ranges, without interpreting it as a numeric price;
 object values still fail validation. An offline Snapshot-job test covers the
 observed range. A one-Store live refresh for Lucullus subsequently completed
-three pages and produced 66 Offers. A complete Location refresh and deployment
-of this fix have not been verified.
+three pages and produced 66 Offers. A later full Location refresh succeeded
+for all seven discovered Stores, publishing 452 Hemköp Offers to Pages.

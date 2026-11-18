@@ -30,3 +30,5 @@ object values; offline Snapshot-job regression tests cover both cases. This
 change has not yet been deployed or verified with a complete live refresh.
 A subsequent bounded live refresh completed all three Lucullus campaign pages
 and produced 66 Offers; the other Stores remain unverified after the fix.
+The later Pages refresh succeeded for all seven discovered Hemköp Stores and
+published 452 Offers.
