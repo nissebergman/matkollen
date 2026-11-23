@@ -9,8 +9,8 @@ const workflow = readFileSync(
 );
 
 describe("static publication workflow", () => {
-  it("runs daily at 05:00 UTC and supports manual refreshes", () => {
-    expect(workflow).toMatch(/schedule:\s*\n\s+- cron:\s*["']?0 5 \* \* \*["']?/);
+  it("runs daily at 05:17 UTC and supports manual refreshes", () => {
+    expect(workflow).toMatch(/schedule:\s*\n\s+- cron:\s*["']?17 5 \* \* \*["']?/);
     expect(workflow).toMatch(/workflow_dispatch:/);
   });
 

@@ -123,7 +123,7 @@ the current Snapshot. Do not assume public availability permits reuse.
 ## GitHub Pages publication
 
 `.github/workflows/publish.yml` refreshes and publishes the app and Snapshots
-daily at 05:00 UTC, or on a manual `workflow_dispatch`. It commits the generated
+daily at 05:17 UTC, or on a manual `workflow_dispatch`. It commits the generated
 Snapshots, builds them alongside the app, and deploys the resulting static site.
 The public site is available at
 <https://nissebergman.github.io/matkollen/>.
