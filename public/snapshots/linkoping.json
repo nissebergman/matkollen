@@ -4,27 +4,27 @@
     "id": "linkoping",
     "name": "Linköping"
   },
-  "generatedAt": "2026-11-23T19:28:04.620Z",
+  "generatedAt": "2026-11-24T16:18:23.116Z",
   "chains": [
     {
       "chain": "ICA",
       "source": "tjek-ereklamblad",
       "status": "ok",
-      "lastAttemptAt": "2026-11-23T19:06:22.130Z",
-      "lastSuccessAt": "2026-11-23T19:20:58.249Z"
+      "lastAttemptAt": "2026-11-24T15:55:01.694Z",
+      "lastSuccessAt": "2026-11-24T16:10:43.347Z"
     },
     {
       "chain": "Coop",
       "source": "coop-tjek",
       "status": "ok",
-      "lastAttemptAt": "2026-11-23T19:20:58.264Z",
-      "lastSuccessAt": "2026-11-23T19:28:04.612Z"
+      "lastAttemptAt": "2026-11-24T16:10:43.360Z",
+      "lastSuccessAt": "2026-11-24T16:18:23.109Z"
     },
     {
       "chain": "Hemköp",
       "source": "hemkop-first-party",
       "status": "failed",
-      "lastAttemptAt": "2026-11-23T19:28:04.618Z",
+      "lastAttemptAt": "2026-11-24T16:18:23.115Z",
       "lastSuccessAt": "2026-11-18T07:36:51.772Z",
       "error": "Hemköps besöksfönster är 04:00–08:45 UTC; ingen begäran skickades."
     }
@@ -5939,7 +5939,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "22 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.34&x2r=0.94&y1r=0.24&y2r=0.45&s=6335728f5f5f91e1f9b441e9761b228f",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.34&x2r=0.94&y1r=0.232&y2r=0.458&s=f4f411ca4ef5086dcdece60686855b8a",
       "sourceCategory": "dairy-and-cold"
     },
     {
@@ -5956,7 +5956,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "6,25 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.03&x2r=0.34&y1r=0.32&y2r=0.47&s=94ef0ebd5b6aae9ea4d65b27c29176ad",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.038&x2r=0.34&y1r=0.32&y2r=0.478&s=66284d7b3a8cf9e3b46b6aed881e7b3a",
       "sourceCategory": "colonial"
     },
     {
@@ -5974,7 +5974,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "20 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.63&x2r=0.94&y1r=0.43&y2r=0.64&s=6f0d745d4ca50211dd4683ab6a813b9a",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.63&x2r=0.94&y1r=0.43&y2r=0.664&s=3c0a7b27a094b973f479d3372cac58d0",
       "sourceCategory": "colonial"
     },
     {
@@ -5991,7 +5991,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "15 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.34&x2r=0.63&y1r=0.46&y2r=0.63&s=b9692297e5dbb84fa1a6694b8a7da9bd",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.332&x2r=0.63&y1r=0.452&y2r=0.638&s=8cef118814f31036b9614cc81e4f6795",
       "sourceCategory": "fruits-and-vegetables"
     },
     {
@@ -6008,7 +6008,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "25 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.04&x2r=0.34&y1r=0.47&y2r=0.63&s=dabaadbc5fc4d36ffa88bd1c8d7ebca3",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.04&x2r=0.34&y1r=0.47&y2r=0.638&s=b873aa5f9264e995ef81da1ad7b57173",
       "sourceCategory": "fruits-and-vegetables"
     },
     {
@@ -6043,7 +6043,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "150 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.34&x2r=0.64&y1r=0.63&y2r=0.83&s=a93bec1f9831ae6229385439797feb42",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.34&x2r=0.648&y1r=0.63&y2r=0.83&s=98b59232c70ac93920eb0f7a73187507",
       "sourceCategory": "cold-cuts"
     },
     {
@@ -6060,7 +6060,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "69 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.64&x2r=0.94&y1r=0.64&y2r=0.83&s=1e54ab1663e0bf8c016d970893b7d4f0",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FQuRzSgIg%2Fp-1.webp&w=300&x1r=0.64&x2r=0.94&y1r=0.648&y2r=0.838&s=56e23c0ec212ca20d6c51427a6389ee8",
       "sourceCategory": "dairy-and-cold"
     },
     {
@@ -6605,7 +6605,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "22 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.354&x2r=0.935&y1r=0.246&y2r=0.45&s=9b0810af20ca555be6299491e24ed988",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.346&x2r=0.935&y1r=0.238&y2r=0.458&s=de4806ddd1d7414150052f14df361026",
       "sourceCategory": "dairy-and-cold"
     },
     {
@@ -6622,7 +6622,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "6,25 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.049&x2r=0.335&y1r=0.32&y2r=0.472&s=9f511589206c31bd942d231181a53849",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.041&x2r=0.335&y1r=0.32&y2r=0.48&s=4a940e769d677d5c6ecebd3b84dfc76f",
       "sourceCategory": "colonial"
     },
     {
@@ -6640,7 +6640,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "20 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.645&x2r=0.935&y1r=0.435&y2r=0.65&s=b2e8075676d659f29e71451c8aed4e35",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.637&x2r=0.935&y1r=0.427&y2r=0.658&s=154ca99d58dd0635c134c0066630b23d",
       "sourceCategory": "colonial"
     },
     {
@@ -6657,7 +6657,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "15 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.345&x2r=0.635&y1r=0.46&y2r=0.63&s=f7f9f407105948195ac01a249de05e22",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.329&x2r=0.635&y1r=0.452&y2r=0.638&s=eb87f9ef6d7963bf9453e691c6e0a86c",
       "sourceCategory": "fruits-and-vegetables"
     },
     {
@@ -6674,7 +6674,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "25 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.049&x2r=0.335&y1r=0.472&y2r=0.63&s=e2511e3907f2c0f7c45159e119e152da",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.033&x2r=0.335&y1r=0.464&y2r=0.638&s=b6137b204aa410268511153673f2c47c",
       "sourceCategory": "fruits-and-vegetables"
     },
     {
@@ -6691,7 +6691,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "59 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.049&x2r=0.335&y1r=0.635&y2r=0.83&s=db31e7b43ed92fc10ff885d8559d9996",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.041&x2r=0.335&y1r=0.635&y2r=0.838&s=018f70b75fccca2e47a84a4de0744952",
       "sourceCategory": "cold-cuts"
     },
     {
@@ -6709,7 +6709,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "150 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.345&x2r=0.642&y1r=0.635&y2r=0.83&s=62b69e3be7da5cb73ca4f7e8173b4947",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.345&x2r=0.65&y1r=0.635&y2r=0.838&s=9291c0ea19f3e21dfcf61c95d3536740",
       "sourceCategory": "cold-cuts"
     },
     {
@@ -6726,7 +6726,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "69 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.645&x2r=0.915&y1r=0.648&y2r=0.83&s=9f4ad928e69c25b8ef02c51cbc48e77f",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2FvQAADlHK%2Fp-1.webp&w=300&x1r=0.645&x2r=0.915&y1r=0.648&y2r=0.838&s=6271393f3506ffcbbb10c2da7cf74746",
       "sourceCategory": "dairy-and-cold"
     },
     {
@@ -9613,23 +9613,6 @@
       "sourceCategory": "fruits-and-vegetables"
     },
     {
-      "id": "ica:750cypl:Z-qrYcio8angCzgOGxUpc",
-      "chain": "ICA",
-      "storeId": "ICA:750cypl",
-      "name": "Julskinka",
-      "mechanicText": "59 kr",
-      "category": "Övrigt",
-      "validTo": "2026-11-29",
-      "sourceUrl": "https://ereklamblad.se/",
-      "price": 59,
-      "unitPrice": 59,
-      "priceUnit": "kg",
-      "comparisonPriceText": "59 kr/kg",
-      "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F_qBZIixQ%2Fp-1.webp&w=300&x1r=0.694&x2r=0.923&y1r=0.174&y2r=0.395&s=28ebbbc39823685dfd9993078b7a74c2",
-      "sourceCategory": "meat-and-fish"
-    },
-    {
       "id": "ica:750cypl:SF7T4_NcClnfFMbRXBaMA",
       "chain": "ICA",
       "storeId": "ICA:750cypl",
@@ -9644,8 +9627,25 @@
       "priceUnit": "kg",
       "comparisonPriceText": "157,32 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F_qBZIixQ%2Fp-1.webp&w=300&x1r=0.434&x2r=0.697&y1r=0.178&y2r=0.395&s=eb5f0a6c521f1eb7110c7d1c9da7d765",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F_qBZIixQ%2Fp-1.webp&w=300&x1r=0.434&x2r=0.697&y1r=0.154&y2r=0.403&s=e29e3625da28c8a3fcb69c3ce5b7e981",
       "sourceCategory": "snacks-and-candies"
+    },
+    {
+      "id": "ica:750cypl:Z-qrYcio8angCzgOGxUpc",
+      "chain": "ICA",
+      "storeId": "ICA:750cypl",
+      "name": "Julskinka",
+      "mechanicText": "59 kr",
+      "category": "Övrigt",
+      "validTo": "2026-11-29",
+      "sourceUrl": "https://ereklamblad.se/",
+      "price": 59,
+      "unitPrice": 59,
+      "priceUnit": "kg",
+      "comparisonPriceText": "59 kr/kg",
+      "validFrom": "2026-11-23",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F_qBZIixQ%2Fp-1.webp&w=300&x1r=0.694&x2r=0.923&y1r=0.166&y2r=0.403&s=a45b844efa271cfeaaf51788ba192b87",
+      "sourceCategory": "meat-and-fish"
     },
     {
       "id": "ica:750cypl:D2oiHlC1heMtr4ry-cNxw",
@@ -9749,7 +9749,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "79,8 kr/kg",
       "validFrom": "2026-11-27",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F_qBZIixQ%2Fp-1.webp&w=300&x1r=0.339&x2r=0.554&y1r=0.655&y2r=0.812&s=b3d56d1225d3ad125cf6b935326afa79",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F_qBZIixQ%2Fp-1.webp&w=300&x1r=0.331&x2r=0.554&y1r=0.655&y2r=0.812&s=54a92031c7132811fb240b487455d49b",
       "sourceCategory": "meat-and-fish"
     },
     {
