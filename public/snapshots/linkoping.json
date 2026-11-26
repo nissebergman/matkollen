@@ -4,27 +4,27 @@
     "id": "linkoping",
     "name": "Linköping"
   },
-  "generatedAt": "2026-11-25T16:01:49.611Z",
+  "generatedAt": "2026-11-26T15:42:08.735Z",
   "chains": [
     {
       "chain": "ICA",
       "source": "tjek-ereklamblad",
       "status": "ok",
-      "lastAttemptAt": "2026-11-25T15:38:37.205Z",
-      "lastSuccessAt": "2026-11-25T15:54:12.137Z"
+      "lastAttemptAt": "2026-11-26T15:20:35.162Z",
+      "lastSuccessAt": "2026-11-26T15:35:03.515Z"
     },
     {
       "chain": "Coop",
       "source": "coop-tjek",
       "status": "ok",
-      "lastAttemptAt": "2026-11-25T15:54:12.153Z",
-      "lastSuccessAt": "2026-11-25T16:01:49.602Z"
+      "lastAttemptAt": "2026-11-26T15:35:03.527Z",
+      "lastSuccessAt": "2026-11-26T15:42:08.727Z"
     },
     {
       "chain": "Hemköp",
       "source": "hemkop-first-party",
       "status": "failed",
-      "lastAttemptAt": "2026-11-25T16:01:49.610Z",
+      "lastAttemptAt": "2026-11-26T15:42:08.734Z",
       "lastSuccessAt": "2026-11-18T07:36:51.772Z",
       "error": "Hemköps besöksfönster är 04:00–08:45 UTC; ingen begäran skickades."
     }
@@ -4642,7 +4642,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "20 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3A98T1Ck%2Fp-1.webp&w=300&x1r=0.643&x2r=0.932&y1r=0.435&y2r=0.646&s=ae204117fb3bf0048c3ea8d9c088cefb",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3A98T1Ck%2Fp-1.webp&w=300&x1r=0.643&x2r=0.932&y1r=0.435&y2r=0.654&s=689046664e51a47661a4b2e1c967dfe0",
       "sourceCategory": "colonial"
     },
     {
@@ -5273,7 +5273,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "22 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.35&x2r=0.93&y1r=0.24&y2r=0.45&s=d21bc76f4b5513b1637e505303095e28",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.342&x2r=0.93&y1r=0.232&y2r=0.458&s=46b65a2777d0aa0563d1cdf91c017ed7",
       "sourceCategory": "dairy-and-cold"
     },
     {
@@ -5290,7 +5290,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "6,25 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.04&x2r=0.33&y1r=0.32&y2r=0.47&s=9cfa473c243347a425a44e7f79952901",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.04&x2r=0.33&y1r=0.312&y2r=0.478&s=d80e56ed871b3ea649754a538d3e99df",
       "sourceCategory": "colonial"
     },
     {
@@ -5308,7 +5308,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "20 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.64&x2r=0.93&y1r=0.43&y2r=0.65&s=3ce6061b44d7f43a8933bf04c4c40d6e",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.64&x2r=0.93&y1r=0.43&y2r=0.658&s=a7034baa16ce0f740e6dcaa470924b2b",
       "sourceCategory": "colonial"
     },
     {
@@ -5325,7 +5325,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "15 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.34&x2r=0.63&y1r=0.46&y2r=0.63&s=83053c174126e3cd9e2b7d3a516c7818",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.332&x2r=0.63&y1r=0.452&y2r=0.638&s=81763cba95f6e0097d731e89e974841f",
       "sourceCategory": "fruits-and-vegetables"
     },
     {
@@ -5342,7 +5342,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "25 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.04&x2r=0.33&y1r=0.47&y2r=0.63&s=0ba414a946e579c0dfa8d62afa53ac35",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.04&x2r=0.33&y1r=0.47&y2r=0.638&s=1a5d1c078a0b876b463c9336b3cbd976",
       "sourceCategory": "fruits-and-vegetables"
     },
     {
@@ -5359,7 +5359,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "59 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.03&x2r=0.33&y1r=0.63&y2r=0.83&s=6bc1a68b59591b2368af3e6f1c922cc5",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.038&x2r=0.338&y1r=0.63&y2r=0.838&s=8ba5a4126240218e2d0864b6ca7d6243",
       "sourceCategory": "cold-cuts"
     },
     {
@@ -5377,7 +5377,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "150 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.34&x2r=0.64&y1r=0.63&y2r=0.83&s=9950cbabb2bc84cde2ba16b1e6c4461f",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.34&x2r=0.656&y1r=0.63&y2r=0.838&s=1dac321ba10fafe4d828a2724f0de4ff",
       "sourceCategory": "cold-cuts"
     },
     {
@@ -5394,7 +5394,7 @@
       "priceUnit": "kg",
       "comparisonPriceText": "69 kr/kg",
       "validFrom": "2026-11-23",
-      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.64&x2r=0.92&y1r=0.65&y2r=0.83&s=cfc56d0532d48c328407c889a18a3412",
+      "imageUrl": "https://image-transformer-api.tjek.com/?u=s3%3A%2F%2Fsgn-prd-assets%2Fuploads%2F3DjdWKf7%2Fp-1.webp&w=300&x1r=0.64&x2r=0.92&y1r=0.65&y2r=0.838&s=dcdeee10c83ba2f4e0d004d20e989756",
       "sourceCategory": "dairy-and-cold"
     },
     {
