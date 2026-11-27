@@ -122,10 +122,17 @@ the current Snapshot. Do not assume public availability permits reuse.
 
 ## GitHub Pages publication
 
-`.github/workflows/publish.yml` refreshes and publishes the app and Snapshots
-daily at 05:17 UTC, or on a manual `workflow_dispatch`. It commits the generated
-Snapshots, builds them alongside the app, and deploys the resulting static site.
-The public site is available at
+`.github/workflows/publish.yml` targets a daily refresh and publication at
+05:17 UTC, and also supports manual `workflow_dispatch`. Backup schedules run
+every two hours from 17:17 through 07:17 UTC to mitigate GitHub's observed
+multi-hour scheduling delays. Scheduled publication can start from 05:00 up
+to 08:00 UTC and is attempted at most once per UTC day, even if it fails.
+Triggers arriving from 08:00 up to 19:00 UTC report a failure if no scheduled
+publication started that morning. Manual dispatch remains available at any
+time; Hemköp still enforces its visit window. GitHub can delay or drop any
+scheduled trigger, so the backups do not guarantee a daily refresh. The workflow
+commits the generated Snapshots, builds them alongside the app, and deploys the
+resulting static site. The public site is available at
 <https://nissebergman.github.io/matkollen/>.
 It stages Snapshots in a clean directory and validates one schema-valid
 Snapshot per configured Location before copying or building. If a Chain refresh
@@ -135,11 +142,11 @@ failure or incomplete output stops before deployment; the checked-in fixture is
 not used as refresh output.
 
 The workflow stores no source credentials and requires no CI source secrets.
-GitHub Actions' automatically provided token is used only to commit Snapshot
-updates and deploy the Pages artifact. GitHub Pages sites may be publicly
-accessible: before configuring Pages or running the workflow, verify that the
-repository and the visibility of its Pages site are acceptable for the
-household data. The workflow does not enable Pages.
+GitHub Actions' automatically provided token is used to check scheduled-run
+history, commit Snapshot updates, and deploy the Pages artifact. GitHub Pages
+sites may be publicly accessible: before configuring Pages or running the
+workflow, verify that the repository and the visibility of its Pages site are
+acceptable for the household data. The workflow does not enable Pages.
 
 For app-only changes, manually dispatch with `refresh_snapshots=false` to reuse
 the persisted live Snapshots without contacting sources. These still pass

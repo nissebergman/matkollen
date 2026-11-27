@@ -3,6 +3,8 @@ name: Publish Offers
 on:
   schedule:
     - cron: "17 5 * * *"
+    # Backup triggers cover multi-hour GitHub scheduling delays.
+    - cron: "17 1,3,7,17,19,21,23 * * *"
   workflow_dispatch:
     inputs:
       refresh_snapshots:
@@ -11,22 +13,97 @@ on:
         default: true
 
 permissions:
+  actions: read
   contents: write
   pages: write
   id-token: write
 
 concurrency:
-  group: publish-offers
+  group: publish-offers-${{ github.event_name }}
   cancel-in-progress: false
 
 jobs:
+  schedule_gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      publish: ${{ steps.decide.outputs.publish }}
+      day: ${{ steps.decide.outputs.day }}
+    steps:
+      - name: Decide scheduled publication
+        id: decide
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.eventName !== "schedule") {
+              core.setOutput("publish", "true");
+              return;
+            }
+            const now = new Date();
+            const hour = now.getUTCHours();
+            if (hour < 5 || hour >= 19) {
+              core.info("Skipping scheduled publication outside 05:00–08:00 UTC.");
+              core.setOutput("publish", "false");
+              return;
+            }
+            const today = now.toISOString().slice(0, 10);
+            const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+              .toISOString().slice(0, 10);
+            const { owner, repo } = context.repo;
+            const runs = await github.paginate(github.rest.actions.listWorkflowRuns, {
+              owner, repo, workflow_id: "publish.yml", event: "schedule",
+              created: `${yesterday}..${today}`, per_page: 100,
+            });
+            for (const run of runs) {
+              if (run.id === context.runId) continue;
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+                owner, repo, run_id: run.id, filter: "all", per_page: 100,
+              });
+              const attempted = jobs.some((job) =>
+                job.name === "publish" &&
+                job.conclusion !== "skipped" &&
+                typeof job.started_at === "string" &&
+                job.started_at >= `${today}T05:00:00Z` &&
+                job.started_at < `${today}T08:00:00Z`
+              );
+              if (attempted) {
+                core.info(`Scheduled publication already attempted in run ${run.id}.`);
+                core.setOutput("publish", "false");
+                return;
+              }
+            }
+            if (hour >= 8) {
+              core.setOutput("publish", "false");
+              core.setFailed("No scheduled publication started between 05:00 and 08:00 UTC today.");
+              return;
+            }
+            core.setOutput("day", today);
+            core.setOutput("publish", "true");
+
   publish:
+    needs: schedule_gate
+    if: needs.schedule_gate.outputs.publish == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    concurrency:
+      group: publish-offers
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Enforce scheduled publication window
+        if: github.event_name == 'schedule'
+        env:
+          APPROVED_DAY: ${{ needs.schedule_gate.outputs.day }}
+        run: |
+          day=$(date -u +%F)
+          hour=$(date -u +%H)
+          if [[ "$day" != "$APPROVED_DAY" ]] || (( 10#$hour < 5 || 10#$hour >= 8 )); then
+            echo "::error::Scheduled publication missed the 05:00–08:00 UTC window."
+            exit 1
+          fi
+
       - name: Check out repository
         uses: actions/checkout@v4
 
